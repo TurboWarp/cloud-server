@@ -16,17 +16,19 @@ class Client {
    */
   constructor(ws, req) {
     this.ws = ws;
-    /** Whether this client is connected to a room. */
-    this.isConnected = false;
     /** The connecting IP */
     this.ip = getIP(req);
-    /** The username of the Client. */
-    this.username = '';
     /**
      * The room this client is connected to.
      * @type {Room}
      */
     this.room = null;
+    /**
+     * The username of the Client.
+     * This value is only valid if room != null
+     * @type {string}
+     */
+    this.username = null;
   }
 
   /**
@@ -51,6 +53,15 @@ class Client {
   }
 
   /**
+   * Send a 'set variable' for each of the variables of the connected room.
+   */
+  sendAllVariables() {
+    this.room.getAllVariables().forEach((value, name) => {
+      this.sendVariableSet(name, value);
+    });
+  }
+
+  /**
    * Close the connection to this client.
    * @param {string} error The reason to send
    */
@@ -60,6 +71,16 @@ class Client {
       reason: error,
     });
     this.ws.close();
+  }
+
+  /**
+   * Put this Client in an unrepairable, destructed state.
+   */
+  destroy() {
+    if (this.room) {
+      this.room.removeClient(this);
+    }
+    this.room = null;
   }
 }
 

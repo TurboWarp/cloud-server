@@ -34,39 +34,40 @@ function parseMessage(data) {
 wss.on('connection', (ws, req) => {
   const client = new Client(ws, req);
 
+  /**
+   * Log a message with a prefix including the IP and username of the client.
+   * @param {any[]} args
+   */
   function log(...args) {
     console.log(`[${client.ip} "${client.username}"]`, ...args);
   }
 
-  function sendAllVariables() {
-    client.room.getAllVariables().forEach((value, name) => {
-      client.sendVariableSet(name, value);
-    });
-  }
-
   function performConnect(roomId, username, variables) {
-    if (client.isConnected) throw new Error('Already connected');
-    if (!Checkers.checkRoomID(roomId)) throw new Error('Invalid room ID');
-    if (!Checkers.checkUsername(username)) throw new Error('Invalid username');
-    if (!Checkers.checkVariableMap(variables)) throw new Error('Invalid variable map');
+    if (client.room) throw new Error('Already has room');
+    if (!Checkers.isValidRoomID(roomId)) throw new Error('Invalid room ID');
+    if (!Checkers.isValidUsername(username)) throw new Error('Invalid username');
+    if (!Checkers.isValidVariableMap(variables)) throw new Error('Invalid variable map');
 
     client.username = username;
 
     if (rooms.has(roomId)) {
-      client.room = rooms.get(roomId);
+      const room = rooms.get(roomId);
+      if (room.hasClientWithUsername(username)) {
+        throw new Error('Client with username already exists');
+      }
+      client.room = room;
+      client.sendAllVariables();
       log('Joined existing room: ' + roomId);
-      sendAllVariables();
     } else {
       client.room = rooms.create(roomId, variables);
       log('Created new room: ' + roomId);
     }
     client.room.addClient(client);
-
-    client.isConnected = true;
   }
 
   function performSet(variable, value) {
-    if (!client.isConnected) throw new Error('No room setup yet');
+    if (!client.room) throw new Error('No room setup yet');
+
     client.room.set(variable, value);
     client.room.getClients().forEach((otherClient) => {
       if (otherClient !== client) {
@@ -101,11 +102,7 @@ wss.on('connection', (ws, req) => {
   });
 
   ws.on('close', () => {
+    client.destroy();
     log('Connection closed');
-    if (client.isConnected) {
-      client.isConnected = false;
-      client.room.removeClient(client);
-      client.room = null;
-    }
   });
 });

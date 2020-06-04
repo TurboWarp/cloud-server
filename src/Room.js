@@ -1,6 +1,10 @@
+/** The maximum amount of variables a single Room can contain. */
 const MAX_VARIABLES = 10;
+/** The maximum length of a variable's value. */
 const MAX_VALUE_LENGTH = 1000;
-const MAX_NAME_LENGTH = 1000;
+/** The maximum length of a variable's name. */
+const MAX_NAME_LENGTH = 100;
+/** A required prefix that must appear at the beginning of all variable's names. */
 const NAME_REQUIRED_PREFIX = '☁ ';
 
 /**
@@ -75,6 +79,7 @@ class Room {
 
   /**
    * Create a new variable.
+   * This method does not inform clients of the change.
    * @param {string} name The name of the variable
    * @param {string} value The value of the variable
    * @throws Will throw if name or value are invalid, the variable already exists, or there are too many variables.
@@ -97,6 +102,7 @@ class Room {
 
   /**
    * Set an existing variable to a new value.
+   * This method does not inform clients of the change.
    * @param {string} name The name of the variable
    * @param {string} value The value of the variable
    * @throws Will throw if name or value are invalid, or the variable does not exist.
@@ -112,6 +118,17 @@ class Room {
       throw new Error('Variable does not exist');
     }
     this.variables.set(name, value);
+  }
+
+  /**
+   * Determine whether a username is already in use by a client connected to this room.
+   * @param {string} username The username to search for
+   * @returns {boolean}
+   */
+  hasClientWithUsername(username) {
+    // usernames are compared case insensitively
+    username = username.toLowerCase();
+    return this.getClients().some((i) => i.username.toLowerCase() === username);
   }
 }
 
