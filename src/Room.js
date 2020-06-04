@@ -4,7 +4,7 @@ const MAX_NAME_LENGTH = 1000;
 const NAME_REQUIRED_PREFIX = '☁ ';
 
 /**
- * @typedef {import('ws')} Client
+ * @typedef {import('./Client')} Client
  */
 
 /**
