@@ -1,4 +1,5 @@
 const Room = require('./Room');
+const config = require('./config');
 
 /**
  * Get the remote IP address of a request.
@@ -6,7 +7,21 @@ const Room = require('./Room');
  * @returns {string} The IP address
  */
 function getIP(req) {
-  return req.socket.remoteAddress || '???';
+  const socketAddress = req.socket.remoteAddress || '???';
+
+  if (config.trustProxy) {
+    let header = req.headers['x-forwarded-for'];
+    if (Array.isArray(header)) {
+      header = header[0];
+    }
+    if (!header) {
+      return socketAddress;
+    }
+    const remoteAddress = header.split(/\s*,\s*/)[0];
+    return remoteAddress || socketAddress;
+  }
+
+  return socketAddress;
 }
 
 class Client {
