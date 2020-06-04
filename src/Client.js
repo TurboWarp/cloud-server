@@ -62,7 +62,7 @@ class Client {
   }
 
   /**
-   * Close the connection to this client.
+   * Close the connection to this client and send one final message to the client.
    * @param {string} error The reason to send
    */
   close(error) {
@@ -70,7 +70,7 @@ class Client {
       kind: 'close',
       reason: error,
     });
-    this.ws.close();
+    this.destroy();
   }
 
   /**
@@ -83,13 +83,18 @@ class Client {
   }
 
   /**
-   * Put this Client in an unrepairable, destructed state.
+   * Destroy this client.
    */
   destroy() {
+    // Close socket
+    if (this.ws.readyState === this.ws.OPEN) {
+      this.ws.close();
+    }
+    // Remove from room
     if (this.room) {
       this.room.removeClient(this);
+      this.room = null;
     }
-    this.room = null;
   }
 }
 

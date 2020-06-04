@@ -104,6 +104,11 @@ wss.on('connection', (ws, req) => {
     }
   });
 
+  ws.on('error', (error) => {
+    log('** ERROR **', error);
+    client.destroy();
+  });
+
   ws.on('close', () => {
     client.destroy();
     log('Connection closed');
