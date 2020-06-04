@@ -13,6 +13,8 @@ class Room {
     this.variables = new Map();
     /** @type {Client[]} */
     this.clients = [];
+    /** @type {number} */
+    this.lastDisconnectTime = -1;
   }
 
   /**
@@ -38,6 +40,7 @@ class Room {
       throw new Error('Client does not belong to this Room');
     }
     this.clients.splice(index, 1);
+    this.lastDisconnectTime = Date.now();
   }
 
   /**

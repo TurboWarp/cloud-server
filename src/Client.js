@@ -15,6 +15,7 @@ class Client {
    * @param {import('http').IncomingMessage} req The HTTP request
    */
   constructor(ws, req) {
+    /** The WebSocket connection */
     this.ws = ws;
     /** The connecting IP */
     this.ip = getIP(req);

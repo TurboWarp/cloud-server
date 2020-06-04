@@ -1,12 +1,14 @@
 const WebSocket = require('ws');
+
 const Room = require('./Room');
 const Client = require('./Client');
 const RoomList = require('./RoomList');
-const Checkers = require('./checkers');
 const Reasons = require('./reasons');
+const Checkers = require('./checkers');
+const logger = require('./logger');
 
 const wss = new WebSocket.Server({
-  port: 8082,
+  noServer: true,
 });
 
 const rooms = new RoomList();
@@ -40,9 +42,9 @@ wss.on('connection', (ws, req) => {
    */
   function log(...args) {
     if (client.username !== null) {
-      console.log(`[${client.ip} "${client.username}"]`, ...args);
+      logger.info(`[${client.ip} "${client.username}"]`, ...args);
     } else {
-      console.log(`[${client.ip} (no username)]`, ...args);
+      logger.info(`[${client.ip}]`, ...args);
     }
   }
 
@@ -61,11 +63,11 @@ wss.on('connection', (ws, req) => {
       }
       client.setRoom(room);
       client.sendAllVariables();
-      log('Joined existing room: ' + roomId);
     } else {
       client.setRoom(rooms.create(roomId, variables));
-      log('Created new room: ' + roomId);
     }
+
+    log('Joined room: ' + roomId);
   }
 
   function performSet(variable, value) {
@@ -114,3 +116,10 @@ wss.on('connection', (ws, req) => {
     log('Connection closed');
   });
 });
+
+wss.on('close', () => {
+  logger.info('Server Closing');
+  rooms.destroy();
+});
+
+module.exports = wss;
