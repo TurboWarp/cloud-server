@@ -9,6 +9,7 @@
   "author": "GarboMuffin",
   "license": "MIT",
   "dependencies": {
+    "@types/jest": "^25.2.3",
     "ws": "^7.3.0"
   },
   "devDependencies": {

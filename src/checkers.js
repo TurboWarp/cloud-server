@@ -2,17 +2,18 @@ const isSafe = require('./naughty');
 
 /** A required prefix that must appear at the beginning of all variable's names. */
 const VARIABLE_NAME_CLOUD_PREFIX = '☁ ';
-/** The maximum length of a variable's name. */
+/** The maximum length of a variable's name. Scratch does not seem to restrict this but it may be a good idea regardless. */
 const VARIABLE_NAME_MAX_LENGTH = 100;
 
 /** The maximum length of a variable's value. */
 const VALUE_MAX_LENGTH = 1024;
-/** Regex for values to match. */
-const VALUE_REGEX = /^[0-9]+$/;
+const VALUE_NUMBERS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-/** Maximum length of usernames. */
-const USERNAME_MAX_LENGTH = 30;
-/** Regex for usernames to match. */
+/** Maximum length of usernames, inclusive. */
+const USERNAME_MAX_LENGTH = 20;
+/** Minimum length of usernames, inclusive. */
+const USERNAME_MIN_LENGTH = 3;
+/** Regex for usernames to match. Letters, numbers, -, and _ */
 const USERNAME_REGEX = /^[a-z0-9_-]+$/i;
 
 /**
@@ -20,7 +21,7 @@ const USERNAME_REGEX = /^[a-z0-9_-]+$/i;
  * @returns {boolean}
  */
 module.exports.isValidUsername = function(username) {
-  return typeof username === 'string' && username.length > 0 && username.length < USERNAME_MAX_LENGTH && USERNAME_REGEX.test(username) && isSafe(username);
+  return typeof username === 'string' && username.length >= USERNAME_MIN_LENGTH && username.length <= USERNAME_MAX_LENGTH && USERNAME_REGEX.test(username) && isSafe(username);
 };
 
 /**
@@ -38,7 +39,7 @@ module.exports.isValidRoomID = function(id) {
  * @returns {boolean}
  */
 module.exports.isValidVariableMap = function(object) {
-  return !!object && typeof object === 'object';
+  return !!object && typeof object === 'object' && Object.prototype.toString.call(object) === '[object Object]';
 };
 
 /**
@@ -46,7 +47,7 @@ module.exports.isValidVariableMap = function(object) {
  * @returns {boolean}
  */
 module.exports.isValidVariableName = function(name) {
-  return typeof name === 'string' && name.startsWith(VARIABLE_NAME_CLOUD_PREFIX) && name.length < VARIABLE_NAME_MAX_LENGTH && isSafe(name);
+  return typeof name === 'string' && name.startsWith(VARIABLE_NAME_CLOUD_PREFIX) && name.length > VARIABLE_NAME_CLOUD_PREFIX.length && name.length < VARIABLE_NAME_MAX_LENGTH && isSafe(name);
 };
 
 /**
@@ -54,5 +55,32 @@ module.exports.isValidVariableName = function(name) {
  * @returns {boolean}
  */
 module.exports.isValidVariableValue = function(value) {
-  return typeof value === 'string' && value.length < VALUE_MAX_LENGTH && VALUE_REGEX.test(value);
+  if (!(typeof value === 'string' && value.length < VALUE_MAX_LENGTH && !Number.isNaN(+value))) {
+    return false;
+  }
+
+  var seenDecimal = false;
+  var length = value.length; // caching value.length can slightly help performance
+
+  // skip negative sign, if any
+  var i = 0;
+  if (value.startsWith('-')) i++;
+
+  for (; i < length; i++) {
+    const char = value.charAt(i);
+
+    // Only allow one decimal
+    if (char === '.') {
+      if (seenDecimal) {
+        return false;
+      }
+      seenDecimal = true;
+      continue;
+    }
+
+    if (!VALUE_NUMBERS.includes(char)) {
+      return false;
+    }
+  }
+  return true;
 };
