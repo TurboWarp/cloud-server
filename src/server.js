@@ -6,6 +6,7 @@ const RoomList = require('./RoomList');
 const ConnectionError = require('./ConnectionError');
 const validators = require('./validators');
 const logger = require('./logger');
+const RateLimiter = require('./RateLimiter');
 
 const wss = new WebSocket.Server({
   noServer: true,
@@ -35,6 +36,7 @@ function parseMessage(data) {
 
 wss.on('connection', (ws, req) => {
   const client = new Client(ws, req);
+  const rateLimiter = new RateLimiter(20, 1000);
 
   /**
    * Log a message with a prefix including the IP and username of the client.
@@ -88,7 +90,16 @@ wss.on('connection', (ws, req) => {
   log('Connection opened');
 
   ws.on('message', (data) => {
+    // Ignore data after the socket is closed
+    if (ws.readyState !== ws.OPEN) {
+      return;
+    }
+
     try {
+      if (rateLimiter.rateLimited()) {
+        throw new ConnectionError.RateLimitError('Too many messages');
+      }
+
       const message = parseMessage(data.toString());
       const kind = message.kind;
 

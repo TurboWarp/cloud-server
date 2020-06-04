@@ -19,5 +19,8 @@ ConnectionError.UsernameError = class UsernameError extends ConnectionError {
 ConnectionError.RoomError = class RoomError extends ConnectionError {
   constructor(message) { super('room', message); }
 };
+ConnectionError.RateLimitError = class RateLimitError extends ConnectionError {
+  constructor(message) { super('rate', message); }
+};
 
 module.exports = ConnectionError;
