@@ -3,8 +3,8 @@ const WebSocket = require('ws');
 const Room = require('./Room');
 const Client = require('./Client');
 const RoomList = require('./RoomList');
-const Reasons = require('./reasons');
-const Checkers = require('./checkers');
+const ConnectionError = require('./ConnectionError');
+const validators = require('./validators');
 const logger = require('./logger');
 
 const wss = new WebSocket.Server({
@@ -41,25 +41,29 @@ wss.on('connection', (ws, req) => {
    * @param {any[]} args
    */
   function log(...args) {
+    let prefix = '[' + client.ip;
     if (client.username !== null) {
-      logger.info(`[${client.ip} "${client.username}"]`, ...args);
-    } else {
-      logger.info(`[${client.ip}]`, ...args);
+      prefix += ' "' + client.username + '"';
     }
+    if (client.room !== null) {
+      prefix += ' in ' + client.room.id;
+    }
+    prefix += ']';
+    logger.info(prefix, ...args);
   }
 
   function performConnect(roomId, username, variables) {
-    if (client.room) throw new Error('Already has room');
-    if (!Checkers.isValidRoomID(roomId)) throw new Error('Invalid room ID');
-    if (!Checkers.isValidUsername(username)) throw new Error('Invalid username');
-    if (!Checkers.isValidVariableMap(variables)) throw new Error('Invalid variable map');
+    if (client.room) throw new ConnectionError.RoomError('Already has room');
+    if (!validators.isValidRoomID(roomId)) throw new ConnectionError.RoomError('Invalid room ID');
+    if (!validators.isValidUsername(username)) throw new ConnectionError.UsernameError('Invalid username');
+    if (!validators.isValidVariableMap(variables)) throw new Error('Invalid variable map');
 
     client.username = username;
 
     if (rooms.has(roomId)) {
       const room = rooms.get(roomId);
       if (room.hasClientWithUsername(username)) {
-        throw new Error('Client with username already exists');
+        throw new ConnectionError.UsernameError('Client with username already exists');
       }
       client.setRoom(room);
       client.sendAllVariables();
@@ -67,11 +71,11 @@ wss.on('connection', (ws, req) => {
       client.setRoom(rooms.create(roomId, variables));
     }
 
-    log('Joined room: ' + roomId);
+    log('Joined room');
   }
 
   function performSet(variable, value) {
-    if (!client.room) throw new Error('No room setup yet');
+    if (!client.room) throw new ConnectionError.RoomError('No room setup yet');
 
     client.room.set(variable, value);
     client.room.getClients().forEach((otherClient) => {
@@ -102,7 +106,11 @@ wss.on('connection', (ws, req) => {
       }
     } catch (e) {
       log('Error handling connection', e);
-      client.close(Reasons.ERROR);
+      if (e instanceof ConnectionError) {
+        client.close(e.code);
+      } else {
+        client.close(ConnectionError.DEFAULT_ERROR_CODE);
+      }
     }
   });
 

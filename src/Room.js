@@ -1,4 +1,4 @@
-const Checkers = require('./checkers');
+const validators = require('./validators');
 
 /** The maximum amount of variables a single Room can contain. */
 const MAX_VARIABLES = 10;
@@ -7,8 +7,17 @@ const MAX_VARIABLES = 10;
  * @typedef {import('./Client')} Client
  */
 
+/**
+ * @typedef {string} RoomID A unique ID for a Room.
+ */
+
 class Room {
-  constructor() {
+  /**
+   * @param {RoomID} id
+   */
+  constructor(id) {
+    /** @type {RoomID} */
+    this.id = id;
     /** @type {Map<string, string>} */
     this.variables = new Map();
     /** @type {Client[]} */
@@ -67,10 +76,10 @@ class Room {
    * @throws Will throw if name or value are invalid, the variable already exists, or there are too many variables.
    */
   createVar(name, value) {
-    if (!Checkers.isValidVariableName(name)) {
+    if (!validators.isValidVariableName(name)) {
       throw new Error('Invalid variable name');
     }
-    if (!Checkers.isValidVariableValue(value)) {
+    if (!validators.isValidVariableValue(value)) {
       throw new Error('Invalid value');
     }
     if (this.variables.has(name)) {
@@ -90,10 +99,10 @@ class Room {
    * @throws Will throw if name or value are invalid, or the variable does not exist.
    */
   set(name, value) {
-    if (!Checkers.isValidVariableName(name)) {
+    if (!validators.isValidVariableName(name)) {
       throw new Error('Invalid variable name');
     }
-    if (!Checkers.isValidVariableValue(value)) {
+    if (!validators.isValidVariableValue(value)) {
       throw new Error('Invalid value');
     }
     if (!this.variables.has(name)) {

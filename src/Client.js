@@ -35,7 +35,7 @@ class Client {
     /** The connecting IP */
     this.ip = getIP(req);
     /**
-     * The room this client is connected to.
+     * The Room this client is connected to.
      * @type {Room}
      */
     this.room = null;

@@ -1,16 +1,22 @@
 const Room = require('./Room');
-const Client = require('./Client');
 const logger = require('./logger');
 
+/** Delay between janitor runs. */
+const JANITOR_INTERVAL = 1000 * 30;
+/** Time a room must be empty for before it may be removed by the janitor. */
+const JANITOR_THRESHOLD = 1000 * 30;
+/** Maximum amount of rooms that can be present */
+const MAX_ROOMS = 100;
+
 /**
- * @typedef {string} RoomID A unique ID for a Room.
+ * @typedef {import('./Room').RoomID} RoomID
  */
 
 class RoomList {
   constructor() {
     /** @type {Map<RoomID, Room>} */
     this.rooms = new Map();
-    this.janitorInterval = setInterval(() => this.janitor(), 1000 * 30);
+    this.janitorInterval = setInterval(() => this.janitor(), JANITOR_INTERVAL);
   }
 
   /**
@@ -26,7 +32,7 @@ class RoomList {
    * Get a Room
    * @param {RoomID} id 
    * @returns {Room}
-   * @throws Throws if room does not exist
+   * @throws Will throw if room does not exist
    */
   get(id) {
     const room = this.rooms.get(id);
@@ -40,9 +46,14 @@ class RoomList {
    * Create a new Room
    * @param {RoomID} id The room ID
    * @param {{ [s: string]: string }} initialData The variables to create and their value
+   * @returns {Room} A new room
+   * @throws Will throw if there are too many rooms.
    */
   create(id, initialData) {
-    const room = new Room();
+    if (this.rooms.size >= MAX_ROOMS) {
+      throw new Error('Too many rooms');
+    }
+    const room = new Room(id);
     for (const key of Object.keys(initialData)) {
       room.createVar(key, initialData[key]);
     }
@@ -69,9 +80,10 @@ class RoomList {
    * Scan for dormant rooms and remove them.
    */
   janitor() {
-    const removalThreshold = Date.now() - 1000 * 30;
+    const removalThreshold = Date.now() - JANITOR_THRESHOLD;
     // I don't know if deleting items from a map during iteration will cause issues,
-    // so we'll collate the ids to remove first then remove them after.
+    // so we'll collect the ids to remove first then remove them after.
+    /** @type {RoomID[]} */
     const idsToRemove = [];
     for (const [id, room] of this.rooms.entries()) {
       if (room.getClients().length === 0) {
