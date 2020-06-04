@@ -46,7 +46,7 @@ class Client {
    */
   sendVariableSet(name, value) {
     this.send({
-      kind: 'set_var',
+      kind: 'set',
       var: name,
       value: value,
     });
@@ -67,10 +67,19 @@ class Client {
    */
   close(error) {
     this.send({
-      kind: 'error',
+      kind: 'close',
       reason: error,
     });
     this.ws.close();
+  }
+
+  /**
+   * Set the room that this client connects to and join it.
+   * @param {Room} room
+   */
+  setRoom(room) {
+    this.room = room;
+    this.room.addClient(this);
   }
 
   /**

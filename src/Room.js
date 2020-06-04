@@ -1,32 +1,11 @@
+const Checkers = require('./checkers');
+
 /** The maximum amount of variables a single Room can contain. */
 const MAX_VARIABLES = 10;
-/** The maximum length of a variable's value. */
-const MAX_VALUE_LENGTH = 1000;
-/** The maximum length of a variable's name. */
-const MAX_NAME_LENGTH = 100;
-/** A required prefix that must appear at the beginning of all variable's names. */
-const NAME_REQUIRED_PREFIX = '☁ ';
 
 /**
  * @typedef {import('./Client')} Client
  */
-
-/**
- * Determine whether a variable name is allowed to be used.
- * @param {string} name Name of the variable
- * @returns {boolean}
- */
-function isValidVariableName(name) {
-  return typeof name === 'string' && name.startsWith(NAME_REQUIRED_PREFIX) && name.length < MAX_NAME_LENGTH;
-}
-
-/**
- * Determine whether a value is allowed to be set.
- * @param {string} value The value of the variable
- */
-function isValidValue(value) {
-  return typeof value === 'string' && value.length < MAX_VALUE_LENGTH;
-}
 
 class Room {
   constructor() {
@@ -85,10 +64,10 @@ class Room {
    * @throws Will throw if name or value are invalid, the variable already exists, or there are too many variables.
    */
   createVar(name, value) {
-    if (!isValidVariableName(name)) {
+    if (!Checkers.isValidVariableName(name)) {
       throw new Error('Invalid variable name');
     }
-    if (!isValidValue(value)) {
+    if (!Checkers.isValidVariableValue(value)) {
       throw new Error('Invalid value');
     }
     if (this.variables.has(name)) {
@@ -108,10 +87,10 @@ class Room {
    * @throws Will throw if name or value are invalid, or the variable does not exist.
    */
   set(name, value) {
-    if (!isValidVariableName(name)) {
+    if (!Checkers.isValidVariableName(name)) {
       throw new Error('Invalid variable name');
     }
-    if (!isValidValue(value)) {
+    if (!Checkers.isValidVariableValue(value)) {
       throw new Error('Invalid value');
     }
     if (!this.variables.has(name)) {

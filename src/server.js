@@ -39,7 +39,11 @@ wss.on('connection', (ws, req) => {
    * @param {any[]} args
    */
   function log(...args) {
-    console.log(`[${client.ip} "${client.username}"]`, ...args);
+    if (client.username !== null) {
+      console.log(`[${client.ip} "${client.username}"]`, ...args);
+    } else {
+      console.log(`[${client.ip} (no username)]`, ...args);
+    }
   }
 
   function performConnect(roomId, username, variables) {
@@ -55,14 +59,13 @@ wss.on('connection', (ws, req) => {
       if (room.hasClientWithUsername(username)) {
         throw new Error('Client with username already exists');
       }
-      client.room = room;
+      client.setRoom(room);
       client.sendAllVariables();
       log('Joined existing room: ' + roomId);
     } else {
-      client.room = rooms.create(roomId, variables);
+      client.setRoom(rooms.create(roomId, variables));
       log('Created new room: ' + roomId);
     }
-    client.room.addClient(client);
   }
 
   function performSet(variable, value) {
@@ -88,7 +91,7 @@ wss.on('connection', (ws, req) => {
           performConnect(message.id, message.username, message.variables);
           break;
 
-        case 'set_var':
+        case 'set':
           performSet(message.var, message.value);
           break;
 
