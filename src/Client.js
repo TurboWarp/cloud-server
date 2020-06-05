@@ -1,5 +1,6 @@
 const Room = require('./Room');
 const config = require('./config');
+const logger = require('./logger');
 
 /**
  * Get the remote IP address of a request.
@@ -48,6 +49,22 @@ class Client {
   }
 
   /**
+   * Log a message with a prefix including the IP and username of this client.
+   * @param {any[]} args
+   */
+  log(...args) {
+    let prefix = '[' + this.ip;
+    if (this.username !== null) {
+      prefix += ' "' + this.username + '"';
+    }
+    if (this.room !== null) {
+      prefix += ' in ' + this.room.id;
+    }
+    prefix += ']';
+    logger.info(prefix, ...args);
+  }
+
+  /**
    * Send data to this client.
    * @param {object} data JS object to send. Will be stringified
    */
@@ -79,14 +96,23 @@ class Client {
 
   /**
    * Close the connection to this client and send one final message to the client.
-   * @param {string} error The reason to send
+   * @param {number} [code] The error code to send
    */
-  close(error) {
-    this.send({
-      kind: 'close',
-      reason: error,
-    });
-    this.destroy();
+  close(code) {
+    // Close connection, inform client
+    if (this.ws.readyState === this.ws.OPEN) {
+      if (code) {
+        this.ws.close(code);
+      } else {
+        this.ws.close();
+      }
+      this.ws = null;
+    }
+    // Remove from room
+    if (this.room) {
+      this.room.removeClient(this);
+      this.room = null;
+    }
   }
 
   /**
@@ -96,21 +122,6 @@ class Client {
   setRoom(room) {
     this.room = room;
     this.room.addClient(this);
-  }
-
-  /**
-   * Destroy this client.
-   */
-  destroy() {
-    // Close socket
-    if (this.ws.readyState === this.ws.OPEN) {
-      this.ws.close();
-    }
-    // Remove from room
-    if (this.room) {
-      this.room.removeClient(this);
-      this.room = null;
-    }
   }
 }
 

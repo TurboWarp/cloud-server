@@ -1,4 +1,5 @@
 const Room = require('./Room');
+const ConnectionError = require('./ConnectionError');
 const logger = require('./logger');
 
 /** Delay between janitor runs. */
@@ -51,7 +52,7 @@ class RoomList {
    */
   create(id, initialData) {
     if (this.rooms.size >= MAX_ROOMS) {
-      throw new Error('Too many rooms');
+      throw new ConnectionError(ConnectionError.TryAgainLater, 'Too many rooms');
     }
     const room = new Room(id);
     for (const key of Object.keys(initialData)) {

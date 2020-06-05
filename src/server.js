@@ -4,6 +4,7 @@ const Room = require('./Room');
 const Client = require('./Client');
 const RoomList = require('./RoomList');
 const ConnectionError = require('./ConnectionError');
+const PingManager = require('./PingManager');
 const validators = require('./validators');
 const logger = require('./logger');
 const RateLimiter = require('./RateLimiter');
@@ -13,6 +14,9 @@ const wss = new WebSocket.Server({
 });
 
 const rooms = new RoomList();
+
+const pingManager = new PingManager(wss);
+pingManager.start(1000 * 30);
 
 /**
  * @param {unknown} data 
@@ -38,34 +42,22 @@ wss.on('connection', (ws, req) => {
   const client = new Client(ws, req);
   const rateLimiter = new RateLimiter(20, 1000);
 
-  /**
-   * Log a message with a prefix including the IP and username of the client.
-   * @param {any[]} args
-   */
-  function log(...args) {
-    let prefix = '[' + client.ip;
-    if (client.username !== null) {
-      prefix += ' "' + client.username + '"';
-    }
-    if (client.room !== null) {
-      prefix += ' in ' + client.room.id;
-    }
-    prefix += ']';
-    logger.info(prefix, ...args);
-  }
+  // @ts-ignore
+  ws.client = client;
+  pingManager.handleConnection(ws);
 
-  function performConnect(roomId, username, variables) {
-    if (client.room) throw new ConnectionError.RoomError('Already has room');
-    if (!validators.isValidRoomID(roomId)) throw new ConnectionError.RoomError('Invalid room ID');
-    if (!validators.isValidUsername(username)) throw new ConnectionError.UsernameError('Invalid username');
-    if (!validators.isValidVariableMap(variables)) throw new Error('Invalid variable map');
+  function performHandshake(roomId, username, variables) {
+    if (client.room) throw new ConnectionError(ConnectionError.ProtocolError, 'Already has room');
+    if (!validators.isValidRoomID(roomId)) throw new ConnectionError(ConnectionError.ProtocolError, 'Invalid room ID');
+    if (!validators.isValidUsername(username)) throw new ConnectionError(ConnectionError.ProtocolError, 'Invalid username');
+    if (!validators.isValidVariableMap(variables)) throw new ConnectionError(ConnectionError.ProtocolError, 'Invalid variable map');
 
     client.username = username;
 
     if (rooms.has(roomId)) {
       const room = rooms.get(roomId);
       if (room.hasClientWithUsername(username)) {
-        throw new ConnectionError.UsernameError('Client with username already exists');
+        throw new ConnectionError(ConnectionError.PolicyViolation, 'Client with username already exists');
       }
       client.setRoom(room);
       client.sendAllVariables();
@@ -73,21 +65,19 @@ wss.on('connection', (ws, req) => {
       client.setRoom(rooms.create(roomId, variables));
     }
 
-    log('Joined room');
+    client.log('Joined room');
   }
 
   function performSet(variable, value) {
-    if (!client.room) throw new ConnectionError.RoomError('No room setup yet');
+    if (!client.room) throw new ConnectionError(ConnectionError.ProtocolError, 'No room setup yet');
 
     client.room.set(variable, value);
-    client.room.getClients().forEach((otherClient) => {
-      if (otherClient !== client) {
-        otherClient.sendVariableSet(variable, value);
-      }
+    client.room.getClients().forEach((client) => {
+      client.sendVariableSet(variable, value);
     });
   }
 
-  log('Connection opened');
+  client.log('Connection opened');
 
   ws.on('message', (data) => {
     // Ignore data after the socket is closed
@@ -97,15 +87,15 @@ wss.on('connection', (ws, req) => {
 
     try {
       if (rateLimiter.rateLimited()) {
-        throw new ConnectionError.RateLimitError('Too many messages');
+        throw new ConnectionError(ConnectionError.TryAgainLater, 'Too many messages');
       }
 
       const message = parseMessage(data.toString());
       const kind = message.kind;
 
       switch (kind) {
-        case 'connect':
-          performConnect(message.id, message.username, message.variables);
+        case 'handshake':
+          performHandshake(message.id, message.username, message.variables);
           break;
 
         case 'set':
@@ -113,31 +103,36 @@ wss.on('connection', (ws, req) => {
           break;
 
         default:
-          throw new Error('Unknown message type');
+          throw new ConnectionError(ConnectionError.ProtocolError, 'Unknown message type');
       }
     } catch (e) {
-      log('Error handling connection', e);
+      client.log('Error handling connection', e);
       if (e instanceof ConnectionError) {
         client.close(e.code);
       } else {
-        client.close(ConnectionError.DEFAULT_ERROR_CODE);
+        client.close(ConnectionError.InternalError);
       }
     }
   });
 
   ws.on('error', (error) => {
-    log('** ERROR **', error);
-    client.destroy();
+    client.log('** ERROR **', error);
+    client.close(ConnectionError.InternalError);
   });
 
-  ws.on('close', () => {
-    client.destroy();
-    log('Connection closed');
+  ws.on('close', (code, reason) => {
+    client.log('Connection closed. code', code, 'reason', reason);
+    client.close(ConnectionError.InternalError);
+  });
+
+  ws.on('pong', () => {
+    pingManager.handlePong(ws);
   });
 });
 
 wss.on('close', () => {
-  logger.info('Server Closing');
+  logger.info('Server closing');
+  pingManager.stop();
   rooms.destroy();
 });
 

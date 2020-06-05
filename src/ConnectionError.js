@@ -1,26 +1,19 @@
 class ConnectionError extends Error {
   /**
    * ConnectionError is an error with some special handling from the server.
-   * @param {string} code Error code. May describe a general type of error. This may be shown to the user.
+   * @param {number} code WebSocket error code. See https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Status_codes
    * @param {string} message Error message. Should include more details. This is not shown to the user.
    */
   constructor(code, message) {
-    super(message);
+    super(`${message} (code ${code})`);
     this.code = code;
   }
 }
 
-/** Default error code when a non-ConnectionError is thrown. */
-ConnectionError.DEFAULT_ERROR_CODE = 'error';
-
-ConnectionError.UsernameError = class UsernameError extends ConnectionError {
-  constructor(message) { super('username', message); }
-};
-ConnectionError.RoomError = class RoomError extends ConnectionError {
-  constructor(message) { super('room', message); }
-};
-ConnectionError.RateLimitError = class RateLimitError extends ConnectionError {
-  constructor(message) { super('rate', message); }
-};
+ConnectionError.ProtocolError = 1002;
+ConnectionError.UnsupportedData = 1003;
+ConnectionError.PolicyViolation = 1008;
+ConnectionError.InternalError = 1011;
+ConnectionError.TryAgainLater = 1013;
 
 module.exports = ConnectionError;
