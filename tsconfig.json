@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    // typescript is only used for typechecking.
+    // we use vanilla JS with jsdoc-style annotations.
+    "target": "ES6",
+    "module": "System",
+    "moduleResolution": "Node",
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": true,
+  }
+}

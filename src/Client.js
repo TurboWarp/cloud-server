@@ -96,16 +96,12 @@ class Client {
 
   /**
    * Close the connection to this client and send one final message to the client.
-   * @param {number} [code] The error code to send
+   * @param {number} code The error code to send
    */
   close(code) {
     // Close connection, inform client
     if (this.ws.readyState === this.ws.OPEN) {
-      if (code) {
-        this.ws.close(code);
-      } else {
-        this.ws.close();
-      }
+      this.ws.close(code);
       this.ws = null;
     }
     // Remove from room

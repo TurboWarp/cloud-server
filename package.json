@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "check": "tsc"
   },
   "author": "GarboMuffin",
   "license": "MIT",
@@ -14,7 +15,8 @@
   "devDependencies": {
     "@types/jest": "^25.2.3",
     "@types/node": "^14.0.10",
-    "jest": "^26.0.1"
+    "jest": "^26.0.1",
+    "typescript": "^3.9.5"
   },
   "private": true
 }

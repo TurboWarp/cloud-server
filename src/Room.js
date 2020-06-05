@@ -1,8 +1,5 @@
 const validators = require('./validators');
 
-/** The maximum amount of variables a single Room can contain. */
-const MAX_VARIABLES = 10;
-
 /**
  * @typedef {import('./Client')} Client
  */
@@ -24,6 +21,8 @@ class Room {
     this.clients = [];
     /** @type {number} */
     this.lastDisconnectTime = -1;
+    /** @type {number} */
+    this.maxVariables = 10;
   }
 
   /**
@@ -85,7 +84,7 @@ class Room {
     if (this.variables.has(name)) {
       throw new Error('Variable already exists');
     }
-    if (this.variables.size >= MAX_VARIABLES) {
+    if (this.variables.size >= this.maxVariables) {
       throw new Error('Too many variables');
     }
     this.variables.set(name, value);
