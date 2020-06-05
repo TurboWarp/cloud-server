@@ -65,11 +65,39 @@ class Client {
   }
 
   /**
-   * Send data to this client.
-   * @param {object} data JS object to send. Will be stringified
+   * Whether the client can receive messages.
+   * @private
+   * @returns {boolean}
+   */
+  canReceiveMessages() {
+    return this.ws !== null && this.ws.readyState === this.ws.OPEN;
+  }
+
+  /**
+   * Send a message to the client.
+   * @param {object} data JSON object to send.
+   * @private
    */
   send(data) {
+    if (!this.canReceiveMessages()) {
+      this.log('cannot send message');
+      return;
+    }
     this.ws.send(JSON.stringify(data));
+  }
+
+  /**
+   * Send multiple messages to the client with a single message.
+   * @param {object[]} data List of JSON objects to send.
+   * @private
+   */
+  sendMany(data) {
+    if (!this.canReceiveMessages()) {
+      this.log('cannot send message');
+      return;
+    }
+    // When sending multiple messages, each message is separated by a newline.
+    this.ws.send(data.map((i) => JSON.stringify(i)).join('\n'));
   }
 
   /**
@@ -86,12 +114,26 @@ class Client {
   }
 
   /**
+   * Send multiple 'set variable' messages to this Client with a single message.
+   * @param {[string, string][]} changes List of tuple with name, value of changed variables
+   */
+  sendManyVariableSet(changes) {
+    this.sendMany(changes.map((i) => ({
+      kind: 'set',
+      var: i[0],
+      value: i[1],
+    })));
+  }
+
+  /**
    * Send a 'set variable' for each of the variables of the connected room.
    */
   sendAllVariables() {
+    const commands = [];
     this.room.getAllVariables().forEach((value, name) => {
-      this.sendVariableSet(name, value);
+      commands.push([name, value]);
     });
+    this.sendManyVariableSet(commands);
   }
 
   /**
@@ -116,6 +158,9 @@ class Client {
    * @param {Room} room
    */
   setRoom(room) {
+    if (this.room !== null) {
+      throw new Error('Already joined a room');
+    }
     this.room = room;
     this.room.addClient(this);
   }

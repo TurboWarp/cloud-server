@@ -72,8 +72,10 @@ wss.on('connection', (ws, req) => {
     if (!client.room) throw new ConnectionError(ConnectionError.ProtocolError, 'No room setup yet');
 
     client.room.set(variable, value);
-    client.room.getClients().forEach((client) => {
-      client.sendVariableSet(variable, value);
+    client.room.getClients().forEach((otherClient) => {
+      if (client !== otherClient) {
+        otherClient.sendVariableSet(variable, value);
+      }
     });
   }
 
