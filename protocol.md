@@ -1,8 +1,8 @@
 # Shared Protocol
 
-All messages send between the client and server (bi-directional) are JSON objects.
+All messages send between the client and server (bi-directional) use JSON to encode the message.
 
-All messages being sent either way must conform to this interface:
+All messages being sent either way must conform to this base interface:
 
 ```ts
 interface Message {
@@ -15,9 +15,8 @@ Different types of messages are defined below
 
 # Server -> Client Protocol
 
-All messages sent to the client are JSON-encoded.
-Multiple messages may sent in a single data frame.
-If this is the case, each JSON object will be separated by a newline (\n).
+The server to client protocol supports sending multiple messages in a single data frame.
+To do this, each JSON message is separated by a newline (\n). This is *not* a JSON list.
 Messages should be processed in the order they were received.
 
 ## set
@@ -36,16 +35,7 @@ interface SetMessage extends Message {
 
 # Client -> Server Protocol
 
-All messages sent to the server are JSON-encoded.
-There must be exactly one JSON object per message.
-
-All messages must conform to:
-
-```ts
-interface Message {
-  kind: string;
-}
-```
+All messages sent to the server are JSON-encoded. There must be exactly one JSON object per message.
 
 ## handshake
 
@@ -53,13 +43,16 @@ interface Message {
 The first message from the client *must* be a handshake message.
 
 ```ts
-interface HandshakeMessage {
-  kind: 'handshake'
+interface HandshakeMessage extends Message {
+  kind: 'handshake';
   // The ID of the room the client would like to join or create.
   room: string;
   // The client's username.
   username: string;
   // Variables known to the client, and their value.
+  // This is used for:
+  //  - setting the initial values of variables in a room
+  //  - disconnecting the client (Incompatibility) if the variable names provided do not match what the room has
   variables: { [s: string]: string; };
 }
 ```
@@ -70,7 +63,7 @@ After a set is received, the server will inform all other connected clients of t
 The server may silently ignore this message, or disconnect the client if it is invalid.
 
 ```ts
-interface SetMessage {
+interface SetMessage extends Message {
   kind: 'set';
   // The name of the variable
   variable: string;
