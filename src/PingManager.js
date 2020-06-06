@@ -69,7 +69,7 @@ class PingManager {
   }
 
   /**
-   * 
+   * Start the PingManager's periodic check.
    * @param {number} ms The time, in milliseconds, between checks.
    */
   start(ms) {

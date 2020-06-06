@@ -183,6 +183,7 @@ class Client {
   /**
    * Set the room that this client connects to and join it.
    * @param {Room} room
+   * @throws Will throw if the client is already in a room.
    */
   setRoom(room) {
     if (this.room !== null) {
