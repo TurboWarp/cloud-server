@@ -19,5 +19,9 @@
     "jest": "^26.0.1",
     "typescript": "^3.9.5"
   },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.1",
+    "utf-8-validate": "^5.0.2"
+  },
   "private": true
 }
