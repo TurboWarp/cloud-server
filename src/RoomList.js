@@ -6,8 +6,6 @@ const logger = require('./logger');
 const JANITOR_INTERVAL = 1000 * 30;
 /** Time a room must be empty for before it may be removed by the janitor. */
 const JANITOR_THRESHOLD = 1000 * 30;
-/** Maximum amount of rooms that can be present */
-const MAX_ROOMS = 100;
 
 /**
  * @typedef {import('./Room').RoomID} RoomID
@@ -15,9 +13,20 @@ const MAX_ROOMS = 100;
 
 class RoomList {
   constructor() {
-    /** @type {Map<RoomID, Room>} */
+    /**
+     * Map of RoomID to the Room with that ID.
+     * @type {Map<RoomID, Room>}
+     * @private
+     */
     this.rooms = new Map();
-    this.janitorInterval = setInterval(() => this.janitor(), JANITOR_INTERVAL);
+    /**
+     * Maximum amount of rooms that can exist at once.
+     * @type {number}
+     */
+    this.maxRooms = 100;
+    this.janitor = this.janitor.bind(this);
+    /** @private */
+    this.janitorInterval = setInterval(this.janitor, JANITOR_INTERVAL);
   }
 
   /**
@@ -51,7 +60,7 @@ class RoomList {
    * @throws Will throw if there are too many rooms.
    */
   create(id, initialData) {
-    if (this.rooms.size >= MAX_ROOMS) {
+    if (this.rooms.size >= this.maxRooms) {
       throw new ConnectionError(ConnectionError.TryAgainLater, 'Too many rooms');
     }
     const room = new Room(id);

@@ -13,15 +13,34 @@ class Room {
    * @param {RoomID} id
    */
   constructor(id) {
-    /** @type {RoomID} */
+    /**
+     * Unique ID given to this room.
+     * @type {RoomID}
+     * @readonly
+     */
     this.id = id;
-    /** @type {Map<string, string>} */
+    /**
+     * The variables that are within this room.
+     * @type {Map<string, string>}
+     * @private
+     * @readonly
+     */
     this.variables = new Map();
-    /** @type {Client[]} */
+    /**
+     * Clients connected to this room.
+     * @type {Client[]}
+     * @private
+     */
     this.clients = [];
-    /** @type {number} */
+    /**
+     * The time of the last client disconnect.
+     * @type {number}
+     */
     this.lastDisconnectTime = -1;
-    /** @type {number} */
+    /**
+     * Maximum number of variables that can be within this room.
+     * @type {number}
+     */
     this.maxVariables = 10;
   }
 

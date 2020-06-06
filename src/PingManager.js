@@ -5,10 +5,7 @@ class PingManager {
    * @param {import('ws').Server} wss The WebSocket server
    */
   constructor(wss) {
-    /**
-     * The WebSocket server.
-     * @private
-     */
+    /** @private */
     this.wss = wss;
     /** @private */
     this.interval = null;
@@ -27,19 +24,25 @@ class PingManager {
       // @ts-ignore
       if (ws.isAlive === false) {
         // Socket has not responded to ping for a long time, and is probably dead.
-        // terminate will call the onclose handler
+        // terminate will call the onclose handler to cleanup the used resources
         ws.terminate();
 
         /** @type {import('./Client')} */
         // @ts-ignore
         const client = ws.client;
-        // client could be null at this point
+        // maybe client could be null if the connection started but was never processed?
         if (client) {
           client.log('Timed out');
+        } else {
+          logger.info('Timed out connection without a client');
         }
 
         return;
       }
+
+      // We will send a ping to the client.
+      // When we receive a pong, isAlive will be set to true.
+      // This gives the client until the next update to respond, this should be plenty long for any living connection.
   
       // @ts-ignore
       ws.isAlive = false;
@@ -71,7 +74,7 @@ class PingManager {
    */
   start(ms) {
     if (this.interval) {
-      throw new Error('already started');
+      throw new Error('Already started');
     }
     this.interval = setInterval(this.update, ms);
   }
@@ -81,7 +84,7 @@ class PingManager {
    */
   stop() {
     if (!this.interval) {
-      throw new Error('not started');
+      throw new Error('Not started');
     }
     clearInterval(this.interval);
   }

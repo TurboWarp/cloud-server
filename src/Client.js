@@ -11,13 +11,11 @@ function getIP(req) {
   const socketAddress = req.socket.remoteAddress || '???';
 
   if (config.trustProxy) {
-    let header = req.headers['x-forwarded-for'];
-    if (Array.isArray(header)) {
-      header = header[0];
-    }
+    const header = /** @type {string} */ (req.headers['x-forwarded-for']);
     if (!header) {
       return socketAddress;
     }
+    // extract the first IP
     const remoteAddress = header.split(/\s*,\s*/)[0];
     return remoteAddress || socketAddress;
   }
@@ -49,10 +47,11 @@ class Client {
   }
 
   /**
-   * Log a message with a prefix including the IP and username of this client.
-   * @param {any[]} args
+   * Get the prefix used in log messages.
+   * @private
+   * @returns {string}
    */
-  log(...args) {
+  getLogPrefix() {
     let prefix = '[' + this.ip;
     if (this.username !== null) {
       prefix += ' "' + this.username + '"';
@@ -61,7 +60,31 @@ class Client {
       prefix += ' in ' + this.room.id;
     }
     prefix += ']';
-    logger.info(prefix, ...args);
+    return prefix;
+  }
+
+  /**
+   * Log a message including some metadata about this client.
+   * @param {...any} args
+   */
+  log(...args) {
+    logger.info(this.getLogPrefix(), ...args);
+  }
+
+  /**
+   * Log a warning message including some metadata about this client.
+   * @param {...any} args
+   */
+  warn(...args) {
+    logger.warn(this.getLogPrefix(), ...args);
+  }
+
+  /**
+   * Log an error message including some metadata about this client.
+   * @param {...any} args
+   */
+  error(...args) {
+    logger.error(this.getLogPrefix(), ...args);
   }
 
   /**
@@ -69,7 +92,7 @@ class Client {
    * @private
    * @returns {boolean}
    */
-  canReceiveMessages() {
+  canSendMessage() {
     return this.ws !== null && this.ws.readyState === this.ws.OPEN;
   }
 
@@ -79,8 +102,8 @@ class Client {
    * @private
    */
   send(data) {
-    if (!this.canReceiveMessages()) {
-      this.log('cannot send message');
+    if (!this.canSendMessage()) {
+      this.log('Cannot send message');
       return;
     }
     this.ws.send(JSON.stringify(data));
@@ -92,12 +115,14 @@ class Client {
    * @private
    */
   sendMany(data) {
-    if (!this.canReceiveMessages()) {
-      this.log('cannot send message');
+    if (!this.canSendMessage()) {
+      this.log('Cannot send message');
       return;
     }
     // When sending multiple messages, each message is separated by a newline.
-    this.ws.send(data.map((i) => JSON.stringify(i)).join('\n'));
+    this.ws.send(
+      data.map((i) => JSON.stringify(i)).join('\n')
+    );
   }
 
   /**
@@ -118,11 +143,13 @@ class Client {
    * @param {[string, string][]} changes List of tuple with name, value of changed variables
    */
   sendManyVariableSet(changes) {
-    this.sendMany(changes.map((i) => ({
-      kind: 'set',
-      var: i[0],
-      value: i[1],
-    })));
+    this.sendMany(
+      changes.map((i) => ({
+        kind: 'set',
+        var: i[0],
+        value: i[1],
+      }))
+    );
   }
 
   /**

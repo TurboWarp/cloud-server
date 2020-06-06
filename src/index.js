@@ -1,4 +1,5 @@
 const http = require('http');
+const process = require('process');
 
 const logger = require('./logger');
 const config = require('./config');
@@ -15,3 +16,16 @@ server.on('upgrade', function upgrade(request, socket, head) {
 server.listen(config.port, function() {
   logger.info('Server started on port: ' + config.port);
 });
+
+server.on('close', function() {
+  logger.info('Server closing');
+  wss.close();
+});
+
+function exit() {
+  server.close();
+}
+
+process.on('exit', exit);
+process.on('SIGINT', exit);
+process.on('SIGTERM', exit);

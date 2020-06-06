@@ -7,11 +7,14 @@ class RateLimiter {
    * @param {number} timePeriod The time, in milliseconds, of each period. Cannot exceed maxOperations in this amount of time.
    */
   constructor(maxOperations, timePeriod) {
+    /** @readonly */
     this.maxOperations = maxOperations;
+    /** @readonly */
     this.timePeriod = timePeriod;
     /**
      * Times of previous operations.
      * @type {number[]}
+     * @private
      */
     this.history = [];
   }

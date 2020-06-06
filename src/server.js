@@ -71,7 +71,9 @@ wss.on('connection', (ws, req) => {
   function performSet(variable, value) {
     if (!client.room) throw new ConnectionError(ConnectionError.ProtocolError, 'No room setup yet');
 
+    // set() will perform validation on the variable name & value
     client.room.set(variable, value);
+
     client.room.getClients().forEach((otherClient) => {
       if (client !== otherClient) {
         otherClient.sendVariableSet(variable, value);
@@ -108,7 +110,7 @@ wss.on('connection', (ws, req) => {
           throw new ConnectionError(ConnectionError.ProtocolError, 'Unknown message type');
       }
     } catch (e) {
-      client.log('Error handling connection', e);
+      client.error('Error handling connection', e);
       if (e instanceof ConnectionError) {
         client.close(e.code);
       } else {
@@ -118,12 +120,12 @@ wss.on('connection', (ws, req) => {
   });
 
   ws.on('error', (error) => {
-    client.log('** ERROR **', error);
+    client.error('** ERROR **', error);
     client.close(ConnectionError.InternalError);
   });
 
   ws.on('close', (code, reason) => {
-    client.log('Connection closed. code', code, 'reason', reason);
+    client.log('Connection closed: code', code, 'reason', reason);
     client.close(ConnectionError.InternalError);
   });
 
@@ -133,7 +135,7 @@ wss.on('connection', (ws, req) => {
 });
 
 wss.on('close', () => {
-  logger.info('Server closing');
+  logger.info('WebSocket closing');
   pingManager.stop();
   rooms.destroy();
 });

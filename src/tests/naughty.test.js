@@ -7,6 +7,7 @@ test('naughty word detector', () => {
   expect(isSafe('Hell-o :)')).toBe(true);
   expect(isSafe('fuck')).toBe(false);
   expect(isSafe('f_u_c_k')).toBe(false);
+  expect(isSafe('fu__3_c_k')).toBe(false);
   expect(isSafe('FUCK')).toBe(false);
   expect(isSafe('bitchute')).toBe(false);
 });
