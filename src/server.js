@@ -47,17 +47,20 @@ wss.on('connection', (ws, req) => {
   pingManager.handleConnection(ws);
 
   function performHandshake(roomId, username, variables) {
-    if (client.room) throw new ConnectionError(ConnectionError.ProtocolError, 'Already has room');
-    if (!validators.isValidRoomID(roomId)) throw new ConnectionError(ConnectionError.ProtocolError, 'Invalid room ID');
-    if (!validators.isValidUsername(username)) throw new ConnectionError(ConnectionError.ProtocolError, 'Invalid username');
-    if (!validators.isValidVariableMap(variables)) throw new ConnectionError(ConnectionError.ProtocolError, 'Invalid variable map');
+    if (client.room) throw new ConnectionError(ConnectionError.Error, 'Already has room');
+    if (!validators.isValidRoomID(roomId)) throw new ConnectionError(ConnectionError.Error, 'Invalid room ID');
+    if (!validators.isValidVariableMap(variables)) throw new ConnectionError(ConnectionError.Error, 'Invalid variable map');
+    if (!validators.isValidUsername(username)) throw new ConnectionError(ConnectionError.Username, 'Invalid username');
 
     client.username = username;
 
     if (rooms.has(roomId)) {
       const room = rooms.get(roomId);
       if (room.hasClientWithUsername(username)) {
-        throw new ConnectionError(ConnectionError.PolicyViolation, 'Client with username already exists');
+        throw new ConnectionError(ConnectionError.Username, 'Client with username already exists');
+      }
+      if (!room.matchesVariableList(Object.keys(variables))) {
+        throw new ConnectionError(ConnectionError.Incompatibility, 'Variable list does not match.');
       }
       client.setRoom(room);
       client.sendAllVariables();
@@ -69,7 +72,7 @@ wss.on('connection', (ws, req) => {
   }
 
   function performSet(variable, value) {
-    if (!client.room) throw new ConnectionError(ConnectionError.ProtocolError, 'No room setup yet');
+    if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
 
     // set() will perform validation on the variable name & value
     client.room.set(variable, value);
@@ -107,26 +110,26 @@ wss.on('connection', (ws, req) => {
           break;
 
         default:
-          throw new ConnectionError(ConnectionError.ProtocolError, 'Unknown message type');
+          throw new ConnectionError(ConnectionError.Error, 'Unknown message type');
       }
     } catch (e) {
       client.error('Error handling connection', e);
       if (e instanceof ConnectionError) {
         client.close(e.code);
       } else {
-        client.close(ConnectionError.InternalError);
+        client.close(ConnectionError.Error);
       }
     }
   });
 
   ws.on('error', (error) => {
     client.error('** ERROR **', error);
-    client.close(ConnectionError.InternalError);
+    client.close(ConnectionError.Error);
   });
 
   ws.on('close', (code, reason) => {
     client.log('Connection closed: code', code, 'reason', reason);
-    client.close(ConnectionError.InternalError);
+    client.close(ConnectionError.Error);
   });
 
   ws.on('pong', () => {

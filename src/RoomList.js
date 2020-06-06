@@ -61,11 +61,11 @@ class RoomList {
    */
   create(id, initialData) {
     if (this.rooms.size >= this.maxRooms) {
-      throw new ConnectionError(ConnectionError.TryAgainLater, 'Too many rooms');
+      throw new ConnectionError(ConnectionError.Overloaded, 'Too many rooms');
     }
     const room = new Room(id);
     for (const key of Object.keys(initialData)) {
-      room.createVar(key, initialData[key]);
+      room.create(key, initialData[key]);
     }
     this.rooms.set(id, room);
     logger.info('Created room: ' + id);

@@ -10,10 +10,10 @@ class ConnectionError extends Error {
   }
 }
 
-ConnectionError.ProtocolError = 1002;
-ConnectionError.UnsupportedData = 1003;
-ConnectionError.PolicyViolation = 1008;
-ConnectionError.InternalError = 1011;
-ConnectionError.TryAgainLater = 1013;
+ConnectionError.Error = 4000;
+ConnectionError.Incompatibility = 4001;
+ConnectionError.Username = 4002;
+ConnectionError.Overloaded = 4003;
+ConnectionError.TryAgainLater = 4004;
 
 module.exports = ConnectionError;

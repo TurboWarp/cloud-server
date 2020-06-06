@@ -93,14 +93,14 @@ class Room {
    * @param {string} value The value of the variable
    * @throws Will throw if name or value are invalid, the variable already exists, or there are too many variables.
    */
-  createVar(name, value) {
+  create(name, value) {
     if (!validators.isValidVariableName(name)) {
       throw new Error('Invalid variable name');
     }
     if (!validators.isValidVariableValue(value)) {
       throw new Error('Invalid value');
     }
-    if (this.variables.has(name)) {
+    if (this.has(name)) {
       throw new Error('Variable already exists');
     }
     if (this.variables.size >= this.maxVariables) {
@@ -123,10 +123,18 @@ class Room {
     if (!validators.isValidVariableValue(value)) {
       throw new Error('Invalid value');
     }
-    if (!this.variables.has(name)) {
+    if (!this.has(name)) {
       throw new Error('Variable does not exist');
     }
     this.variables.set(name, value);
+  }
+
+  /**
+   * Determine whether this room has a variable of a given name.
+   * @param {string} name The name of the variable
+   */
+  has(name) {
+    return this.variables.has(name);
   }
 
   /**
@@ -138,6 +146,24 @@ class Room {
     // usernames are compared case insensitively
     username = username.toLowerCase();
     return this.getClients().some((i) => i.username.toLowerCase() === username);
+  }
+
+  /**
+   * Determine whether a list of variable names matches the names of the variables in this room.
+   * Case sensitive, order doesn't matter.
+   * @param {string[]} variables The list of variable names. Must not contain duplicates.
+   * @returns {boolean}
+   */
+  matchesVariableList(variables) {
+    if (variables.length !== this.variables.size) {
+      return false;
+    }
+    for (const variableName of this.getAllVariables().keys()) {
+      if (variables.indexOf(variableName) === -1) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 

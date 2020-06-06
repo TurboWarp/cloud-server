@@ -31,20 +31,32 @@ test('clients', () => {
   expect(() => room.removeClient(client2)).toThrow();
 });
 
-test('createVar', () => {
+test('create', () => {
   const room = new Room('1234');
-  expect(() => room.createVar('invalid name', '123')).toThrow();
-  expect(() => room.createVar('☁ name', 'invalid value')).toThrow();
-  room.createVar('☁ variable', '123');
-  expect(() => room.createVar('☁ variable', '123')).toThrow();
+  expect(() => room.create('invalid name', '123')).toThrow();
+  expect(() => room.create('☁ name', 'invalid value')).toThrow();
+  room.create('☁ variable', '123');
+  expect(() => room.create('☁ variable', '123')).toThrow();
 });
 
-test('variable count limit', () => {
+test('maxVariables', () => {
   const room = new Room('1234');
   for (var i = 0; i < room.maxVariables; i++) {
-    room.createVar('☁ variable' + i, '1234');
+    room.create('☁ variable' + i, '1234');
   }
-  expect(() => room.createVar('☁ too many exist', '1234')).toThrow();
+  expect(() => room.create('☁ too many exist', '1234')).toThrow();
+});
+
+test('has', () => {
+  const room = new Room('1234');
+  expect(room.has('☁ foo')).toBe(false);
+  expect(room.has('☁ bar')).toBe(false);
+  room.create('☁ foo', '123');
+  expect(room.has('☁ foo')).toBe(true);
+  expect(room.has('☁ bar')).toBe(false);
+  room.create('☁ bar', '123');
+  expect(room.has('☁ foo')).toBe(true);
+  expect(room.has('☁ bar')).toBe(true);
 });
 
 test('set', () => {
@@ -52,8 +64,8 @@ test('set', () => {
   expect(() => room.set('☁ doesnt exist', '123')).toThrow();
   expect(() => room.set('☁ foo', 'invalid value')).toThrow();
   expect(() => room.set('invalid name', '123')).toThrow();
-  room.createVar('☁ foo', '123');
-  room.createVar('☁ bar', '456');
+  room.create('☁ foo', '123');
+  room.create('☁ bar', '456');
   const vars = room.getAllVariables();
   expect(vars.size).toBe(2);
   expect(vars.get('☁ foo')).toBe('123');
@@ -80,4 +92,31 @@ test('hasClientWithUsername', () => {
   room.addClient(client2);
   expect(room.hasClientWithUsername('username')).toBe(true);
   expect(room.hasClientWithUsername('username2')).toBe(true);
+});
+
+test('matchesVariableList', () => {
+  const room = new Room('1234');
+  expect(room.matchesVariableList([])).toBe(true);
+  expect(room.matchesVariableList(['not even a cloud variable'])).toBe(false);
+  expect(room.matchesVariableList(['☁ foo'])).toBe(false);
+  expect(room.matchesVariableList(['☁ Foo'])).toBe(false);
+  expect(room.matchesVariableList(['☁ foo', '☁ bar'])).toBe(false);
+  expect(room.matchesVariableList(['☁ bar', '☁ foo'])).toBe(false);
+  expect(room.matchesVariableList(['☁ bar', '☁ foo', '☁ fizz'])).toBe(false);
+  room.create('☁ foo', '123');
+  expect(room.matchesVariableList([])).toBe(false);
+  expect(room.matchesVariableList(['☁ foo'])).toBe(true);
+  expect(room.matchesVariableList(['☁ Foo'])).toBe(false);
+  expect(room.matchesVariableList(['☁ foo', '☁ foo'])).toBe(false);
+  expect(room.matchesVariableList(['☁ foo', '☁ bar'])).toBe(false);
+  expect(room.matchesVariableList(['☁ bar', '☁ foo'])).toBe(false);
+  expect(room.matchesVariableList(['☁ bar', '☁ foo', '☁ fizz'])).toBe(false);
+  room.create('☁ bar', '123');
+  expect(room.matchesVariableList([])).toBe(false);
+  expect(room.matchesVariableList(['☁ foo'])).toBe(false);
+  expect(room.matchesVariableList(['☁ foo', 'not even a cloud variable'])).toBe(false);
+  expect(room.matchesVariableList(['☁ foo', '☁ foo'])).toBe(false);
+  expect(room.matchesVariableList(['☁ foo', '☁ bar'])).toBe(true);
+  expect(room.matchesVariableList(['☁ bar', '☁ foo'])).toBe(true);
+  expect(room.matchesVariableList(['☁ bar', '☁ foo', '☁ fizz'])).toBe(false);
 });
