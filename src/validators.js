@@ -54,34 +54,34 @@ module.exports.isValidVariableName = function(name) {
  * @returns {boolean}
  */
 module.exports.isValidVariableValue = function(value) {
-  if (!(typeof value === 'string' && value.length < VALUE_MAX_LENGTH && !Number.isNaN(+value))) {
+  if (!(typeof value === 'string' && value.length < VALUE_MAX_LENGTH)) {
+    return false;
+  }
+
+  var length = value.length;
+  // catch some special cases
+  if (value === '.' || value === '-') {
     return false;
   }
 
   var seenDecimal = false;
-  var length = value.length; // caching value.length can slightly help performance
-  if (length === 0) {
-    return true;
-  }
-
-  // skip negative sign, if any
   var i = 0;
-  if (value.charAt(0) === '-') i++;
+  // 45 = -
+  if (value.charCodeAt(0) === 45) i++;
 
   for (; i < length; i++) {
-    var char = value.charAt(i);
-
-    // Only allow one decimal
-    if (char === '.') {
-      if (seenDecimal) {
-        return false;
-      }
+    var char = value.charCodeAt(i);
+    // 46 = .
+    if (char === 46) {
+      if (seenDecimal) return false;
       seenDecimal = true;
     } else {
-      if (!(char === '0' || char === '1' || char === '2' || char === '3' || char === '4' || char === '5' || char === '6' || char === '7' || char === '8' || char === '9')) {
-        return false;
-      }
+      // 48 = 0
+      // 57 = 9
+      // all the numbers are between these
+      if (char < 48 || char > 57) return false;
     }
   }
+
   return true;
 };

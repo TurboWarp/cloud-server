@@ -68,7 +68,7 @@ test('isValidVariableName', () => {
   expect(validators.isValidVariableName({})).toBe(false);
 });
 
-test('isValidVarialeValue', () => {
+test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue({})).toBe(false);
   expect(validators.isValidVariableValue('{}')).toBe(false);
   expect(validators.isValidVariableValue([])).toBe(false);
@@ -85,34 +85,57 @@ test('isValidVarialeValue', () => {
   expect(validators.isValidVariableValue('Infinity')).toBe(false);
   expect(validators.isValidVariableValue(NaN)).toBe(false);
   expect(validators.isValidVariableValue('NaN')).toBe(false);
+  expect(validators.isValidVariableValue('abcde')).toBe(false);
+  expect(validators.isValidVariableValue('☁')).toBe(false);
   expect(validators.isValidVariableValue('')).toBe(true);
   expect(validators.isValidVariableValue(' ')).toBe(false);
+  expect(validators.isValidVariableValue('.')).toBe(false);
+  expect(validators.isValidVariableValue('. ')).toBe(false);
+  expect(validators.isValidVariableValue(' .')).toBe(false);
+  expect(validators.isValidVariableValue('..')).toBe(false);
   expect(validators.isValidVariableValue(4)).toBe(false);
+  expect(validators.isValidVariableValue('-')).toBe(false);
+  expect(validators.isValidVariableValue('--')).toBe(false);
+  expect(validators.isValidVariableValue('- ')).toBe(false);
+  expect(validators.isValidVariableValue(' -')).toBe(false);
+  expect(validators.isValidVariableValue('-2500')).toBe(true);
+  expect(validators.isValidVariableValue('2500')).toBe(true);
   expect(validators.isValidVariableValue('-0')).toBe(true);
   expect(validators.isValidVariableValue('0')).toBe(true);
+  expect(validators.isValidVariableValue('1')).toBe(true);
   expect(validators.isValidVariableValue('4-')).toBe(false);
   expect(validators.isValidVariableValue('4 ')).toBe(false);
   expect(validators.isValidVariableValue(' 4')).toBe(false);
   expect(validators.isValidVariableValue('4.00')).toBe(true);
+  expect(validators.isValidVariableValue('4..00')).toBe(false);
   expect(validators.isValidVariableValue('4.0-0')).toBe(false);
   expect(validators.isValidVariableValue('4.')).toBe(true);
   expect(validators.isValidVariableValue('-4.')).toBe(true);
   expect(validators.isValidVariableValue('-4')).toBe(true);
   expect(validators.isValidVariableValue('-4.0')).toBe(true);
+  expect(validators.isValidVariableValue('.32')).toBe(true);
+  expect(validators.isValidVariableValue('-.32')).toBe(true);
   expect(validators.isValidVariableValue('--4')).toBe(false);
   expect(validators.isValidVariableValue('-777777.44')).toBe(true);
-  expect(validators.isValidVariableValue('1'.repeat(100))).toBe(true);
-  expect(validators.isValidVariableValue('-' + '1'.repeat(100))).toBe(true);
-  expect(validators.isValidVariableValue('-' + '1'.repeat(100) + '.' + '1'.repeat(100))).toBe(true);
   expect(validators.isValidVariableValue('00003.3330000')).toBe(true);
   expect(validators.isValidVariableValue('-00003.3330000')).toBe(true);
-  expect(validators.isValidVariableValue('-')).toBe(false);
   expect(validators.isValidVariableValue('3..3')).toBe(false);
   expect(validators.isValidVariableValue('3e3')).toBe(false);
   expect(validators.isValidVariableValue('-3e3')).toBe(false);
   expect(validators.isValidVariableValue('0x03')).toBe(false);
   expect(validators.isValidVariableValue('-0x03')).toBe(false);
-  expect(validators.isValidVariableValue('1'.repeat(256))).toBe(true); // longest variable Scratch 3 allows
+  // long vars
+  expect(validators.isValidVariableValue('-' + '1'.repeat(100))).toBe(true);
+  expect(validators.isValidVariableValue('-' + '1'.repeat(100) + '.' + '1'.repeat(100))).toBe(true);
+  for (var i = 100; i < 256; i++) {
+    expect(validators.isValidVariableValue('1'.repeat(i))).toBe(true);
+    expect(validators.isValidVariableValue('-' + '1'.repeat(i))).toBe(true);
+  }
+  // too long
+  expect(validators.isValidVariableValue('1'.repeat(10000))).toBe(false);
+  // ascii neighbors to 0, 9
+  expect(validators.isValidVariableValue('/')).toBe(false);
+  expect(validators.isValidVariableValue(':')).toBe(false);
   // actual cloud variable samples from real projects
   expect(validators.isValidVariableValue('121121038464634514854524245338529813421560282228134215602822281342156028222818421560282228290310010102131342156028222813421560282228')).toBe(true); // https://scratch.mit.edu/projects/12785898/
   expect(validators.isValidVariableValue('379741339735283235319715161527061916240207071306973097339741363797070213200697')).toBe(true); // https://scratch.mit.edu/projects/311764678/
