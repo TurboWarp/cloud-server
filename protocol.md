@@ -1,6 +1,6 @@
 # Shared Protocol
 
-All messages send between the client and server (bi-directional) use JSON to encode the message.
+All messages send between the client and server use JSON to encode the message.
 
 All messages being sent either way must conform to this base interface:
 
@@ -52,7 +52,7 @@ interface HandshakeMessage extends Message {
   // Variables known to the client, and their value.
   // This is used for:
   //  - setting the initial values of variables in a room
-  //  - disconnecting the client (Incompatibility) if the variable names provided do not match what the room has
+  //  - disconnecting the client (by Incompatibility) if the variable names provided do not match what the room has
   variables: { [s: string]: string; };
 }
 ```
@@ -76,29 +76,25 @@ interface SetMessage extends Message {
 
 ```
 1xxx  Protocol Errors
-  Autoreconnect: yes
+  WebSocket errors.
+  No special meaning is assigned to these status codes.
 
 4000  Generic error
   When the client violates the protocol.
   For example, if you send a 'set' before a 'handshake', or try to change the value of variables that don't exist.
-  Autoreconnect: yes
 
 4001  Incompatibility
   When the connection is unable to continue due to a compatibility issue.
   For example, when the variables provided by the client do not match those in the room.
-  Autoreconnect: no
 
 4002  Username error
   When there is a problem with the provided username that can be solved by changing the username.
   For example, if the name is too short, too long, already in use, or is deemed unsafe.
-  Autoreconnect: no
 
 4003  Overloaded
   When the server is overloaded and refuses to accept new connections.
-  Autoreconnect: yes
 
 4004  Try Again Later
-  When the client has done something wrong that has caused them to be kicked.
-  The client is free to try again.
-  Autoreconnect: yes
+  When the client has done an operation that is invalid at this time, but may have been valid if sent later.
+  For example, when the client sends too many messages in a given period of time.
 ```

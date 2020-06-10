@@ -47,7 +47,7 @@ wss.on('connection', (ws, req) => {
   pingManager.handleConnection(ws);
 
   function performHandshake(roomId, username, variables) {
-    if (client.room) throw new ConnectionError(ConnectionError.Error, 'Already has room');
+    if (client.room) throw new ConnectionError(ConnectionError.Error, 'Already performed handshake');
     if (!validators.isValidRoomID(roomId)) throw new ConnectionError(ConnectionError.Error, 'Invalid room ID');
     if (!validators.isValidVariableMap(variables)) throw new ConnectionError(ConnectionError.Error, 'Invalid variable map');
     if (!validators.isValidUsername(username)) throw new ConnectionError(ConnectionError.Username, 'Invalid username');
@@ -57,7 +57,7 @@ wss.on('connection', (ws, req) => {
     if (rooms.has(roomId)) {
       const room = rooms.get(roomId);
       if (room.hasClientWithUsername(username)) {
-        throw new ConnectionError(ConnectionError.Username, 'Client with username already exists');
+        throw new ConnectionError(ConnectionError.Username, 'Client with provided username already exists');
       }
       if (!room.matchesVariableList(Object.keys(variables))) {
         throw new ConnectionError(ConnectionError.Incompatibility, 'Variable list does not match.');
@@ -110,7 +110,7 @@ wss.on('connection', (ws, req) => {
           break;
 
         default:
-          throw new ConnectionError(ConnectionError.Error, 'Unknown message type');
+          throw new ConnectionError(ConnectionError.Error, 'Unknown message kind');
       }
     } catch (e) {
       client.error('Error handling connection', e);

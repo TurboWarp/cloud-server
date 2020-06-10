@@ -7,7 +7,6 @@ const VARIABLE_NAME_MAX_LENGTH = 100;
 
 /** The maximum length of a variable's value. */
 const VALUE_MAX_LENGTH = 1024;
-const VALUE_NUMBERS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 /** Maximum length of usernames, inclusive. */
 const USERNAME_MAX_LENGTH = 20;
@@ -61,13 +60,16 @@ module.exports.isValidVariableValue = function(value) {
 
   var seenDecimal = false;
   var length = value.length; // caching value.length can slightly help performance
+  if (length === 0) {
+    return true;
+  }
 
   // skip negative sign, if any
   var i = 0;
-  if (value.startsWith('-')) i++;
+  if (value.charAt(0) === '-') i++;
 
   for (; i < length; i++) {
-    const char = value.charAt(i);
+    var char = value.charAt(i);
 
     // Only allow one decimal
     if (char === '.') {
@@ -75,11 +77,10 @@ module.exports.isValidVariableValue = function(value) {
         return false;
       }
       seenDecimal = true;
-      continue;
-    }
-
-    if (!VALUE_NUMBERS.includes(char)) {
-      return false;
+    } else {
+      if (!(char === '0' || char === '1' || char === '2' || char === '3' || char === '4' || char === '5' || char === '6' || char === '7' || char === '8' || char === '9')) {
+        return false;
+      }
     }
   }
   return true;
