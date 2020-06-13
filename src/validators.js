@@ -3,7 +3,7 @@ const isSafe = require('./naughty');
 /** A required prefix that must appear at the beginning of all variable's names. */
 const VARIABLE_NAME_CLOUD_PREFIX = '☁ ';
 /** The maximum length of a variable's name. Scratch does not seem to restrict this but it may be a good idea regardless. */
-const VARIABLE_NAME_MAX_LENGTH = 100;
+const VARIABLE_NAME_MAX_LENGTH = 512;
 
 /** The maximum length of a variable's value. */
 const VALUE_MAX_LENGTH = 1024;
@@ -46,7 +46,7 @@ module.exports.isValidVariableMap = function(object) {
  * @returns {boolean}
  */
 module.exports.isValidVariableName = function(name) {
-  return typeof name === 'string' && name.startsWith(VARIABLE_NAME_CLOUD_PREFIX) && name.length > VARIABLE_NAME_CLOUD_PREFIX.length && name.length < VARIABLE_NAME_MAX_LENGTH && isSafe(name);
+  return typeof name === 'string' && name.startsWith(VARIABLE_NAME_CLOUD_PREFIX) && name.length > VARIABLE_NAME_CLOUD_PREFIX.length && name.length < VARIABLE_NAME_MAX_LENGTH;
 };
 
 /**

@@ -84,7 +84,7 @@ interface SetMessage extends Message {
   For example, if you send a 'set' before a 'handshake', or try to change the value of variables that don't exist.
 
 4001  Incompatibility
-  When the connection is unable to continue due to a compatibility issue.
+  When the connection is unable to continue due to a compatibility issue with the data provided.
   For example, when the variables provided by the client do not match those in the room.
 
 4002  Username error
@@ -92,7 +92,7 @@ interface SetMessage extends Message {
   For example, if the name is too short, too long, already in use, or is deemed unsafe.
 
 4003  Overloaded
-  When the server is overloaded and refuses to accept new connections.
+  When the server is overloaded or full and refuses to accept new connections.
 
 4004  Try Again Later
   When the client has done an operation that is invalid at this time, but may have been valid if sent later.

@@ -4,6 +4,7 @@ const logger = require('./logger');
 
 /**
  * Get the remote IP address of a request.
+ * This may be configured to trust a proxy and return the proxy's forwarded-for IP instead of the actual remote IP
  * @param {import('http').IncomingMessage} req
  * @returns {string} The IP address
  */
@@ -164,7 +165,7 @@ class Client {
   }
 
   /**
-   * Close the connection to this client and send one final message to the client.
+   * Close the connection to this client with a given error code and remove from connected room.
    * @param {number} code The error code to send
    */
   close(code) {

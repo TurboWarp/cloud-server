@@ -10,8 +10,8 @@ const fileServer = new static.Server('./public', {
   serverInfo: 'https://github.com/forkphorus/cloud-server',
 });
 const server = http.createServer(function(req, res) {
-  // Serve static files
-  req.addListener('end', function () {
+  // Serve static files over HTTP
+  req.addListener('end', function() {
     fileServer.serve(req, res);
   }).resume();
 });

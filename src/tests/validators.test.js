@@ -51,14 +51,14 @@ test('isValidVariableMap', () => {
 
 test('isValidVariableName', () => {
   expect(validators.isValidVariableName('☁ Foo')).toBe(true);
+  expect(validators.isValidVariableName('☁ this is a pretty long variable name but not too long')).toBe(true);
   expect(validators.isValidVariableName('☁ 123')).toBe(true);
   expect(validators.isValidVariableName(' ☁ 123')).toBe(false);
   expect(validators.isValidVariableName('☁ null')).toBe(true);
   expect(validators.isValidVariableName('null')).toBe(false);
   expect(validators.isValidVariableName('☁')).toBe(false);
   expect(validators.isValidVariableName('☁ ')).toBe(false);
-  expect(validators.isValidVariableName('☁ ' + 'e'.repeat(100))).toBe(false);
-  expect(validators.isValidVariableName('☁ fuck')).toBe(false);
+  expect(validators.isValidVariableName('☁ ' + 'e'.repeat(10000))).toBe(false);
   expect(validators.isValidVariableName(123)).toBe(false);
   expect(validators.isValidVariableName(null)).toBe(false);
   expect(validators.isValidVariableName(undefined)).toBe(false);
