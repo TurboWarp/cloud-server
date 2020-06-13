@@ -1,13 +1,12 @@
 const WebSocket = require('ws');
 
-const Room = require('./Room');
 const Client = require('./Client');
 const RoomList = require('./RoomList');
 const ConnectionError = require('./ConnectionError');
 const PingManager = require('./PingManager');
+const RateLimiter = require('./RateLimiter');
 const validators = require('./validators');
 const logger = require('./logger');
-const RateLimiter = require('./RateLimiter');
 
 const wss = new WebSocket.Server({
   noServer: true,
@@ -19,7 +18,7 @@ const pingManager = new PingManager(wss);
 pingManager.start(1000 * 30);
 
 /**
- * @param {unknown} data 
+ * @param {unknown} data
  */
 function isValidMessage(data) {
   // @ts-ignore

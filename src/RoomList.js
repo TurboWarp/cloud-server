@@ -40,13 +40,13 @@ class RoomList {
 
   /**
    * Get a Room
-   * @param {RoomID} id 
+   * @param {RoomID} id
    * @returns {Room}
    * @throws Will throw if room does not exist
    */
   get(id) {
     const room = this.rooms.get(id);
-    if (room === null) {
+    if (!room) {
       throw new Error('Room does not exist');
     }
     return room;

@@ -8,5 +8,12 @@
     "noEmit": true,
     "allowJs": true,
     "checkJs": true,
+    // Make the checker much more strict without being too limiting
+    "strict": true,
+    "noImplicitAny": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowUnreachableCode": false,
   }
 }

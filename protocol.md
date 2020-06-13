@@ -81,10 +81,9 @@ interface SetMessage extends Message {
 
 4000  Generic error
   When the client violates the protocol.
-  For example, if you send a 'set' before a 'handshake', or try to change the value of variables that don't exist.
 
 4001  Incompatibility
-  When the connection is unable to continue due to a compatibility issue with the data provided.
+  When the connection is unable to continue due to an unfixable compatibility issue.
   For example, when the variables provided by the client do not match those in the room.
 
 4002  Username error
@@ -95,6 +94,6 @@ interface SetMessage extends Message {
   When the server is overloaded or full and refuses to accept new connections.
 
 4004  Try Again Later
-  When the client has done an operation that is invalid at this time, but may have been valid if sent later.
+  When the client has done an operation that is invalid at this time, but would have been valid if sent later.
   For example, when the client sends too many messages in a given period of time.
 ```

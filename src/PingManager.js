@@ -24,7 +24,7 @@ class PingManager {
       // @ts-ignore
       if (ws.isAlive === false) {
         // Socket has not responded to ping for a long time, and is probably dead.
-        // terminate will call the onclose handler to cleanup the used resources
+        // terminate will call the onclose handler to cleanup the connection
         ws.terminate();
 
         /** @type {import('./Client')} */
@@ -43,7 +43,7 @@ class PingManager {
       // We will send a ping to the client.
       // When we receive a pong, isAlive will be set to true.
       // This gives the client until the next update to respond, this should be plenty long for any living connection.
-  
+
       // @ts-ignore
       ws.isAlive = false;
       ws.ping();

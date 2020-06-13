@@ -5,15 +5,19 @@ const logger = require('./logger');
 /**
  * Get the remote IP address of a request.
  * This may be configured to trust a proxy and return the proxy's forwarded-for IP instead of the actual remote IP
- * @param {import('http').IncomingMessage} req
+ * @param {?import('http').IncomingMessage} req
  * @returns {string} The IP address
  */
 function getIP(req) {
-  const socketAddress = req.socket.remoteAddress || '???';
+  if (req === null) {
+    return '(req missing)';
+  }
+
+  const socketAddress = req.socket.remoteAddress || '(remoteAddress missing)';
 
   if (config.trustProxy) {
     const header = /** @type {string} */ (req.headers['x-forwarded-for']);
-    if (!header) {
+    if (!header || typeof header !== 'string') {
       return socketAddress;
     }
     // extract the first IP
@@ -26,8 +30,8 @@ function getIP(req) {
 
 class Client {
   /**
-   * @param {import('ws')} ws The WebSocket connection
-   * @param {import('http').IncomingMessage} req The HTTP request
+   * @param {?import('ws')} ws The WebSocket connection
+   * @param {?import('http').IncomingMessage} req The HTTP request
    */
   constructor(ws, req) {
     /** The WebSocket connection */
@@ -36,15 +40,15 @@ class Client {
     this.ip = getIP(req);
     /**
      * The Room this client is connected to.
-     * @type {Room}
+     * @type {?Room}
      */
     this.room = null;
     /**
      * The username of the Client.
-     * This value is only valid if room != null
+     * This value is only valid if room !== null
      * @type {string}
      */
-    this.username = null;
+    this.username = '';
   }
 
   /**
@@ -54,7 +58,7 @@ class Client {
    */
   getLogPrefix() {
     let prefix = '[' + this.ip;
-    if (this.username !== null) {
+    if (this.username !== '') {
       prefix += ' "' + this.username + '"';
     }
     if (this.room !== null) {
@@ -89,21 +93,12 @@ class Client {
   }
 
   /**
-   * Whether the client can receive messages.
-   * @private
-   * @returns {boolean}
-   */
-  canSendMessage() {
-    return this.ws !== null && this.ws.readyState === this.ws.OPEN;
-  }
-
-  /**
    * Send a message to the client.
    * @param {object} data JSON object to send.
    * @private
    */
   send(data) {
-    if (!this.canSendMessage()) {
+    if (this.ws === null || this.ws.readyState !== this.ws.OPEN) {
       this.log('Cannot send message');
       return;
     }
@@ -116,7 +111,7 @@ class Client {
    * @private
    */
   sendMany(data) {
-    if (!this.canSendMessage()) {
+    if (this.ws === null || this.ws.readyState !== this.ws.OPEN) {
       this.log('Cannot send message');
       return;
     }
@@ -155,8 +150,13 @@ class Client {
 
   /**
    * Send a 'set variable' for each of the variables of the connected room.
+   * @throws Will throw if the client is not in a room.
    */
   sendAllVariables() {
+    if (!this.room) {
+      throw new Error('Not in a room');
+    }
+    /** @type {[string, string][]} */
     const commands = [];
     this.room.getAllVariables().forEach((value, name) => {
       commands.push([name, value]);

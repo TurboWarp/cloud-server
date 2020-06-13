@@ -1,19 +1,16 @@
 const http = require('http');
-const process = require('process');
-const static = require('node-static');
+const finalhandler = require('finalhandler');
+const serveStatic = require('serve-static');
 
 const logger = require('./logger');
 const config = require('./config');
-
 const wss = require('./server');
-const fileServer = new static.Server('./public', {
-  serverInfo: 'https://github.com/forkphorus/cloud-server',
-});
-const server = http.createServer(function(req, res) {
-  // Serve static files over HTTP
-  req.addListener('end', function() {
-    fileServer.serve(req, res);
-  }).resume();
+
+// We serve static files over HTTP
+const serve = serveStatic('public');
+const server = http.createServer(function handler(req, res) {
+  // @ts-ignore
+  serve(req, res, finalhandler(req, res));
 });
 
 server.on('upgrade', function upgrade(request, socket, head) {
@@ -28,7 +25,7 @@ server.on('close', function() {
   logger.info('Server closing');
   wss.close();
 });
- 
+
 server.listen(config.port, function() {
   logger.info('Server started on port: ' + config.port);
 });

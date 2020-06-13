@@ -117,14 +117,14 @@ class Room {
    * @throws Will throw if name or value are invalid, or the variable does not exist.
    */
   set(name, value) {
+    if (!this.has(name)) {
+      throw new Error('Variable does not exist');
+    }
     if (!validators.isValidVariableName(name)) {
       throw new Error('Invalid variable name');
     }
     if (!validators.isValidVariableValue(value)) {
       throw new Error('Invalid value');
-    }
-    if (!this.has(name)) {
-      throw new Error('Variable does not exist');
     }
     this.variables.set(name, value);
   }
