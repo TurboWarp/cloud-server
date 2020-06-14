@@ -3,8 +3,9 @@
     // typescript is only used for typechecking.
     // we use vanilla JS with jsdoc-style annotations.
     "target": "ES6",
-    "module": "System",
+    "module": "CommonJS",
     "moduleResolution": "Node",
+    "resolveJsonModule": true,
     "noEmit": true,
     "allowJs": true,
     "checkJs": true,
