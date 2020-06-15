@@ -24,9 +24,11 @@ class RoomList {
      * @type {number}
      */
     this.maxRooms = 512;
+    /** Enable or disable logging of events to the console. */
+    this.enableLogging = false;
     this.janitor = this.janitor.bind(this);
     /** @private */
-    this.janitorInterval = setInterval(this.janitor, JANITOR_INTERVAL);
+    this.janitorInterval = null;
   }
 
   /**
@@ -61,14 +63,20 @@ class RoomList {
    */
   create(id, initialData) {
     if (this.rooms.size >= this.maxRooms) {
+      // TODO: it may be worthwhile to call janitor() and check again
       throw new ConnectionError(ConnectionError.Overloaded, 'Too many rooms');
+    }
+    if (this.has(id)) {
+      throw new Error('Room already exists');
     }
     const room = new Room(id);
     for (const key of Object.keys(initialData)) {
       room.create(key, initialData[key]);
     }
     this.rooms.set(id, room);
-    logger.info('Created room: ' + id);
+    if (this.enableLogging) {
+      logger.info('Created room: ' + id);
+    }
     return room;
   }
 
@@ -77,17 +85,20 @@ class RoomList {
    * @param {RoomID} id The ID of the Room
    * @throws Will throw if the room does not exist, or if the room has clients connected.
    */
-  removeRoom(id) {
+  remove(id) {
     const room = this.get(id);
     if (room.getClients().length > 0) {
       throw new Error('Clients are connected to this room');
     }
     this.rooms.delete(id);
-    logger.info('Removed room: ' + id);
+    if (this.enableLogging) {
+      logger.info('Removed room: ' + id);
+    }
   }
 
   /**
    * Scan for dormant rooms and remove them.
+   * @private
    */
   janitor() {
     const removalThreshold = Date.now() - JANITOR_THRESHOLD;
@@ -103,15 +114,25 @@ class RoomList {
       }
     }
     for (const id of idsToRemove) {
-      this.removeRoom(id);
+      this.remove(id);
     }
   }
 
   /**
+   * Begin the janitor timer.
+   */
+  startJanitor() {
+    this.janitorInterval = setInterval(this.janitor, JANITOR_INTERVAL)
+  }
+
+  /**
    * Delete this RoomList.
+   * Stops the janitor timer, if it is started.
    */
   destroy() {
-    clearInterval(this.janitorInterval);
+    if (this.janitorInterval) {
+      clearInterval(this.janitorInterval);
+    }
   }
 }
 
