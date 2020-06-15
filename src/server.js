@@ -15,7 +15,7 @@ const wss = new WebSocket.Server({
 const rooms = new RoomList();
 
 const pingManager = new PingManager(wss);
-pingManager.start(1000 * 30);
+pingManager.start();
 
 /**
  * @param {unknown} data

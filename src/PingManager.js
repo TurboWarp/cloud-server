@@ -1,5 +1,8 @@
 const logger = require('./logger');
 
+/** The time, in milliseconds, between ping checks. */
+const TIMEOUT = 1000 * 30;
+
 class PingManager {
   /**
    * @param {import('ws').Server} wss The WebSocket server
@@ -70,13 +73,12 @@ class PingManager {
 
   /**
    * Start the PingManager's periodic check.
-   * @param {number} ms The time, in milliseconds, between checks.
    */
-  start(ms) {
+  start() {
     if (this.interval) {
       throw new Error('Already started');
     }
-    this.interval = setInterval(this.update, ms);
+    this.interval = setInterval(this.update, TIMEOUT);
   }
 
   /**
