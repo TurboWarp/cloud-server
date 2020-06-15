@@ -3,9 +3,9 @@ const ConnectionError = require('./ConnectionError');
 const logger = require('./logger');
 
 /** Delay between janitor runs. */
-const JANITOR_INTERVAL = 1000 * 30;
+const JANITOR_INTERVAL = 1000 * 60;
 /** Time a room must be empty for before it may be removed by the janitor. */
-const JANITOR_THRESHOLD = 1000 * 30;
+const JANITOR_THRESHOLD = 1000 * 60 * 10;
 
 /**
  * @typedef {import('./Room').RoomID} RoomID
@@ -23,7 +23,7 @@ class RoomList {
      * Maximum amount of rooms that can exist at once.
      * @type {number}
      */
-    this.maxRooms = 100;
+    this.maxRooms = 512;
     this.janitor = this.janitor.bind(this);
     /** @private */
     this.janitorInterval = setInterval(this.janitor, JANITOR_INTERVAL);
