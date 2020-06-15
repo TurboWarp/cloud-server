@@ -34,11 +34,12 @@ module.exports.isValidRoomID = function(id) {
 /**
  * Determine whether an object is a valid map-like for variables.
  * The variable name and values are not validated.
+ * The presence of at least one entry is validated.
  * @param {unknown} object
  * @returns {boolean}
  */
 module.exports.isValidVariableMap = function(object) {
-  return !!object && typeof object === 'object' && Object.prototype.toString.call(object) === '[object Object]';
+  return !!object && typeof object === 'object' && Object.prototype.toString.call(object) === '[object Object]' && Object.keys(object).length >= 1;
 };
 
 /**
