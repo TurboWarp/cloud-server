@@ -30,17 +30,16 @@ class Room {
     /**
      * Clients connected to this room.
      * @type {Set<Client>}
+     * @readonly
      * @private
      */
     this.clients = new Set();
     /**
      * The time of the last client disconnect.
-     * @type {number}
      */
     this.lastDisconnectTime = -1;
     /**
      * Maximum number of variables that can be within this room.
-     * @type {number}
      */
     this.maxVariables = 10;
     /**
@@ -121,14 +120,11 @@ class Room {
    * This method does not inform clients of the change.
    * @param {string} name The name of the variable
    * @param {string} value The value of the variable
-   * @throws Will throw if name or value are invalid, or the variable does not exist.
+   * @throws Will throw if the value is invalid, or the variable does not exist.
    */
   set(name, value) {
     if (!this.has(name)) {
       throw new Error('Variable does not exist');
-    }
-    if (!validators.isValidVariableName(name)) {
-      throw new Error('Invalid variable name');
     }
     if (!validators.isValidVariableValue(value)) {
       throw new Error('Invalid value');

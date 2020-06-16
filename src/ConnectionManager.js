@@ -1,6 +1,5 @@
 const logger = require('./logger');
 const Client = require('./Client');
-const ConnectionError = require('./ConnectionError');
 
 /**
  * Time, in milliseconds, for connections to be considered timed out.
