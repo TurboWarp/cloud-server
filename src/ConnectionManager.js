@@ -1,9 +1,10 @@
 const logger = require('./logger');
+const Client = require('./Client');
 
 /** The time, in milliseconds, between ping checks. */
 const TIMEOUT = 1000 * 30;
 
-class PingManager {
+class ConnectionManager {
   /**
    * @param {import('ws').Server} wss The WebSocket server
    */
@@ -13,62 +14,60 @@ class PingManager {
     /** @private */
     this.interval = null;
     this.update = this.update.bind(this);
+    /**
+     * All connected clients.
+     * @type {Set<Client>}
+     * @private
+     */
+    this.clients = new Set();
   }
 
   /**
    * @private
    */
   update() {
-    const clients = this.wss.clients;
-    if (clients.size > 0) {
-      logger.info(`Pinging ${clients.size} clients...`);
+    if (this.clients.size > 0) {
+      logger.info(`Pinging ${this.clients.size} clients...`);
     }
-    clients.forEach(function(ws) {
-      // @ts-ignore
-      if (ws.isAlive === false) {
-        // Socket has not responded to ping for a long time, and is probably dead.
+    this.clients.forEach(function(client) {
+      if (client.isAlive === false) {
+        // Socket has not responded to the previous ping request, and is probably dead.
         // terminate will call the onclose handler to cleanup the connection
-        ws.terminate();
-
-        /** @type {import('./Client')} */
-        // @ts-ignore
-        const client = ws.client;
-        // maybe client could be null if the connection started but was never processed?
-        if (client) {
-          client.log('Timed out');
-        } else {
-          logger.info('Timed out connection without a client');
-        }
-
+        client.ws.terminate();
+        client.log('Timed out');
         return;
       }
 
       // We will send a ping to the client.
       // When we receive a pong, isAlive will be set to true.
       // This gives the client until the next update to respond, this should be plenty long for any living connection.
-
-      // @ts-ignore
-      ws.isAlive = false;
-      ws.ping();
+      client.isAlive = false;
+      client.ws.ping();
     });
   }
 
   /**
    * Handle a connection from a client.
-   * @param {import('ws')} ws The WebSocket server
+   * @param {Client} client The Client connecting.
    */
-  handleConnection(ws) {
-    // @ts-ignore
-    ws.isAlive = true;
+  handleConnect(client) {
+    this.clients.add(client);
+  }
+
+  /**
+   * Handle a disconnection from a client.
+   * @param {Client} client The Client disconnecting.
+   */
+  handleDisconnect(client) {
+    this.clients.delete(client);
   }
 
   /**
    * Handle a pong from a client.
-   * @param {import('ws')} ws The WebSocket server the pong is from
+   * @param {Client} client The WebSocket server the pong is from
    */
-  handlePong(ws) {
-    // @ts-ignore
-    ws.isAlive = true;
+  handlePong(client) {
+    client.isAlive = true;
   }
 
   /**
@@ -92,4 +91,4 @@ class PingManager {
   }
 }
 
-module.exports = PingManager;
+module.exports = ConnectionManager;

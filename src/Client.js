@@ -49,6 +49,7 @@ class Client {
      * @type {string}
      */
     this.username = '';
+    this.isAlive = true;
   }
 
   /**

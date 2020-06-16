@@ -3,21 +3,22 @@ const WebSocket = require('ws');
 const Client = require('./Client');
 const RoomList = require('./RoomList');
 const ConnectionError = require('./ConnectionError');
-const PingManager = require('./PingManager');
+const ConnectionManager = require('./ConnectionManager');
 const RateLimiter = require('./RateLimiter');
 const validators = require('./validators');
 const logger = require('./logger');
 
 const wss = new WebSocket.Server({
   noServer: true,
+  clientTracking: false,
 });
 
 const rooms = new RoomList();
 rooms.enableLogging = true;
 rooms.startJanitor();
 
-const pingManager = new PingManager(wss);
-pingManager.start();
+const connectionManager = new ConnectionManager(wss);
+connectionManager.start();
 
 /**
  * @param {unknown} data
@@ -43,9 +44,7 @@ wss.on('connection', (ws, req) => {
   const client = new Client(ws, req);
   const rateLimiter = new RateLimiter(20, 1000);
 
-  // @ts-ignore
-  ws.client = client;
-  pingManager.handleConnection(ws);
+  connectionManager.handleConnect(client);
 
   function performHandshake(roomId, username, variables) {
     if (client.room) throw new ConnectionError(ConnectionError.Error, 'Already performed handshake');
@@ -129,18 +128,19 @@ wss.on('connection', (ws, req) => {
   });
 
   ws.on('close', (code, reason) => {
+    connectionManager.handleDisconnect(client);
     client.log('Connection closed: code', code, 'reason', reason);
     client.close(ConnectionError.Error);
   });
 
   ws.on('pong', () => {
-    pingManager.handlePong(ws);
+    connectionManager.handlePong(client);
   });
 });
 
 wss.on('close', () => {
-  logger.info('WebSocket closing');
-  pingManager.stop();
+  logger.info('WebSocket server closing');
+  connectionManager.stop();
   rooms.destroy();
 });
 
