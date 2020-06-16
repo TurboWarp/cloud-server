@@ -50,9 +50,9 @@ class ConnectionManager {
       // Clients that have not responded to the most recent ping are considered dead.
       return true;
     }
-    if (!client.completedHandshake) {
+    if (client.room) {
       if (client.connectedAt < Date.now() - TIMEOUT) {
-        // Clients that have not completed the handshake in a reasonable time are considered dead.
+        // Clients that have not joined a room in a reasonable time are considered dead.
         return true;
       }
     }

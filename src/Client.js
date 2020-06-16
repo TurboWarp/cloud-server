@@ -62,10 +62,6 @@ class Client {
      * Whether this client has responded to most recent ping request yet.
      */
     this.respondedToPing = true;
-    /**
-     * Whether this client has completed the handshake process.
-     */
-    this.completedHandshake = false;
   }
 
   /**
