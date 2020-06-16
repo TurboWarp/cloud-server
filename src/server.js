@@ -42,7 +42,7 @@ function parseMessage(data) {
 
 wss.on('connection', (ws, req) => {
   const client = new Client(ws, req);
-  const rateLimiter = new RateLimiter(20, 1000);
+  const rateLimiter = new RateLimiter(25, 1000);
 
   connectionManager.handleConnect(client);
 
