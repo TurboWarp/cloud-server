@@ -91,7 +91,7 @@ interface SetMessage extends Message {
   For example, if the name is too short, too long, already in use, or is deemed unsafe.
 
 4003  Overloaded
-  When the server is overloaded or full and refuses to accept new connections.
+  When the server or room is full and can not continue the connection.
 
 4004  Try Again Later
   When the client has done an operation that is invalid at this time, but would have been valid if sent later.

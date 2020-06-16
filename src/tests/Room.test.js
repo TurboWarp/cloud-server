@@ -120,3 +120,12 @@ test('matchesVariableList', () => {
   expect(room.matchesVariableList(['☁ bar', '☁ foo'])).toBe(true);
   expect(room.matchesVariableList(['☁ bar', '☁ foo', '☁ fizz'])).toBe(false);
 });
+
+test('maxClients', () => {
+  const room = new Room('1234');
+  room.maxClients = 10;
+  for (var i = 0; i < room.maxClients; i++) {
+    room.addClient(new Client(null, null));
+  }
+  expect(() => room.addClient(new Client(null, null))).toThrow();
+});

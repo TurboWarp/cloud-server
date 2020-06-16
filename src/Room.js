@@ -1,4 +1,5 @@
 const validators = require('./validators');
+const ConnectionError = require('./ConnectionError');
 
 /**
  * @typedef {import('./Client')} Client
@@ -42,16 +43,23 @@ class Room {
      * @type {number}
      */
     this.maxVariables = 10;
+    /**
+     * Maximum number of clients that can be connected to this room.
+     */
+    this.maxClients = 100;
   }
 
   /**
    * Add a new client.
    * @param {Client} client The client to add
-   * @throws Will throw if client is already added.
+   * @throws Will throw if client is already added, or there are too many clients connected.
    */
   addClient(client) {
     if (this.clients.includes(client)) {
       throw new Error('Client is already added to this Room.');
+    }
+    if (this.clients.length >= this.maxClients) {
+      throw new ConnectionError(ConnectionError.Overloaded, 'Too many clients are connected to this room.');
     }
     this.clients.push(client);
   }
@@ -59,12 +67,12 @@ class Room {
   /**
    * Remove a client.
    * @param {Client} client The client to remove
-   * @throws Will throw if the client does not belong to this room.
+   * @throws Will throw if the client is not part of this room.
    */
   removeClient(client) {
     const index = this.clients.indexOf(client);
     if (index === -1) {
-      throw new Error('Client does not belong to this Room');
+      throw new Error('Client is not part of this Room.');
     }
     this.clients.splice(index, 1);
     this.lastDisconnectTime = Date.now();
