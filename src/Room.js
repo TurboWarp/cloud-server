@@ -29,10 +29,10 @@ class Room {
     this.variables = new Map();
     /**
      * Clients connected to this room.
-     * @type {Client[]}
+     * @type {Set<Client>}
      * @private
      */
-    this.clients = [];
+    this.clients = new Set();
     /**
      * The time of the last client disconnect.
      * @type {number}
@@ -55,13 +55,13 @@ class Room {
    * @throws Will throw if client is already added, or there are too many clients connected.
    */
   addClient(client) {
-    if (this.clients.includes(client)) {
+    if (this.clients.has(client)) {
       throw new Error('Client is already added to this Room.');
     }
-    if (this.clients.length >= this.maxClients) {
+    if (this.clients.size >= this.maxClients) {
       throw new ConnectionError(ConnectionError.Overloaded, 'Too many clients are connected to this room.');
     }
-    this.clients.push(client);
+    this.clients.add(client);
   }
 
   /**
@@ -70,17 +70,16 @@ class Room {
    * @throws Will throw if the client is not part of this room.
    */
   removeClient(client) {
-    const index = this.clients.indexOf(client);
-    if (index === -1) {
+    if (!this.clients.has(client)) {
       throw new Error('Client is not part of this Room.');
     }
-    this.clients.splice(index, 1);
+    this.clients.delete(client);
     this.lastDisconnectTime = Date.now();
   }
 
   /**
    * Get all connected clients.
-   * @returns {Client[]} All connected clients.
+   * @returns {Set<Client>} All connected clients.
    */
   getClients() {
     return this.clients;
@@ -153,7 +152,12 @@ class Room {
   hasClientWithUsername(username) {
     // usernames are compared case insensitively
     username = username.toLowerCase();
-    return this.getClients().some((i) => i.username.toLowerCase() === username);
+    for (const client of this.clients) {
+      if (client.username.toLowerCase() === username) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
