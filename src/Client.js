@@ -34,9 +34,14 @@ class Client {
    * @param {?import('http').IncomingMessage} req The HTTP request
    */
   constructor(ws, req) {
-    /** The WebSocket connection */
+    /**
+     * The WebSocket connection
+     * @type {?import('ws')}
+     */
     this.ws = ws;
-    /** The connecting IP */
+    /**
+     * The connecting IP
+     */
     this.ip = getIP(req);
     /**
      * The Room this client is connected to.
@@ -46,10 +51,21 @@ class Client {
     /**
      * The username of the Client.
      * This value is only valid if room !== null
-     * @type {string}
      */
     this.username = '';
-    this.isAlive = true;
+    /**
+     * The time when this Client was created.
+     * @readonly
+     */
+    this.connectedAt = Date.now();
+    /**
+     * Whether this client has responded to most recent ping request yet.
+     */
+    this.respondedToPing = true;
+    /**
+     * Whether this client has completed the handshake process.
+     */
+    this.completedHandshake = false;
   }
 
   /**
@@ -193,6 +209,16 @@ class Client {
     }
     this.room = room;
     this.room.addClient(this);
+  }
+
+  /**
+   * Send a ping message to this Client.
+   */
+  ping() {
+    this.respondedToPing = false;
+    if (this.ws !== null) {
+      this.ws.ping();
+    }
   }
 }
 

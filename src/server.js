@@ -17,7 +17,7 @@ const rooms = new RoomList();
 rooms.enableLogging = true;
 rooms.startJanitor();
 
-const connectionManager = new ConnectionManager(wss);
+const connectionManager = new ConnectionManager();
 connectionManager.start();
 
 /**

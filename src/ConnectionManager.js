@@ -1,16 +1,14 @@
 const logger = require('./logger');
 const Client = require('./Client');
+const ConnectionError = require('./ConnectionError');
 
-/** The time, in milliseconds, between ping checks. */
+/**
+ * Time, in milliseconds, for connections to be considered timed out.
+ */
 const TIMEOUT = 1000 * 30;
 
 class ConnectionManager {
-  /**
-   * @param {import('ws').Server} wss The WebSocket server
-   */
-  constructor(wss) {
-    /** @private */
-    this.wss = wss;
+  constructor() {
     /** @private */
     this.interval = null;
     this.update = this.update.bind(this);
@@ -29,21 +27,37 @@ class ConnectionManager {
     if (this.clients.size > 0) {
       logger.info(`Pinging ${this.clients.size} clients...`);
     }
-    this.clients.forEach(function(client) {
-      if (client.isAlive === false) {
-        // Socket has not responded to the previous ping request, and is probably dead.
-        // terminate will call the onclose handler to cleanup the connection
+    this.clients.forEach((client) => {
+      if (this.isConnectionDead(client)) {
+        // terminate() will call the onclose handler to cleanup the client completely
         client.ws.terminate();
         client.log('Timed out');
         return;
       }
 
-      // We will send a ping to the client.
-      // When we receive a pong, isAlive will be set to true.
-      // This gives the client until the next update to respond, this should be plenty long for any living connection.
-      client.isAlive = false;
-      client.ws.ping();
+      // Clients are sent a ping, and expected to respond to the ping by the time the next ping will be sent.
+      client.ping();
     });
+  }
+
+  /**
+   * Determine whether a Client's connection is likely dead.
+   * @private
+   * @param {Client} client The connected Client.
+   * @returns {boolean}
+   */
+  isConnectionDead(client) {
+    if (!client.respondedToPing) {
+      // Clients that have not responded to the most recent ping are considered dead.
+      return true;
+    }
+    if (!client.completedHandshake) {
+      if (client.connectedAt < Date.now() - TIMEOUT) {
+        // Clients that have not completed the handshake in a reasonable time are considered dead.
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -67,11 +81,11 @@ class ConnectionManager {
    * @param {Client} client The WebSocket server the pong is from
    */
   handlePong(client) {
-    client.isAlive = true;
+    client.respondedToPing = true;
   }
 
   /**
-   * Start the PingManager's periodic check.
+   * Start the ConnectionManager's periodic check.
    */
   start() {
     if (this.interval) {
@@ -81,7 +95,7 @@ class ConnectionManager {
   }
 
   /**
-   * Stop the PingManager from running.
+   * Stop the ConnectionManager from running.
    */
   stop() {
     if (!this.interval) {
