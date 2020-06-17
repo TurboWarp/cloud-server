@@ -107,74 +107,14 @@ class Client {
 
   /**
    * Send a message to the client.
-   * @param {object} data JSON object to send.
-   * @private
+   * @param {import('ws').Data} data The data to send.
    */
   send(data) {
     if (this.ws === null || this.ws.readyState !== this.ws.OPEN) {
       this.log('Cannot send message');
       return;
     }
-    this.ws.send(JSON.stringify(data));
-  }
-
-  /**
-   * Send multiple messages to the client with a single message.
-   * @param {object[]} data List of JSON objects to send.
-   * @private
-   */
-  sendMany(data) {
-    if (this.ws === null || this.ws.readyState !== this.ws.OPEN) {
-      this.log('Cannot send message');
-      return;
-    }
-    // When sending multiple messages, each message is separated by a newline.
-    this.ws.send(
-      data.map((i) => JSON.stringify(i)).join('\n')
-    );
-  }
-
-  /**
-   * Send a 'set variable' message to this Client.
-   * @param {string} name The variable's name
-   * @param {string} value The variable's value
-   */
-  sendVariableSet(name, value) {
-    this.send({
-      kind: 'set',
-      var: name,
-      value: value,
-    });
-  }
-
-  /**
-   * Send multiple 'set variable' messages to this Client with a single message.
-   * @param {[string, string][]} changes List of tuple with name, value of changed variables
-   */
-  sendManyVariableSet(changes) {
-    this.sendMany(
-      changes.map((i) => ({
-        kind: 'set',
-        var: i[0],
-        value: i[1],
-      }))
-    );
-  }
-
-  /**
-   * Send a 'set variable' for each of the variables of the connected room.
-   * @throws Will throw if the client is not in a room.
-   */
-  sendAllVariables() {
-    if (!this.room) {
-      throw new Error('Not in a room');
-    }
-    /** @type {[string, string][]} */
-    const commands = [];
-    this.room.getAllVariables().forEach((value, name) => {
-      commands.push([name, value]);
-    });
-    this.sendManyVariableSet(commands);
+    this.ws.send(data);
   }
 
   /**

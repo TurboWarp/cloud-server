@@ -36,6 +36,17 @@ class RateLimiter {
     }
     return false;
   }
+
+  /**
+   * Get the time, in milliseconds, since the last operation within the given period.
+   * @returns {number}
+   */
+  timeSinceLastOperationInPeriod() {
+    if (this.history.length === 0) {
+      return 0;
+    }
+    return Date.now() - this.history[0];
+  }
 }
 
 module.exports = RateLimiter;

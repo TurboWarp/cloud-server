@@ -11,6 +11,7 @@ const logger = require('./logger');
 const wss = new WebSocket.Server({
   noServer: true,
   clientTracking: false,
+  maxPayload: 5 * 1024 * 1024,
 });
 
 const rooms = new RoomList();
@@ -22,6 +23,7 @@ connectionManager.start();
 
 /**
  * @param {unknown} data
+ * @returns {boolean}
  */
 function isValidMessage(data) {
   // @ts-ignore
@@ -31,6 +33,7 @@ function isValidMessage(data) {
 /**
  * Parse WebSocket message data.
  * @param {string} data Message data
+ * @returns {object}
  */
 function parseMessage(data) {
   const message = JSON.parse(data);
@@ -38,6 +41,20 @@ function parseMessage(data) {
     throw new Error('Invalid message');
   }
   return message;
+}
+
+/**
+ * Create a "set" message to send to clients to set a variable.
+ * @param {string} name The name of the variable.
+ * @param {string} value The variable's new value.
+ * @returns {string} The stringified JSON of the message.
+ */
+function createSetMessage(name, value) {
+  return JSON.stringify({
+    kind: 'set',
+    var: name,
+    value: value,
+  });
 }
 
 wss.on('connection', (ws, req) => {
@@ -63,7 +80,15 @@ wss.on('connection', (ws, req) => {
         throw new ConnectionError(ConnectionError.Incompatibility, 'Variable list does not match.');
       }
       client.setRoom(room);
-      client.sendAllVariables();
+
+      // Send the data of all the variables in the room to the client.
+      // This is done in one message by separating each "set" with a newline.
+      /** @type {string[]} */
+      const messages = [];
+      client.room.getAllVariables().forEach((value, name) => {
+        messages.push(createSetMessage(name, value));
+      });
+      client.send(messages.join('\n'));
     } else {
       client.setRoom(rooms.create(roomId, variables));
     }
@@ -74,14 +99,37 @@ wss.on('connection', (ws, req) => {
   function performSet(variable, value) {
     if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
 
-    // set() will perform validation on the variable name & value
+    // set() will perform validation on the variable name & value, and throw if they are invalid.
     client.room.set(variable, value);
 
-    client.room.getClients().forEach((otherClient) => {
+    const message = createSetMessage(variable, value);
+    for (const otherClient of client.room.getClients()) {
       if (client !== otherClient) {
-        otherClient.sendVariableSet(variable, value);
+        otherClient.send(message);
       }
-    });
+    }
+  }
+
+  function processMessage(data) {
+    if (rateLimiter.rateLimited()) {
+      throw new ConnectionError(ConnectionError.TryAgainLater, `Too many messages (last in period: ${rateLimiter.timeSinceLastOperationInPeriod()}ms ago}`);
+    }
+
+    const message = parseMessage(data.toString());
+    const kind = message.kind;
+
+    switch (kind) {
+      case 'handshake':
+        performHandshake(message.id, message.username, message.variables);
+        break;
+
+      case 'set':
+        performSet(message.var, message.value);
+        break;
+
+      default:
+        throw new ConnectionError(ConnectionError.Error, 'Unknown message kind: ' + kind);
+    }
   }
 
   client.log('Connection opened');
@@ -93,25 +141,7 @@ wss.on('connection', (ws, req) => {
     }
 
     try {
-      if (rateLimiter.rateLimited()) {
-        throw new ConnectionError(ConnectionError.TryAgainLater, 'Too many messages');
-      }
-
-      const message = parseMessage(data.toString());
-      const kind = message.kind;
-
-      switch (kind) {
-        case 'handshake':
-          performHandshake(message.id, message.username, message.variables);
-          break;
-
-        case 'set':
-          performSet(message.var, message.value);
-          break;
-
-        default:
-          throw new ConnectionError(ConnectionError.Error, 'Unknown message kind: ' + kind);
-      }
+      processMessage(data);
     } catch (e) {
       client.error('Error handling connection', e);
       if (e instanceof ConnectionError) {
