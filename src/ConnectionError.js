@@ -1,8 +1,8 @@
 class ConnectionError extends Error {
   /**
    * ConnectionError is an error with some special handling from the server.
-   * @param {number} code WebSocket error code. See https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Status_codes
-   * @param {string} message Error message. Should include more details. This is not shown to the user.
+   * @param {number} code WebSocket status code.
+   * @param {string} message Error message. Should include more details than the status code. This is not shown to the user.
    */
   constructor(code, message) {
     super(`${message} (code ${code})`);
@@ -10,6 +10,7 @@ class ConnectionError extends Error {
   }
 }
 
+// See protocol.md
 ConnectionError.Error = 4000;
 ConnectionError.Incompatibility = 4001;
 ConnectionError.Username = 4002;

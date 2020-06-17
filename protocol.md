@@ -74,6 +74,8 @@ interface SetMessage extends Message {
 
 # Status Codes
 
+Only used by the server when closing a connection to a client. Status codes provided by the client are ignored by the server. The reason field is not used.
+
 ```
 1xxx  Protocol Errors
   WebSocket errors.
