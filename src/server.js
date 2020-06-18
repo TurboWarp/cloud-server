@@ -11,7 +11,7 @@ const logger = require('./logger');
 const wss = new WebSocket.Server({
   noServer: true,
   clientTracking: false,
-  maxPayload: 5 * 1024 * 1024,
+  maxPayload: 1024 * 1024, // 1 MB should be plenty
 });
 
 const rooms = new RoomList();
