@@ -102,10 +102,14 @@ wss.on('connection', (ws, req) => {
     // set() will perform validation on the variable name & value, and throw if they are invalid.
     client.room.set(variable, value);
 
-    const message = createSetMessage(variable, value);
-    for (const otherClient of client.room.getClients()) {
-      if (client !== otherClient) {
-        otherClient.send(message);
+    // Generate the send message only when a client will actually hear it.
+    const clients = client.room.getClients();
+    if (clients.length > 1) {
+      const message = createSetMessage(variable, value);
+      for (const otherClient of clients) {
+        if (client !== otherClient) {
+          otherClient.send(message);
+        }
       }
     }
   }
