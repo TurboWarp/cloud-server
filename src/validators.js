@@ -39,7 +39,9 @@ module.exports.isValidRoomID = function(id) {
  * @returns {boolean}
  */
 module.exports.isValidVariableMap = function(object) {
-  return typeof object === 'object' && !!object && Object.keys(object).length >= 1;
+  // TODO: the Object.prototype.toString is there to ensure that this is an object.
+  // It may be better to use !Array.isArray because all we really care about is not allowing arrays.
+  return typeof object === 'object' && !!object && Object.prototype.toString.call(object) === '[object Object]' && Object.keys(object).length >= 1;
 };
 
 /**
