@@ -107,7 +107,7 @@ class RoomList {
     /** @type {RoomID[]} */
     const idsToRemove = [];
     for (const [id, room] of this.rooms.entries()) {
-      if (room.getClients().size === 0) {
+      if (room.getClients().length === 0) {
         if (room.lastDisconnectTime < removalThreshold) {
           idsToRemove.push(id);
         }
