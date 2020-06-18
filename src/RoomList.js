@@ -87,7 +87,7 @@ class RoomList {
    */
   remove(id) {
     const room = this.get(id);
-    if (room.getClients().size > 0) {
+    if (room.getClients().length > 0) {
       throw new Error('Clients are connected to this room');
     }
     this.rooms.delete(id);
