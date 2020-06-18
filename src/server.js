@@ -85,7 +85,7 @@ wss.on('connection', (ws, req) => {
       // This is done in one message by separating each "set" with a newline.
       /** @type {string[]} */
       const messages = [];
-      client.room.getAllVariables().forEach((value, name) => {
+      room.getAllVariables().forEach((value, name) => {
         messages.push(createSetMessage(name, value));
       });
       client.send(messages.join('\n'));

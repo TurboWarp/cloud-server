@@ -28,9 +28,7 @@ class ConnectionManager {
     }
     this.clients.forEach((client) => {
       if (this.isConnectionDead(client)) {
-        // terminate() will call the onclose handler to cleanup the client completely
-        client.ws.terminate();
-        client.log('Timed out');
+        client.timedOut();
         return;
       }
 

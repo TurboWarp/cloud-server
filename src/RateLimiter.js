@@ -29,8 +29,8 @@ class RateLimiter {
     this.history.push(now);
     if (this.history.length > this.maxOperations) {
       // history definitely will have something in it, so shift() will not return undefined.
-      const period = /** @type {number} */ (this.history.shift());
-      const timeSince = now - period;
+      const lastInHistory = /** @type {number} */ (this.history.shift());
+      const timeSince = now - lastInHistory;
       // If the last request of the last maxOperations operations was within the time period, this is a rate limiting violation.
       return timeSince < this.timePeriod;
     }

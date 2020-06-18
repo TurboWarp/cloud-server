@@ -39,7 +39,7 @@ module.exports.isValidRoomID = function(id) {
  * @returns {boolean}
  */
 module.exports.isValidVariableMap = function(object) {
-  return !!object && typeof object === 'object' && Object.prototype.toString.call(object) === '[object Object]' && Object.keys(object).length >= 1;
+  return typeof object === 'object' && !!object && Object.keys(object).length >= 1;
 };
 
 /**

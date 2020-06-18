@@ -11,7 +11,8 @@
     "checkJs": true,
     // Make the checker much more strict without being too limiting
     "strict": true,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
     "noImplicitAny": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

@@ -156,6 +156,16 @@ class Client {
       this.ws.ping();
     }
   }
+
+  timedOut() {
+    if (this.ws !== null) {
+      // terminate will then run the proper onclose handlers
+      this.ws.terminate();
+    } else {
+      this.log('Timed out but not connected?');
+    }
+    this.log('Timed out');
+  }
 }
 
 module.exports = Client;
