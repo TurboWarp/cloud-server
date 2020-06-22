@@ -71,21 +71,32 @@ class RoomList {
       throw new Error('Room already exists');
     }
     const room = new Room(id);
-    for (const variableName of Object.keys(initialData)) {
-      if (!validators.isValidVariableName(variableName)) {
-        throw new Error('Invalid variable name: ' + variableName);
-      }
-      const variableValue = initialData[variableName];
-      if (!validators.isValidVariableValue(variableValue)) {
-        throw new Error('Invalid variable value: ' + variableValue);
-      }
-      room.create(variableName, variableValue);
-    }
+    this.setRoomData(room, initialData);
+    // It is important we update the room ID map at the end as setRoomData may throw.
     this.rooms.set(id, room);
     if (this.enableLogging) {
       logger.info('Created room: ' + id);
     }
     return room;
+  }
+
+  /**
+   * Set the data of a Room to that of a variable map.
+   * @private
+   * @param {Room} room The Room
+   * @param {*} data 
+   */
+  setRoomData(room, data) {
+    for (const variableName of Object.keys(data)) {
+      if (!validators.isValidVariableName(variableName)) {
+        throw new Error('Invalid variable name: ' + variableName);
+      }
+      const variableValue = data[variableName];
+      if (!validators.isValidVariableValue(variableValue)) {
+        throw new Error('Invalid variable value: ' + variableValue);
+      }
+      room.create(variableName, variableValue);
+    }
   }
 
   /**
