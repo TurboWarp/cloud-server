@@ -143,8 +143,8 @@ class Client {
     if (this.room !== null) {
       throw new Error('Already joined a room');
     }
+    room.addClient(this);
     this.room = room;
-    this.room.addClient(this);
   }
 
   /**
