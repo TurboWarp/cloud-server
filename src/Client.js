@@ -110,8 +110,12 @@ class Client {
    * @param {import('ws').Data} data The data to send.
    */
   send(data) {
-    if (this.ws === null || this.ws.readyState !== this.ws.OPEN) {
-      this.log('Cannot send message');
+    if (this.ws === null) {
+      this.log('Cannot send message; ws is null');
+      return;
+    }
+    if (this.ws.readyState !== this.ws.OPEN) {
+      this.log('Cannot send message; readyState ' + this.ws.readyState);
       return;
     }
     this.ws.send(data);
