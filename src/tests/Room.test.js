@@ -33,8 +33,6 @@ test('clients', () => {
 
 test('create', () => {
   const room = new Room('1234');
-  expect(() => room.create('invalid name', '123')).toThrow();
-  expect(() => room.create('☁ name', 'invalid value')).toThrow();
   room.create('☁ variable', '123');
   expect(() => room.create('☁ variable', '123')).toThrow();
 });

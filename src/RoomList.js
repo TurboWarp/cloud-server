@@ -1,6 +1,7 @@
 const Room = require('./Room');
 const ConnectionError = require('./ConnectionError');
 const logger = require('./logger');
+const validators = require('./validators');
 
 /** Delay between janitor runs. */
 const JANITOR_INTERVAL = 1000 * 60;
@@ -70,8 +71,15 @@ class RoomList {
       throw new Error('Room already exists');
     }
     const room = new Room(id);
-    for (const key of Object.keys(initialData)) {
-      room.create(key, initialData[key]);
+    for (const variableName of Object.keys(initialData)) {
+      if (!validators.isValidVariableName(variableName)) {
+        throw new Error('Invalid variable name: ' + variableName);
+      }
+      const variableValue = initialData[variableName];
+      if (!validators.isValidVariableValue(variableValue)) {
+        throw new Error('Invalid variable value: ' + variableValue);
+      }
+      room.create(variableName, variableValue);
     }
     this.rooms.set(id, room);
     if (this.enableLogging) {

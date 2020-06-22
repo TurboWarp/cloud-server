@@ -1,4 +1,3 @@
-const validators = require('./validators');
 const ConnectionError = require('./ConnectionError');
 
 /**
@@ -97,15 +96,9 @@ class Room {
    * This method does not inform clients of the change.
    * @param {string} name The name of the variable
    * @param {string} value The value of the variable
-   * @throws Will throw if name or value are invalid, the variable already exists, or there are too many variables.
+   * @throws Will throw if the variable already exists, or there are too many variables.
    */
   create(name, value) {
-    if (!validators.isValidVariableName(name)) {
-      throw new Error('Invalid variable name');
-    }
-    if (!validators.isValidVariableValue(value)) {
-      throw new Error('Invalid value');
-    }
     if (this.has(name)) {
       throw new Error('Variable already exists');
     }
@@ -120,14 +113,11 @@ class Room {
    * This method does not inform clients of the change.
    * @param {string} name The name of the variable
    * @param {string} value The value of the variable
-   * @throws Will throw if the value is invalid, or the variable does not exist.
+   * @throws Will throw if the variable does not exist.
    */
   set(name, value) {
     if (!this.has(name)) {
       throw new Error('Variable does not exist');
-    }
-    if (!validators.isValidVariableValue(value)) {
-      throw new Error('Invalid value');
     }
     this.variables.set(name, value);
   }

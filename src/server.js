@@ -98,8 +98,8 @@ wss.on('connection', (ws, req) => {
 
   function performSet(variable, value) {
     if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
+    if (!validators.isValidVariableValue(value)) throw new Error('Invalid variable value: ' + value);
 
-    // set() will perform validation on the variable name & value, and throw if they are invalid.
     client.room.set(variable, value);
 
     // Generate the send message only when a client will actually hear it.
