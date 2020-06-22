@@ -25,8 +25,7 @@
     "typescript": "^3.9.5"
   },
   "optionalDependencies": {
-    "bufferutil": "^4.0.1",
-    "utf-8-validate": "^5.0.2"
+    "bufferutil": "^4.0.1"
   },
   "private": true
 }
