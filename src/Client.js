@@ -123,7 +123,7 @@ class Client {
    */
   close(code) {
     // Close connection, inform client
-    if (this.ws !== null && this.ws.readyState === this.ws.OPEN) {
+    if (this.ws !== null) {
       this.ws.close(code);
       this.ws = null;
     }
