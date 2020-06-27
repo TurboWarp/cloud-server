@@ -1,32 +1,6 @@
 const Room = require('./Room');
-const config = require('./config');
+const address = require('./address');
 const logger = require('./logger');
-
-/**
- * Get the remote IP address of a request.
- * This may be configured to trust a proxy and return the proxy's forwarded-for IP instead of the actual remote IP
- * @param {?import('http').IncomingMessage} req
- * @returns {string} The IP address
- */
-function getIP(req) {
-  if (req === null) {
-    return '(req missing)';
-  }
-
-  const socketAddress = req.socket.remoteAddress || '(remoteAddress missing)';
-
-  if (config.trustProxy) {
-    const header = /** @type {string} */ (req.headers['x-forwarded-for']);
-    if (!header || typeof header !== 'string') {
-      return socketAddress;
-    }
-    // extract the first IP
-    const remoteAddress = header.split(/\s*,\s*/)[0];
-    return remoteAddress || socketAddress;
-  }
-
-  return socketAddress;
-}
 
 class Client {
   /**
@@ -42,7 +16,7 @@ class Client {
     /**
      * The connecting IP
      */
-    this.ip = getIP(req);
+    this.ip = address.getAddress(req);
     /**
      * The Room this client is connected to.
      * @type {?Room}
