@@ -1,13 +1,21 @@
-// This file contains many words that some may find disturbing.
+// This file contains words that some may find disturbing.
 
-const isSafe = require('../naughty');
+const naughty = require('../naughty');
 
 test('naughty word detector', () => {
-  expect(isSafe('griffpatch')).toBe(true);
-  expect(isSafe('Hell-o :)')).toBe(true);
-  expect(isSafe('fuck')).toBe(false);
-  expect(isSafe('f_u_c_k')).toBe(false);
-  expect(isSafe('fu__3_c_k')).toBe(false);
-  expect(isSafe('FUCK')).toBe(false);
-  expect(isSafe('bitchute')).toBe(false);
+  expect(naughty('griffpatch')).toBe(false);
+  expect(naughty('Hell-o :)')).toBe(false);
+  expect(naughty('fuck')).toBe(true);
+  expect(naughty('f_u_c_k')).toBe(true);
+  expect(naughty('fu__3_c_k')).toBe(true);
+  expect(naughty('FUCK')).toBe(true);
+  expect(naughty('bitchute')).toBe(true);
+  expect(naughty('')).toBe(false);
+  expect(naughty(' ')).toBe(false);
+  expect(naughty('123')).toBe(false);
+});
+
+test('metrics', () => {
+  expect(naughty.getTotalBlockedPhrases()).toBeGreaterThan(0);
+  expect(naughty.getTotalFilterLists()).toBeGreaterThan(0);
 });

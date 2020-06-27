@@ -7,6 +7,7 @@ const ConnectionManager = require('./ConnectionManager');
 const RateLimiter = require('./RateLimiter');
 const validators = require('./validators');
 const logger = require('./logger');
+const naughty = require('./naughty');
 
 const wss = new WebSocket.Server({
   noServer: true,
@@ -20,6 +21,8 @@ rooms.startJanitor();
 
 const connectionManager = new ConnectionManager();
 connectionManager.start();
+
+logger.info(`Naughty word detector has ${naughty.getTotalBlockedPhrases()} blocked phrases from ${naughty.getTotalFilterLists()} filters`);
 
 /**
  * @param {unknown} data

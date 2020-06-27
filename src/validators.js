@@ -1,4 +1,4 @@
-const isSafe = require('./naughty');
+const naughty = require('./naughty');
 
 /** A required prefix that must appear at the beginning of all variable's names. */
 const VARIABLE_NAME_CLOUD_PREFIX = '☁ ';
@@ -20,7 +20,7 @@ const USERNAME_REGEX = /^[a-z0-9_-]+$/i;
  * @returns {boolean}
  */
 module.exports.isValidUsername = function(username) {
-  return typeof username === 'string' && username.length >= USERNAME_MIN_LENGTH && username.length <= USERNAME_MAX_LENGTH && USERNAME_REGEX.test(username) && isSafe(username);
+  return typeof username === 'string' && username.length >= USERNAME_MIN_LENGTH && username.length <= USERNAME_MAX_LENGTH && USERNAME_REGEX.test(username) && !naughty(username);
 };
 
 /**
