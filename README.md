@@ -25,3 +25,5 @@ HTTP requests are served static files from the public directory.
 Change the PORT environment variable (or PORT in src/config.js) to change the port.
 
 If you use a proxy such as nginx set the TRUST_PROXY environment variable (or TRUST_PROXY in src/config.js) to `true` to make log messages include the correct IP addresses.
+
+Changing more complex values (such as changing variable restrictions, username restrictions, etc.) is more complicated.

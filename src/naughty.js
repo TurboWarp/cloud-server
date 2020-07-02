@@ -2,6 +2,13 @@ const fs = require('fs');
 const pathUtil = require('path');
 
 /**
+ * ATTENTION!
+ *
+ * Do not add entries to the lists here.
+ * Put your filter lists inside `src/filters`, they will be loaded automatically.
+ */
+
+/**
  * A list of the names of the loaded filters.
  * @type {string[]}
  */
