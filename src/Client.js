@@ -57,26 +57,26 @@ class Client {
 
   /**
    * Log a message including some metadata about this client.
-   * @param {...any} args
+   * @param {string} message
    */
-  log(...args) {
-    logger.info(this.getLogPrefix(), ...args);
+  log(message) {
+    logger.info(this.getLogPrefix() + ' ' + message);
   }
 
   /**
    * Log a warning message including some metadata about this client.
-   * @param {...any} args
+   * @param {string} message
    */
-  warn(...args) {
-    logger.warn(this.getLogPrefix(), ...args);
+  warn(message) {
+    logger.warn(this.getLogPrefix() + ' ' + message);
   }
 
   /**
    * Log an error message including some metadata about this client.
-   * @param {...any} args
+   * @param {string} message
    */
-  error(...args) {
-    logger.error(this.getLogPrefix(), ...args);
+  error(message) {
+    logger.error(this.getLogPrefix() + ' ' + message);
   }
 
   /**
