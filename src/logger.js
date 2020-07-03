@@ -1,39 +1,26 @@
-class Logger {
-  constructor() {
-    this.infoEnabled = true;
-    this.warnEnabled = true;
-    this.errorEnabled = true;
-  }
+const winston = require('winston');
+require('winston-daily-rotate-file');
 
-  /**
-   * Log a message.
-   * @param {...any} args Message to log
-   */
-  info(...args) {
-    if (this.infoEnabled) {
-      console.log('\u001b[92minfo\u001b[37m', ...args);
-    }
-  }
+const config = require('./config');
+const environment = require('./environment');
 
-  /**
-   * Log a warning.
-   * @param {...any} args Message to log
-   */
-  warn(...args) {
-    if (this.warnEnabled) {
-      console.error('\u001b[93mwarning!\u001b[37m', ...args);
-    }
-  }
+const logger = winston.createLogger({
+  level: environment.isDevelopment ? 'debug' : 'info',
+  format: winston.format.combine(
+    winston.format.splat(),
+    winston.format.simple()
+  ),
+});
 
-  /**
-   * Log an error.
-   * @param {...any} args Message to log
-   */
-  error(...args) {
-    if (this.errorEnabled) {
-      console.error('\u001b[91merror!\u001b[37m', ...args);
-    }
-  }
+logger.add(new winston.transports.DailyRotateFile(config.logging.rotation));
+
+if ((environment.isDevelopment || config.logging.forceEnableConsoleLogging) && !environment.isTest) {
+  logger.add(new winston.transports.Console({
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.simple(),
+    ),
+  }));
 }
 
-module.exports = new Logger();
+module.exports = logger;
