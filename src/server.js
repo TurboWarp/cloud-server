@@ -153,10 +153,10 @@ wss.on('connection', (ws, req) => {
 
     try {
       processMessage(data);
-    } catch (e) {
-      client.error('Error handling connection', e);
-      if (e instanceof ConnectionError) {
-        client.close(e.code);
+    } catch (error) {
+      client.error('Error handling connection: ' + error);
+      if (error instanceof ConnectionError) {
+        client.close(error.code);
       } else {
         client.close(ConnectionError.Error);
       }
@@ -164,13 +164,13 @@ wss.on('connection', (ws, req) => {
   });
 
   ws.on('error', (error) => {
-    client.error('** ERROR **', error);
+    client.error('** ERROR ** ' + error);
     client.close(ConnectionError.Error);
   });
 
   ws.on('close', (code, reason) => {
     connectionManager.handleDisconnect(client);
-    client.log('Connection closed: code', code, 'reason', reason);
+    client.log(`Connection closed: code ${code} reason ${reason}`);
     client.close(ConnectionError.Error);
   });
 
