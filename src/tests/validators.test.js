@@ -162,6 +162,20 @@ test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue('-3e3')).toBe(false);
   expect(validators.isValidVariableValue('0x03')).toBe(false);
   expect(validators.isValidVariableValue('-0x03')).toBe(false);
+  expect(validators.isValidVariableValue('1e100')).toBe(false);
+  expect(validators.isValidVariableValue('1e+100')).toBe(true);
+  expect(validators.isValidVariableValue('4.983873181796813e+128')).toBe(true);
+  expect(validators.isValidVariableValue('-4.983873181796813e+128')).toBe(true);
+  expect(validators.isValidVariableValue('-4.983873181796813e+255')).toBe(true);
+  expect(validators.isValidVariableValue('4.983873181796813e-128')).toBe(true);
+  expect(validators.isValidVariableValue('-4.983873181796813e-128')).toBe(true);
+  expect(validators.isValidVariableValue('-4.983873181796813e-255')).toBe(true);
+  expect(validators.isValidVariableValue('4.983873181796813e+128.5')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813e128')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813e+e128')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813ee+128')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813e')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813e 128')).toBe(false);
   // long vars
   expect(validators.isValidVariableValue('-' + '1'.repeat(100))).toBe(true);
   expect(validators.isValidVariableValue('-' + '1'.repeat(100) + '.' + '1'.repeat(100))).toBe(true);
@@ -180,4 +194,6 @@ test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue('64885663555655556256626464645555636153565358606258585316181618161816181618010305536253645364535553')).toBe(true); // https://scratch.mit.edu/projects/370996134/
   expect(validators.isValidVariableValue('081106020130142912311419272312361629046502010307096610016503070766080107010201020125010301')).toBe(true); // https://scratch.mit.edu/projects/335884915/
   expect(validators.isValidVariableValue('1210272429390012102724293900121027242939001210272429390012102724293900291714271413163034373839400029171427141316303437383940002917142714131630343738394000')).toBe(true); // https://scratch.mit.edu/projects/398782663/
+  expect(validators.isValidVariableValue('47414048363737383938413738454036374100404438483900291412172222102337004200450045004500450044454240404500')).toBe(true); // https://scratch.mit.edu/projects/408252905/
+  expect(validators.isValidVariableValue('3.2959163851126096e+128')).toBe(true); // https://scratch.mit.edu/projects/408252905/
 });

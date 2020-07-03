@@ -68,6 +68,7 @@ module.exports.isValidVariableValue = function(value) {
   }
 
   var seenDecimal = false;
+  var exponent = false;
   var i = 0;
   // 45 = -
   if (value.charCodeAt(0) === 45) i++;
@@ -76,8 +77,17 @@ module.exports.isValidVariableValue = function(value) {
     var char = value.charCodeAt(i);
     // 46 = .
     if (char === 46) {
-      if (seenDecimal) return false;
+      // only a single decimal is allowed, and never allowed within an exponent
+      if (seenDecimal || exponent) return false;
       seenDecimal = true;
+    } else if (char === 101) { // 101 === e
+      i++;
+      char = value.charCodeAt(i);
+      // e is expected to be followed by + or -
+      if (char !== 43 && char !== 45) {
+        return false;
+      }
+      exponent = true;
     } else {
       // 48 = 0
       // 57 = 9
