@@ -80,14 +80,16 @@ module.exports.isValidVariableValue = function(value) {
       // only a single decimal is allowed, and never allowed within an exponent
       if (seenDecimal || exponent) return false;
       seenDecimal = true;
-    } else if (char === 101) { // 101 === e
+    } else if (char === 101) { // 101 = e
+      // only one exponent is allowed
+      if (exponent) return false;
+      exponent = true;
       i++;
       char = value.charCodeAt(i);
-      // e is expected to be followed by + or -
+      // e is expected to be followed by + (43) or - (45)
       if (char !== 43 && char !== 45) {
         return false;
       }
-      exponent = true;
     } else {
       // 48 = 0
       // 57 = 9

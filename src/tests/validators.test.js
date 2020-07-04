@@ -176,6 +176,7 @@ test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue('4.983873181796813ee+128')).toBe(false);
   expect(validators.isValidVariableValue('4.983873181796813e')).toBe(false);
   expect(validators.isValidVariableValue('4.983873181796813e 128')).toBe(false);
+  expect(validators.isValidVariableValue('5e+e+10')).toBe(false);
   // long vars
   expect(validators.isValidVariableValue('-' + '1'.repeat(100))).toBe(true);
   expect(validators.isValidVariableValue('-' + '1'.repeat(100) + '.' + '1'.repeat(100))).toBe(true);
