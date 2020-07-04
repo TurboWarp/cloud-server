@@ -89,11 +89,11 @@ class RoomList {
   setRoomData(room, data) {
     for (const variableName of Object.keys(data)) {
       if (!validators.isValidVariableName(variableName)) {
-        throw new Error('Invalid variable name: ' + variableName);
+        throw new Error(`Invalid variable name for room ${room.id}: ${variableName}`);
       }
       const variableValue = data[variableName];
       if (!validators.isValidVariableValue(variableValue)) {
-        throw new Error('Invalid variable value: ' + variableValue);
+        throw new Error(`Invalid variable value for room ${room.id}: ${variableValue}`);
       }
       room.create(variableName, variableValue);
     }
