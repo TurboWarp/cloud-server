@@ -25,7 +25,7 @@
     "@types/serve-static": "^1.13.4",
     "@types/ws": "^7.2.6",
     "jest": "^26.1.0",
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.6"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.1"
