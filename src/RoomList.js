@@ -91,9 +91,9 @@ class RoomList {
       if (!validators.isValidVariableName(variableName)) {
         throw new Error(`Invalid variable name for room ${room.id}: ${variableName}`);
       }
-      const variableValue = data[variableName];
+      let variableValue = data[variableName];
       if (!validators.isValidVariableValue(variableValue)) {
-        throw new Error(`Invalid variable value for room ${room.id}: ${variableValue}`);
+        variableValue = '0';
       }
       room.create(variableName, variableValue);
     }
