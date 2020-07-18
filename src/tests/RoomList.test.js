@@ -17,7 +17,12 @@ test('create', () => {
   expect(() => roomList.create('1', testVariables)).toThrow();
   expect(() => roomList.create('2', testVariables)).toThrow();
   expect(() => roomList.create('3', {foo: '123'})).toThrow();
-  expect(() => roomList.create('4', {'☁ foo': 'abc'})).toThrow();
+});
+
+test('invalid values passed to create become 0', () => {
+  const roomList = new RoomList();
+  const room = roomList.create('1', {'☁ foo': 'abc'});
+  expect(room.getAllVariables().get('☁ foo')).toBe('0');
 });
 
 test('has', () => {
