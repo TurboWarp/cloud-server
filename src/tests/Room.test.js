@@ -76,6 +76,22 @@ test('set', () => {
   expect(vars2.get('☁ bar')).toBe('123');
 });
 
+test('hasClientWithUsername', () => {
+  const room = new Room('1234');
+  const client1 = new Client(null, null);
+  client1.username = 'username';
+  const client2 = new Client(null, null);
+  client2.username = 'username2';
+  expect(room.hasClientWithUsername('username')).toBe(false);
+  expect(room.hasClientWithUsername('username2')).toBe(false);
+  room.addClient(client1);
+  expect(room.hasClientWithUsername('username')).toBe(true);
+  expect(room.hasClientWithUsername('username2')).toBe(false);
+  room.addClient(client2);
+  expect(room.hasClientWithUsername('username')).toBe(true);
+  expect(room.hasClientWithUsername('username2')).toBe(true);
+});
+
 test('matchesVariableList', () => {
   const room = new Room('1234');
   expect(room.matchesVariableList([])).toBe(true);

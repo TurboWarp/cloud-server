@@ -131,6 +131,17 @@ class Room {
   }
 
   /**
+   * Determine whether a username is already in use by a client connected to this room.
+   * @param {string} username The username to search for
+   * @returns {boolean}
+   */
+  hasClientWithUsername(username) {
+    // usernames are compared case insensitively
+    username = username.toLowerCase();
+    return this.getClients().some((i) => i.username.toLowerCase() === username);
+  }
+
+  /**
    * Determine whether a list of variable names matches the names of the variables in this room.
    * Case sensitive, order doesn't matter.
    * @param {string[]} variables The list of variable names. Must not contain duplicates.
