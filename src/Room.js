@@ -131,14 +131,22 @@ class Room {
   }
 
   /**
-   * Determine whether a username is already in use by a client connected to this room.
-   * @param {string} username The username to search for
-   * @returns {boolean}
+   * Determine whether a username is available for use by a new client.
+   * @param {string} username The username to search for.
+   * @param {Client} client The client that is trying to use this username.
+   * @returns {boolean} true if the username is not used by another client with a different IP
    */
-  hasClientWithUsername(username) {
+  isUsernameAvailable(username, client) {
     // usernames are compared case insensitively
     username = username.toLowerCase();
-    return this.getClients().some((i) => i.username.toLowerCase() === username);
+    for (const otherClient of this.getClients()) {
+      // multiple clients from different IPs cannot share the same username
+      // todo: .ip can be anonymized. Should we require non-anonymized IPs here?
+      if (otherClient.username.toLowerCase() === username && otherClient.ip !== client.ip) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**

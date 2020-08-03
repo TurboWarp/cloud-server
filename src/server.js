@@ -76,8 +76,8 @@ wss.on('connection', (ws, req) => {
 
     if (rooms.has(roomId)) {
       const room = rooms.get(roomId);
-      if (room.hasClientWithUsername(username)) {
-        throw new ConnectionError(ConnectionError.Username, 'Client with provided username already exists: ' + username);
+      if (!room.isUsernameAvailable(username, client)) {
+        throw new ConnectionError(ConnectionError.Username, 'Username is unavailable: ' + username);
       }
       if (!room.matchesVariableList(Object.keys(variables))) {
         throw new ConnectionError(ConnectionError.Incompatibility, 'Variable list does not match.');
