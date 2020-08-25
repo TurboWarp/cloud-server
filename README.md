@@ -36,17 +36,17 @@ In this setup cloud-server should listen on a high port like 9080, and your prox
 
 Set the TRUST_PROXY environment variable (or TRUST_PROXY in src/config.js) to `true` to make the server use the correct IP addresses.
 
-Here's a sample nginx config:
+Here's a sample nginx config that uses SSL to secure the connection:
 
 ```
 server {
-        listen 443 ssl http2;
-        listen [::]:443 ssl http2;
-        ssl_certificate /path/to/your/ssl/cert;
-        ssl_certificate_key /path/to/your/ssl/key;
-        server_name clouddata.yourdomain.com;
+        listen 443 ssl http2; # or listen 80; if not using ssl
+        listen [::]:443 ssl http2; # or listen [::]:80; if not using ssl
+        ssl_certificate /path/to/your/ssl/cert; # remove if not using ssl
+        ssl_certificate_key /path/to/your/ssl/key; # remove if not using ssl
+        server_name clouddata.yourdomain.com; # update to your domain name
         location / {
-                proxy_pass http://127.0.0.1:9080;
+                proxy_pass http://127.0.0.1:9080; # change port for your setup
                 proxy_http_version 1.1;
                 proxy_set_header Upgrade $http_upgrade;
                 proxy_set_header Connection "upgrade";
