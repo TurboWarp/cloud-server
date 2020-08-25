@@ -38,7 +38,7 @@ Set the TRUST_PROXY environment variable (or TRUST_PROXY in src/config.js) to `t
 
 Here's a sample nginx config that uses SSL to secure the connection:
 
-```
+```cfg
 server {
         listen 443 ssl http2; # or listen 80; if not using ssl
         listen [::]:443 ssl http2; # or listen [::]:80; if not using ssl
