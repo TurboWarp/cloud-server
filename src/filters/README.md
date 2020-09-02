@@ -6,6 +6,6 @@ The version of cloud-server used by forkphorus has an additional set of filters 
 
 ## File Format
 
-One word per line. Case does not matter, non-alphabetical characters are ignored.
+One regular expression per line. Each expression is case insensitive. Anything that isn't a-z is removed out before the regex runs.
 
-Lines that start with # are comments and are ignored. Empty lines are ignored. Spaces at the start and end of lines are ignored.
+Lines that start with # are comments and are ignored. Empty lines are ignored.

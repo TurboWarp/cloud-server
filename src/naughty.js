@@ -15,10 +15,10 @@ const pathUtil = require('path');
 const LOADED_FILTERS = [];
 
 /**
- * A list of phrases that cannot be used.
- * @type {string[]}
+ * A list of regular expressions that cannot match a string for it to be considered safe.
+ * @type {RegExp[]}
  */
-const BLOCKED_PHRASES = [];
+const FILTERS = [];
 
 /**
  * Load a filter.
@@ -31,8 +31,8 @@ function loadFilter(name, contents) {
   contents.split('\n')
     .map((i) => i.trim()) // remove whitespace around lines
     .filter((i) => i && !i.startsWith('#')) // ignore empty lines and comments
-    .map((i) => simplify(i)) // case insensitive, remove non-alphabetical
-    .forEach((word) => BLOCKED_PHRASES.push(word));
+    .map((i) => new RegExp(i, 'i')) // convert to regular expression
+    .forEach((filter) => FILTERS.push(filter));
 }
 
 /**
@@ -73,9 +73,9 @@ function simplify(text) {
 function naughty(text) {
   text = simplify(text);
 
-  const length = BLOCKED_PHRASES.length;
+  const length = FILTERS.length;
   for (var i = 0; i < length; i++) {
-    if (text.indexOf(BLOCKED_PHRASES[i]) !== -1) {
+    if (FILTERS[i].test(text)) {
       return true;
     }
   }
@@ -83,7 +83,7 @@ function naughty(text) {
   return false;
 }
 
-naughty.getTotalBlockedPhrases = () => BLOCKED_PHRASES.length;
+naughty.getTotalBlockedPhrases = () => FILTERS.length;
 naughty.getTotalFilterLists = () => LOADED_FILTERS.length;
 
 loadFilters();
