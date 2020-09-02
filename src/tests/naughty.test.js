@@ -6,8 +6,8 @@ test('naughty word detector', () => {
   expect(naughty('griffpatch')).toBe(false);
   expect(naughty('Hell-o :)')).toBe(false);
   expect(naughty('fuck')).toBe(true);
-  expect(naughty('f_u_c_k')).toBe(true);
-  expect(naughty('fu__3_c_k')).toBe(true);
+  expect(naughty('f_u_c_-k')).toBe(true);
+  expect(naughty('-fu_c_k')).toBe(true);
   expect(naughty('FUCK')).toBe(true);
   expect(naughty('bitchute')).toBe(true);
   expect(naughty('ceebee')).toBe(true);

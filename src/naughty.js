@@ -57,21 +57,14 @@ function loadFilters() {
 }
 
 /**
- * Simplify some text for consistent filtering.
- * @param {string} text The text to simplify.
- */
-function simplify(text) {
-  return text.toLowerCase().replace(/[^a-z]/g, '');
-}
-
-/**
  * Determine whether a given string of text is probably safe for most audiences.
  * Note that this is not foolproof.
  * @param {string} text The text to scan
  * @returns {boolean} true if the text is naughty.
  */
 function naughty(text) {
-  text = simplify(text);
+  // Remove non alphanumerics
+  text = text.replace(/[^a-z0-9]/gi, '');
 
   const length = FILTERS.length;
   for (var i = 0; i < length; i++) {
