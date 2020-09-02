@@ -10,6 +10,8 @@ test('naughty word detector', () => {
   expect(naughty('fu__3_c_k')).toBe(true);
   expect(naughty('FUCK')).toBe(true);
   expect(naughty('bitchute')).toBe(true);
+  expect(naughty('ceebee')).toBe(true);
+  expect(naughty('iloveceebee')).toBe(false);
   expect(naughty('')).toBe(false);
   expect(naughty(' ')).toBe(false);
   expect(naughty('123')).toBe(false);
