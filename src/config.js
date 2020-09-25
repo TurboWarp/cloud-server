@@ -15,7 +15,8 @@ module.exports = {
     // passed directly into winston-daily-rotate-file
     rotation: {
       filename: '%DATE%.log',
-      dirname: 'logs',
+      // LOGS_DIRECTORY is used by systemd
+      dirname: process.env.LOGS_DIRECTORY || 'logs',
       datePattern: 'YYYY-MM-DD',
       maxFiles: '7d',
       auditFile: 'logs/.log-audit.json',
