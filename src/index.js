@@ -31,7 +31,7 @@ const port = config.port;
 server.listen(port, function() {
   // Update permissions of unix sockets
   if (typeof port === 'string' && port.startsWith('/') && config.unixSocketPermissions >= 0) {
-    fs.chmod(port, config.APP.unixSocketPermissions, function(err) {
+    fs.chmod(port, config.unixSocketPermissions, function(err) {
       if (err) {
         logger.error('could not chmod unix socket: ' + err);
         process.exit(1);
