@@ -19,7 +19,7 @@ module.exports = {
       dirname: process.env.LOGS_DIRECTORY || 'logs',
       datePattern: 'YYYY-MM-DD',
       maxFiles: '7d',
-      auditFile: 'logs/.log-audit.json',
+      createSymlink: true,
     },
   },
 };
