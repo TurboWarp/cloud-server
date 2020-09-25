@@ -1,4 +1,5 @@
 const http = require('http');
+const fs = require('fs');
 const finalhandler = require('finalhandler');
 const serveStatic = require('serve-static');
 
@@ -26,6 +27,16 @@ server.on('close', function() {
   wss.close();
 });
 
-server.listen(config.port, function() {
-  logger.info('Server started on port: ' + config.port);
+const port = config.port;
+server.listen(port, function() {
+  // Update permissions of unix sockets
+  if (typeof port === 'string' && port.startsWith('/') && config.APP.unixSocketPermissions >= 0) {
+    fs.chmod(port, config.APP.unixSocketPermissions, function(err) {
+      if (err) {
+        logger.error('could not chmod unix socket: ' + err);
+        process.exit(1);
+      }
+    });
+  }
+  logger.info('Server started on port: ' + port);
 });

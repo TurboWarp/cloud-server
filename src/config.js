@@ -2,6 +2,9 @@ module.exports = {
   // port for the server to listen on
   port: process.env.PORT || 9080,
 
+  // change to >0 to change permission of unix sockets
+  unixSocketPermissions: -1,
+
   // enable to read x-forwarded-for
   trustProxy: process.env.TRUST_PROXY === 'true',
 
