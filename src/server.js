@@ -62,7 +62,7 @@ function createSetMessage(name, value) {
 
 wss.on('connection', (ws, req) => {
   const client = new Client(ws, req);
-  const rateLimiter = new RateLimiter(30, 1000);
+  const rateLimiter = new RateLimiter(100, 1000);
 
   connectionManager.handleConnect(client);
 
