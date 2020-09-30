@@ -148,24 +148,6 @@ class Room {
     }
     return true;
   }
-
-  /**
-   * Determine whether a list of variable names matches the names of the variables in this room.
-   * Case sensitive, order doesn't matter.
-   * @param {string[]} variables The list of variable names. Must not contain duplicates.
-   * @returns {boolean}
-   */
-  matchesVariableList(variables) {
-    if (variables.length !== this.variables.size) {
-      return false;
-    }
-    for (const variableName of this.getAllVariables().keys()) {
-      if (variables.indexOf(variableName) === -1) {
-        return false;
-      }
-    }
-    return true;
-  }
 }
 
 module.exports = Room;

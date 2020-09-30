@@ -79,9 +79,6 @@ wss.on('connection', (ws, req) => {
       if (!room.isUsernameAvailable(username, client)) {
         throw new ConnectionError(ConnectionError.Username, 'Username is unavailable: ' + username);
       }
-      if (!room.matchesVariableList(Object.keys(initialData))) {
-        throw new ConnectionError(ConnectionError.Incompatibility, 'Variable list does not match.');
-      }
       client.setRoom(room);
 
       // Send the data of all the variables in the room to the client.
@@ -103,7 +100,10 @@ wss.on('connection', (ws, req) => {
 
   function performSet(variable, value, username) {
     if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
-    if (username !== client.username) throw new ConnectionError(ConnectionError.Error, 'Username mismatch');
+    // Verify username if it was sent.
+    if (username !== undefined && username !== client.username) {
+      throw new ConnectionError(ConnectionError.Error, 'Username mismatch');
+    }
 
     if (!validators.isValidVariableValue(value)) {
       // silently ignore
