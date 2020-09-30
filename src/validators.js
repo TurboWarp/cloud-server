@@ -32,16 +32,14 @@ module.exports.isValidRoomID = function(id) {
 };
 
 /**
- * Determine whether an object is a valid map-like for variables.
+ * Determine whether an object is a valid initial variable data map.
  * The variable name and values are not validated.
- * The presence of at least one entry is validated.
  * @param {unknown} object
  * @returns {boolean}
  */
-module.exports.isValidVariableMap = function(object) {
-  // TODO: the Object.prototype.toString is there to ensure that this is an object.
-  // It may be better to use !Array.isArray because all we really care about is not allowing arrays.
-  return typeof object === 'object' && !!object && Object.prototype.toString.call(object) === '[object Object]' && Object.keys(object).length >= 1;
+module.exports.isValidInitialData = function(object) {
+  // Object.prototype.toString is there to ensure that this is an object and not an array
+  return typeof object === 'object' && !!object && Object.prototype.toString.call(object) === '[object Object]';
 };
 
 /**

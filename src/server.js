@@ -30,7 +30,7 @@ logger.info(`Naughty word detector has ${naughty.getTotalBlockedPhrases()} block
  */
 function isValidMessage(data) {
   // @ts-ignore
-  return !!data && typeof data === 'object' && typeof data.kind === 'string';
+  return !!data && typeof data === 'object' && typeof data.method === 'string';
 }
 
 /**
@@ -54,8 +54,8 @@ function parseMessage(data) {
  */
 function createSetMessage(name, value) {
   return JSON.stringify({
-    kind: 'set',
-    var: name,
+    method: 'set',
+    name: name,
     value: value,
   });
 }
@@ -66,10 +66,10 @@ wss.on('connection', (ws, req) => {
 
   connectionManager.handleConnect(client);
 
-  function performHandshake(roomId, username, variables) {
+  function performHandshake(roomId, username, initialData) {
     if (client.room) throw new ConnectionError(ConnectionError.Error, 'Already performed handshake');
     if (!validators.isValidRoomID(roomId)) throw new ConnectionError(ConnectionError.Error, 'Invalid room ID: ' + roomId);
-    if (!validators.isValidVariableMap(variables)) throw new ConnectionError(ConnectionError.Error, 'Invalid variable map');
+    if (!validators.isValidInitialData(initialData)) throw new ConnectionError(ConnectionError.Error, 'Invalid initial data');
     if (!validators.isValidUsername(username)) throw new ConnectionError(ConnectionError.Username, 'Invalid username: '  + username);
 
     client.username = username;
@@ -79,7 +79,7 @@ wss.on('connection', (ws, req) => {
       if (!room.isUsernameAvailable(username, client)) {
         throw new ConnectionError(ConnectionError.Username, 'Username is unavailable: ' + username);
       }
-      if (!room.matchesVariableList(Object.keys(variables))) {
+      if (!room.matchesVariableList(Object.keys(initialData))) {
         throw new ConnectionError(ConnectionError.Incompatibility, 'Variable list does not match.');
       }
       client.setRoom(room);
@@ -91,19 +91,23 @@ wss.on('connection', (ws, req) => {
       room.getAllVariables().forEach((value, name) => {
         messages.push(createSetMessage(name, value));
       });
-      client.send(messages.join('\n'));
+      if (messages.length > 0) {
+        client.send(messages.join('\n'));
+      }
     } else {
-      client.setRoom(rooms.create(roomId, variables));
+      client.setRoom(rooms.create(roomId, initialData));
     }
 
     client.log('Joined room');
   }
 
-  function performSet(variable, value) {
+  function performSet(variable, value, username) {
     if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
+    if (username !== client.username) throw new ConnectionError(ConnectionError.Error, 'Username mismatch');
 
     if (!validators.isValidVariableValue(value)) {
       // silently ignore
+      logger.debug('Ignoring invalid value: ' + value);
       return;
     }
 
@@ -127,19 +131,19 @@ wss.on('connection', (ws, req) => {
     }
 
     const message = parseMessage(data.toString());
-    const kind = message.kind;
+    const method = message.method;
 
-    switch (kind) {
+    switch (method) {
       case 'handshake':
-        performHandshake(message.id, message.username, message.variables);
+        performHandshake(message.project_id, message.user, message.initial_data || {});
         break;
 
       case 'set':
-        performSet(message.var, message.value);
+        performSet(message.name, message.value, message.user);
         break;
 
       default:
-        throw new ConnectionError(ConnectionError.Error, 'Unknown message kind: ' + kind);
+        throw new ConnectionError(ConnectionError.Error, 'Unknown message method: ' + method);
     }
   }
 
