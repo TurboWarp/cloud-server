@@ -14,6 +14,7 @@ test('isValidUsername', () => {
   expect(validators.isValidUsername('e'.repeat(19))).toBe(true);
   expect(validators.isValidUsername('e'.repeat(20))).toBe(true);
   expect(validators.isValidUsername('e'.repeat(21))).toBe(false);
+  expect(validators.isValidUsername('ScratchCat')).toBe(false);
   expect(validators.isValidUsername('fuck')).toBe(false);
   expect(validators.isValidUsername(null)).toBe(false);
   expect(validators.isValidUsername(undefined)).toBe(false);
@@ -40,7 +41,6 @@ test('isValidUsername', () => {
   expect(validators.isValidUsername('SapphireDemon-')).toBe(true);
   expect(validators.isValidUsername('AnExtremelyLongName')).toBe(true);
   expect(validators.isValidUsername('PotatoAnimator')).toBe(true);
-  expect(validators.isValidUsername('ScratchCat')).toBe(true);
   expect(validators.isValidUsername('EliMendez19Test')).toBe(true);
   expect(validators.isValidUsername('BESTERNOOB')).toBe(true);
   expect(validators.isValidUsername('cs123123123')).toBe(true);
