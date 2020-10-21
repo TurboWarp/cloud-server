@@ -1,7 +1,6 @@
 const Room = require('./Room');
 const ConnectionError = require('./ConnectionError');
 const logger = require('./logger');
-const validators = require('./validators');
 
 /** Delay between janitor runs. */
 const JANITOR_INTERVAL = 1000 * 60;
