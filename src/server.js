@@ -200,9 +200,9 @@ wss.on('connection', (ws, req) => {
     client.close(ConnectionError.Error);
   });
 
-  ws.on('close', (code, reason) => {
+  ws.on('close', (code) => {
     connectionManager.handleDisconnect(client);
-    client.log(`Connection closed: code ${code} reason ${reason}`);
+    client.log(`Connection closed: code ${code}`);
     client.close(ConnectionError.Error);
   });
 
