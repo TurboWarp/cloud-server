@@ -46,8 +46,9 @@ module.exports.isValidVariableName = function(name) {
 module.exports.isValidVariableValue = function(value) {
   if (typeof value === 'number') {
     // If the value is a number, we don't have to parse it because we already know it's valid.
+    // NaN and [-]Infinity are not valid, however.
     // TODO: is checking length necessary on numbers?
-    return !Number.isNaN(value) && value.toString().length <= VALUE_MAX_LENGTH;
+    return !Number.isNaN(value) && Number.isFinite(value) && value.toString().length <= VALUE_MAX_LENGTH;
   }
 
   if (typeof value === 'string') {
