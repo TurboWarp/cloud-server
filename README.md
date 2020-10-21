@@ -2,7 +2,7 @@
 
 This is a cloud data server for [forkphorus](https://forkphorus.github.io/).
 
-It uses a protocol similar to Scratch's cloud variable protocol. See docs/protocol.md for details.
+It uses a protocol similar to Scratch's cloud variable protocol. See doc/protocol.md for details.
 
 ## Long term storage
 
