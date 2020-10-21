@@ -73,20 +73,6 @@ test('isValidRoomID', () => {
   expect(validators.isValidRoomID({})).toBe(false);
 });
 
-test('isValidVariableMap', () => {
-  expect(validators.isValidVariableMap({})).toBe(false);
-  expect(validators.isValidVariableMap('{}')).toBe(false);
-  expect(validators.isValidVariableMap(4)).toBe(false);
-  expect(validators.isValidVariableMap({'hello': '123'})).toBe(true);
-  expect(validators.isValidVariableMap({'hello': '123', 'foo': 'bar'})).toBe(true);
-  expect(validators.isValidVariableMap(null)).toBe(false);
-  expect(validators.isValidVariableMap(undefined)).toBe(false);
-  expect(validators.isValidVariableMap(true)).toBe(false);
-  expect(validators.isValidVariableMap(false)).toBe(false);
-  expect(validators.isValidVariableMap([])).toBe(false);
-  expect(validators.isValidVariableMap([1, 2, 3])).toBe(false);
-});
-
 test('isValidVariableName', () => {
   expect(validators.isValidVariableName('☁ Foo')).toBe(true);
   expect(validators.isValidVariableName('☁ this is a pretty long variable name but not too long')).toBe(true);

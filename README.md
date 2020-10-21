@@ -2,10 +2,11 @@
 
 This is a cloud data server for [forkphorus](https://forkphorus.github.io/).
 
-## This is not
+It uses a protocol similar to Scratch's cloud variable protocol. See docs/protocol.md for details.
 
- - a reimplementation of the Scratch cloud data server (protocols have several differences)
- - a "permanent" or "long term" data server, all "rooms" are removed when they are empty for a while
+## Long term storage
+
+This server does not implement long term variable storage. All data is stored only in memory (never on disk) and are removed promptly when they are emptied.
 
 ## Setup
 

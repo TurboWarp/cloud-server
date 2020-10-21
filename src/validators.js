@@ -32,17 +32,6 @@ module.exports.isValidRoomID = function(id) {
 };
 
 /**
- * Determine whether an object is a valid initial variable data map.
- * The variable name and values are not validated.
- * @param {unknown} object
- * @returns {boolean}
- */
-module.exports.isValidInitialData = function(object) {
-  // Object.prototype.toString is there to ensure that this is an object and not an array
-  return typeof object === 'object' && !!object && Object.prototype.toString.call(object) === '[object Object]';
-};
-
-/**
  * @param {unknown} name
  * @returns {boolean}
  */

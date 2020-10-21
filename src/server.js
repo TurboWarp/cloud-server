@@ -66,10 +66,9 @@ wss.on('connection', (ws, req) => {
 
   connectionManager.handleConnect(client);
 
-  function performHandshake(roomId, username, initialData) {
+  function performHandshake(roomId, username) {
     if (client.room) throw new ConnectionError(ConnectionError.Error, 'Already performed handshake');
     if (!validators.isValidRoomID(roomId)) throw new ConnectionError(ConnectionError.Error, 'Invalid room ID: ' + roomId);
-    if (!validators.isValidInitialData(initialData)) throw new ConnectionError(ConnectionError.Error, 'Invalid initial data');
     if (!validators.isValidUsername(username)) throw new ConnectionError(ConnectionError.Username, 'Invalid username: '  + username);
 
     client.username = username;
@@ -92,18 +91,37 @@ wss.on('connection', (ws, req) => {
         client.send(messages.join('\n'));
       }
     } else {
-      client.setRoom(rooms.create(roomId, initialData));
+      client.setRoom(rooms.create(roomId));
     }
 
     client.log('Joined room');
   }
 
-  function performSet(variable, value, username) {
+  function performCreate(variable, value) {
+    performSet(variable, value);
+  }
+
+  function performDelete(variable) {
     if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
-    // Verify username if it was sent.
-    if (username !== undefined && username !== client.username) {
-      throw new ConnectionError(ConnectionError.Error, 'Username mismatch');
+
+    client.room.delete(variable);
+  }
+
+  function performRename(oldName, newName) {
+    if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
+
+    if (!validators.isValidVariableValue(newName)) {
+      throw new Error(`Invalid variable name: ${newName}`);
     }
+
+    // get throws if old name does not exist
+    const value = client.room.get(oldName);
+    client.room.delete(oldName);
+    client.room.set(newName, value);
+  }
+
+  function performSet(variable, value) {
+    if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
 
     if (!validators.isValidVariableValue(value)) {
       // silently ignore
@@ -111,7 +129,16 @@ wss.on('connection', (ws, req) => {
       return;
     }
 
-    client.room.set(variable, value);
+    // TODO: treat numbers as a first class data type
+    if (typeof value === 'number') {
+      value = value.toString();
+    }
+
+    if (client.room.has(variable)) {
+      client.room.set(variable, value);
+    } else {
+      client.room.create(variable, value);
+    }
 
     // Generate the send message only when a client will actually hear it.
     const clients = client.room.getClients();
@@ -135,11 +162,23 @@ wss.on('connection', (ws, req) => {
 
     switch (method) {
       case 'handshake':
-        performHandshake(message.project_id, message.user, message.initial_data || {});
+        performHandshake(message.project_id, message.user);
         break;
 
       case 'set':
-        performSet(message.name, message.value, message.user);
+        performSet(message.name, message.value);
+        break;
+
+      case 'create':
+        performCreate(message.name, message.value);
+        break;
+
+      case 'delete':
+        performDelete(message.name);
+        break;
+
+      case 'rename':
+        performRename(message.name, message.new_name);
         break;
 
       default:

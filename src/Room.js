@@ -1,5 +1,3 @@
-const ConnectionError = require('./ConnectionError');
-
 /**
  * @typedef {import('./Client')} Client
  */
@@ -56,7 +54,7 @@ class Room {
       throw new Error('Client is already added to this Room.');
     }
     if (this.clients.length >= this.maxClients) {
-      throw new ConnectionError(ConnectionError.Overloaded, 'Too many clients are connected to this room.');
+      throw new Error('Too many clients are connected to this room.');
     }
     this.clients.push(client);
   }
@@ -120,6 +118,32 @@ class Room {
       throw new Error('Variable does not exist');
     }
     this.variables.set(name, value);
+  }
+
+  /**
+   * Delete a variable.
+   * @param {string} name The name of the variable
+   * @throws Will throw if the variable does not exist.
+   */
+  delete(name) {
+    if (!this.has(name)) {
+      throw new Error('Variable does not exist');
+    }
+    this.variables.delete(name);
+  }
+
+  /**
+   * Get a variable.
+   * @param {string} name The name of the variable
+   * @returns {string} Variable value.
+   * @throws Will throw if the variable does not exist.
+   */
+  get(name) {
+    const value = this.variables.get(name);
+    if (typeof value === 'undefined') {
+      throw new Error('Variable does not exist');
+    }
+    return value;
   }
 
   /**
