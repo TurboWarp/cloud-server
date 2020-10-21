@@ -23,6 +23,8 @@ By default the server is listening on ws://localhost:9080/. To change the port o
 
 To enable use of this server in forkphorus, you can use the `chost` URL parameter, for example: https://forkphorus.github.io/?chost=ws://localhost:9080/
 
+Or in TurboWarp: https://turbowarp.org/?cloud_host=ws://localhost:9080/
+
 ## Configuration
 
 HTTP requests are served static files from the public directory.
