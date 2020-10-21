@@ -107,6 +107,9 @@ test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue('undefined')).toBe(false);
   expect(validators.isValidVariableValue(Infinity)).toBe(false);
   expect(validators.isValidVariableValue('Infinity')).toBe(false);
+  expect(validators.isValidVariableValue(Infinity)).toBe(false);
+  expect(validators.isValidVariableValue('-Infinity')).toBe(false);
+  expect(validators.isValidVariableValue(-Infinity)).toBe(false);
   expect(validators.isValidVariableValue(NaN)).toBe(false);
   expect(validators.isValidVariableValue('NaN')).toBe(false);
   expect(validators.isValidVariableValue('abcde')).toBe(false);
@@ -117,16 +120,20 @@ test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue('. ')).toBe(false);
   expect(validators.isValidVariableValue(' .')).toBe(false);
   expect(validators.isValidVariableValue('..')).toBe(false);
-  expect(validators.isValidVariableValue(4)).toBe(false);
   expect(validators.isValidVariableValue('-')).toBe(false);
   expect(validators.isValidVariableValue('--')).toBe(false);
   expect(validators.isValidVariableValue('- ')).toBe(false);
   expect(validators.isValidVariableValue(' -')).toBe(false);
   expect(validators.isValidVariableValue('-2500')).toBe(true);
+  expect(validators.isValidVariableValue(-2500)).toBe(true);
   expect(validators.isValidVariableValue('2500')).toBe(true);
+  expect(validators.isValidVariableValue(2500)).toBe(true);
   expect(validators.isValidVariableValue('-0')).toBe(true);
+  expect(validators.isValidVariableValue(-0)).toBe(true);
   expect(validators.isValidVariableValue('0')).toBe(true);
+  expect(validators.isValidVariableValue(0)).toBe(true);
   expect(validators.isValidVariableValue('1')).toBe(true);
+  expect(validators.isValidVariableValue(1)).toBe(true);
   expect(validators.isValidVariableValue('4-')).toBe(false);
   expect(validators.isValidVariableValue('4 ')).toBe(false);
   expect(validators.isValidVariableValue(' 4')).toBe(false);
@@ -150,6 +157,7 @@ test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue('-0x03')).toBe(false);
   expect(validators.isValidVariableValue('1e100')).toBe(false);
   expect(validators.isValidVariableValue('1e+100')).toBe(true);
+  expect(validators.isValidVariableValue(1e+100)).toBe(true);
   expect(validators.isValidVariableValue('4.983873181796813e+128')).toBe(true);
   expect(validators.isValidVariableValue('-4.983873181796813e+128')).toBe(true);
   expect(validators.isValidVariableValue('-4.983873181796813e+255')).toBe(true);
@@ -161,6 +169,7 @@ test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue('4.983873181796813e+e128')).toBe(false);
   expect(validators.isValidVariableValue('4.983873181796813ee+128')).toBe(false);
   expect(validators.isValidVariableValue('4.983873181796813e')).toBe(false);
+  // expect(validators.isValidVariableValue('4.983873181796813e+')).toBe(false);
   expect(validators.isValidVariableValue('4.983873181796813e 128')).toBe(false);
   expect(validators.isValidVariableValue('5e+e+10')).toBe(false);
   // long vars
@@ -171,7 +180,7 @@ test('isValidVariableValue', () => {
     expect(validators.isValidVariableValue('-' + '1'.repeat(i))).toBe(true);
   }
   // too long
-  expect(validators.isValidVariableValue('1'.repeat(10000))).toBe(false);
+  expect(validators.isValidVariableValue('1'.repeat(100000))).toBe(false);
   // ascii neighbors to 0, 9
   expect(validators.isValidVariableValue('/')).toBe(false);
   expect(validators.isValidVariableValue(':')).toBe(false);
