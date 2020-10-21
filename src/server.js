@@ -4,7 +4,6 @@ const Client = require('./Client');
 const RoomList = require('./RoomList');
 const ConnectionError = require('./ConnectionError');
 const ConnectionManager = require('./ConnectionManager');
-const RateLimiter = require('./RateLimiter');
 const validators = require('./validators');
 const logger = require('./logger');
 const naughty = require('./naughty');
@@ -62,7 +61,6 @@ function createSetMessage(name, value) {
 
 wss.on('connection', (ws, req) => {
   const client = new Client(ws, req);
-  const rateLimiter = new RateLimiter(100, 1000);
 
   connectionManager.handleConnect(client);
 
@@ -148,10 +146,6 @@ wss.on('connection', (ws, req) => {
   }
 
   function processMessage(data) {
-    if (rateLimiter.rateLimited()) {
-      throw new ConnectionError(ConnectionError.TryAgainLater, `Too many messages (last in period: ${rateLimiter.timeSinceLastOperationInPeriod()}ms ago}`);
-    }
-
     const message = parseMessage(data.toString());
     const method = message.method;
 
