@@ -8,8 +8,8 @@ test('isValidUsername', () => {
   expect(validators.isValidUsername(' griffpatch')).toBe(false);
   expect(validators.isValidUsername('abcdé')).toBe(false);
   expect(validators.isValidUsername('')).toBe(false);
-  expect(validators.isValidUsername('e')).toBe(false);
-  expect(validators.isValidUsername('ee')).toBe(false);
+  expect(validators.isValidUsername('e')).toBe(true);
+  expect(validators.isValidUsername('ee')).toBe(true);
   expect(validators.isValidUsername('eee')).toBe(true);
   expect(validators.isValidUsername('e'.repeat(19))).toBe(true);
   expect(validators.isValidUsername('e'.repeat(20))).toBe(true);
