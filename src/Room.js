@@ -6,6 +6,10 @@
  * @typedef {string} RoomID A unique ID for a Room.
  */
 
+/**
+ * @typedef {string|number} Value A value stored in a variable in a Room.
+ */
+
 class Room {
   /**
    * @param {RoomID} id
@@ -19,7 +23,7 @@ class Room {
     this.id = id;
     /**
      * The variables that are within this room.
-     * @type {Map<string, string>}
+     * @type {Map<string, Value>}
      * @private
      * @readonly
      */
@@ -83,7 +87,7 @@ class Room {
 
   /**
    * Get a map of all variables.
-   * @returns {Map<string, string>} All variables, and their value.
+   * @returns {Map<string, Value>} All variables, and their value.
    */
   getAllVariables() {
     return this.variables;
@@ -110,7 +114,7 @@ class Room {
    * Set an existing variable to a new value.
    * This method does not inform clients of the change.
    * @param {string} name The name of the variable
-   * @param {string} value The value of the variable
+   * @param {Value} value The value of the variable
    * @throws Will throw if the variable does not exist.
    */
   set(name, value) {
@@ -135,7 +139,7 @@ class Room {
   /**
    * Get a variable.
    * @param {string} name The name of the variable
-   * @returns {string} Variable value.
+   * @returns {Value} Variable value.
    * @throws Will throw if the variable does not exist.
    */
   get(name) {

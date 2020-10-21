@@ -49,7 +49,7 @@ function parseMessage(data) {
 /**
  * Create a "set" message to send to clients to set a variable.
  * @param {string} name The name of the variable.
- * @param {string} value The variable's new value.
+ * @param {string|number} value The variable's new value.
  * @returns {string} The stringified JSON of the message.
  */
 function createSetMessage(name, value) {
@@ -127,11 +127,6 @@ wss.on('connection', (ws, req) => {
       // silently ignore
       logger.debug('Ignoring invalid value: ' + value);
       return;
-    }
-
-    // TODO: treat numbers as a first class data type
-    if (typeof value === 'number') {
-      value = value.toString();
     }
 
     if (client.room.has(variable)) {
