@@ -11,6 +11,11 @@ module.exports = {
   // truncates some parts of connecting IP addresses
   anonymizeAddresses: process.env.ANONYMIZE_ADDRESSES === 'true',
 
+  // change this to an object to enable the WebSocket per-message deflate extension
+  // note: this can cause significant performance penalty and catastrophic memory fragmentation (https://github.com/nodejs/node/issues/8871)
+  // see here for parameters: https://github.com/websockets/ws/blob/master/doc/ws.md#new-websocketserveroptions-callback
+  perMessageDeflate: false,
+
   logging: {
     // forcibly enable console logging when NODE_ENV is set to production
     forceEnableConsoleLogging: false,
