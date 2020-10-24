@@ -85,6 +85,10 @@ module.exports.isValidVariableValue = function(value) {
         if (char !== 43 && char !== 45) {
           return false;
         }
+        // there must be another number after the exponent
+        if (i + 1 >= length) {
+          return false;
+        }
       } else {
         // 48 = 0
         // 57 = 9

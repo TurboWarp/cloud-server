@@ -95,6 +95,7 @@ test('isValidVariableName', () => {
 test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue({})).toBe(false);
   expect(validators.isValidVariableValue('{}')).toBe(false);
+  expect(validators.isValidVariableValue('[object Object]')).toBe(false);
   expect(validators.isValidVariableValue([])).toBe(false);
   expect(validators.isValidVariableValue('[]')).toBe(false);
   expect(validators.isValidVariableValue(true)).toBe(false);
@@ -153,11 +154,17 @@ test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue('3..3')).toBe(false);
   expect(validators.isValidVariableValue('3e3')).toBe(false);
   expect(validators.isValidVariableValue('-3e3')).toBe(false);
+  expect(validators.isValidVariableValue(0x03)).toBe(true);
   expect(validators.isValidVariableValue('0x03')).toBe(false);
   expect(validators.isValidVariableValue('-0x03')).toBe(false);
   expect(validators.isValidVariableValue('1e100')).toBe(false);
   expect(validators.isValidVariableValue('1e+100')).toBe(true);
   expect(validators.isValidVariableValue(1e+100)).toBe(true);
+  expect(validators.isValidVariableValue(4.983873181796813e+128)).toBe(true);
+  expect(validators.isValidVariableValue(-4.983873181796813e+128)).toBe(true);
+  expect(validators.isValidVariableValue('5e+1')).toBe(true);
+  expect(validators.isValidVariableValue('4.983873181796813e+1')).toBe(true);
+  expect(validators.isValidVariableValue('4.983873181796813e+0')).toBe(true);
   expect(validators.isValidVariableValue('4.983873181796813e+128')).toBe(true);
   expect(validators.isValidVariableValue('-4.983873181796813e+128')).toBe(true);
   expect(validators.isValidVariableValue('-4.983873181796813e+255')).toBe(true);
@@ -168,7 +175,18 @@ test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue('4.983873181796813e128')).toBe(false);
   expect(validators.isValidVariableValue('4.983873181796813e+e128')).toBe(false);
   expect(validators.isValidVariableValue('4.983873181796813ee+128')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813ee+ 128')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813ee+128 ')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813e+-128')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813e-+128')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813e--128')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813e++128')).toBe(false);
   expect(validators.isValidVariableValue('4.983873181796813e')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813ee')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813e+')).toBe(false);
+  expect(validators.isValidVariableValue('-4.983873181796813e+')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813e-')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813e- ')).toBe(false);
   // expect(validators.isValidVariableValue('4.983873181796813e+')).toBe(false);
   expect(validators.isValidVariableValue('4.983873181796813e 128')).toBe(false);
   expect(validators.isValidVariableValue('5e+e+10')).toBe(false);
