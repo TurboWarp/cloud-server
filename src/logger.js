@@ -16,9 +16,11 @@ const logger = winston.createLogger({
   format: format
 });
 
-logger.add(new winston.transports.DailyRotateFile(config.logging.rotation));
+if (config.logging.rotation) {
+  logger.add(new winston.transports.DailyRotateFile(config.logging.rotation));
+}
 
-if ((environment.isDevelopment || config.logging.forceEnableConsoleLogging) && !environment.isTest) {
+if (config.logging.console && !environment.isTest) {
   logger.add(new winston.transports.Console({
     format: winston.format.combine(
       // Include color when logging to console, not when logging to file (results in ugly escape codes)

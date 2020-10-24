@@ -1,29 +1,30 @@
 module.exports = {
   // port for the server to listen on
+  // on unix-like platforms, this can be the path to a unix socket
   port: process.env.PORT || 9080,
 
-  // change to >0 to change permission of unix sockets
-  unixSocketPermissions: -1,
+  // the unix permissions to use for unix sockets
+  // set to -1 to disable permission changing
+  // make sure to use an octal (`0o`) instead of just a regular number
+  unixSocketPermissions: 0o777,
 
   // enable to read x-forwarded-for
   trustProxy: process.env.TRUST_PROXY === 'true',
 
-  // truncates some parts of connecting IP addresses
+  // truncates some parts of IP addresses
   anonymizeAddresses: process.env.ANONYMIZE_ADDRESSES === 'true',
 
   // change this to an object to enable the WebSocket per-message deflate extension
-  // note: this can cause significant performance penalty and catastrophic memory fragmentation (https://github.com/nodejs/node/issues/8871)
-  // see here for parameters: https://github.com/websockets/ws/blob/master/doc/ws.md#new-websocketserveroptions-callback
   perMessageDeflate: false,
 
   logging: {
-    // forcibly enable console logging when NODE_ENV is set to production
-    forceEnableConsoleLogging: false,
+    console: true,
 
     // passed directly into winston-daily-rotate-file
+    // see here for options: https://github.com/winstonjs/winston-daily-rotate-file#options
     rotation: {
       filename: '%DATE%.log',
-      // LOGS_DIRECTORY is used by systemd
+      // LOGS_DIRECTORY is used by systemd services with the LogsDirectory= directive
       dirname: process.env.LOGS_DIRECTORY || 'logs',
       datePattern: 'YYYY-MM-DD',
       maxFiles: '7d',
