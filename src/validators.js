@@ -47,7 +47,6 @@ module.exports.isValidVariableValue = function(value) {
   if (typeof value === 'number') {
     // If the value is a number, we don't have to parse it because we already know it's valid.
     // NaN and [-]Infinity are not valid, however.
-    // TODO: is checking length necessary on numbers?
     return !Number.isNaN(value) && Number.isFinite(value) && value.toString().length <= VALUE_MAX_LENGTH;
   }
 
@@ -56,14 +55,13 @@ module.exports.isValidVariableValue = function(value) {
       return false;
     }
 
-    var length = value.length;
     // catch some special cases
     if (value === '.' || value === '-') {
       return false;
     }
 
+    var length = value.length;
     var seenDecimal = false;
-    var exponent = false;
     var i = 0;
     // 45 = -
     if (value.charCodeAt(0) === 45) i++;
@@ -72,23 +70,8 @@ module.exports.isValidVariableValue = function(value) {
       var char = value.charCodeAt(i);
       // 46 = .
       if (char === 46) {
-        // only a single decimal is allowed, and never allowed within an exponent
-        if (seenDecimal || exponent) return false;
+        if (seenDecimal) return false;
         seenDecimal = true;
-      } else if (char === 101) { // 101 = e
-        // only one exponent is allowed
-        if (exponent) return false;
-        exponent = true;
-        i++;
-        char = value.charCodeAt(i);
-        // e is expected to be followed by + (43) or - (45)
-        if (char !== 43 && char !== 45) {
-          return false;
-        }
-        // there must be another number after the exponent
-        if (i + 1 >= length) {
-          return false;
-        }
       } else {
         // 48 = 0
         // 57 = 9
