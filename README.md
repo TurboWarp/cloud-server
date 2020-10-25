@@ -4,9 +4,11 @@ A cloud data server for Scratch 3. Used by [forkphorus](https://forkphorus.githu
 
 It uses a protocol very similar to Scratch's cloud variable protocol. See doc/protocol.md for further details.
 
-## Long term storage
+## Restrictions
 
-This server does not implement long term variable storage. All data is stored only in memory (never on disk) and are removed promptly when they are emptied.
+This server does not implement long term variable storage. All data is stored only in memory (never on disk) and are removed promptly when rooms are emptied or the server restarts.
+
+This server also does not implement history logs.
 
 ## Setup
 
