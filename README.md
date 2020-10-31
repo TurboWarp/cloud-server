@@ -1,11 +1,14 @@
 # cloud-server
 
-This is a cloud data server for [forkphorus](https://forkphorus.github.io/).
+A cloud data server for Scratch 3. Used by [forkphorus](https://forkphorus.github.io/) and [TurboWarp](https://turbowarp.org/).
 
-## This is not
+It uses a protocol very similar to Scratch's cloud variable protocol. See doc/protocol.md for further details.
 
- - a reimplementation of the Scratch cloud data server (protocols have several differences)
- - a "permanent" or "long term" data server, all "rooms" are removed when they are empty for a while
+## Restrictions
+
+This server does not implement long term variable storage. All data is stored only in memory (never on disk) and are removed promptly when rooms are emptied or the server restarts.
+
+This server also does not implement history logs.
 
 ## Setup
 
@@ -20,33 +23,48 @@ npm start
 
 By default the server is listening on ws://localhost:9080/. To change the port or enable wss://, read below.
 
-To enable use of this server in forkphorus, you can use the `chost` URL parameter, for example: https://forkphorus.github.io/?chost=ws://localhost:9080/
+To use a local cloud variable server in forkphorus, you can use the `chost` URL parameter, for example: https://forkphorus.github.io/?chost=ws://localhost:9080/
+
+You can do a similar thing in TurboWarp with the `cloud_host` URL parameter: https://turbowarp.org/?cloud_host=ws://localhost:9080/
 
 ## Configuration
 
-HTTP requests are served static files from the public directory.
+HTTP requests are served static files in the `public` directory.
 
-Change the PORT environment variable (or PORT in src/config.js) to change the port.
+### src/config.js
 
-### Reverse proxy
+src/config.js is the configuration file for cloud-server.
 
-In a production setup, you should use a reverse proxy like nginx.
+The `port` property (or the `PORT` environment variable) configures the port to listen on.
 
-In this setup cloud-server should listen on a high port like 9080, and your proxy will listen on a low port (80 or 443 for ws:// and wss:// respectively) and forward requests to the cloud server. You should make sure that the port that cloud-server is listening on is not forwarded.
+On unix-like systems, port can also be a path to a unix socket. By default cloud-server will set the permission of unix sockets to `777`. This can be configured with `unixSocketPermissions`.
 
-Set the TRUST_PROXY environment variable (or TRUST_PROXY in src/config.js) to `true` to make the server use the correct IP addresses.
+If you use a reverse proxy, set the `trustProxy` property (or `TRUST_PROXY` environment variable) to `true` so that logs contain the user's IP address instead of your proxy's.
+
+Set `anonymizeAddresses` to `true` if you want IP addresses to be partially anonymized.
+
+Set `perMessageDeflate` to an object to enable "permessage-deflate", which uses compression to reduce the bandwidth of data transfers. This can lead to poor performance and catastrophic memory fragmentation on Linux (https://github.com/nodejs/node/issues/8871). See here for options: https://github.com/websockets/ws/blob/master/doc/ws.md#new-websocketserveroptions-callback (look for `perMessageDeflate`)
+
+You can configure logging with the `logging` property of src/config.js. By default cloud-server logs to stdout and to files in the `logs` folder. stdout logging can be disabled by setting `logging.console` to false. File logging is configured with `logging.rotation`, see here for options: https://github.com/winstonjs/winston-daily-rotate-file#options. Set to false to disable.
+
+### Production setup
+
+cloud-server is considered production ready as it has been in use in a production environment for months without issue. That said, there is no warranty. If a bug in cloud-server results in you losing millions of dollars, tough luck. (see LICENSE for more details)
+
+You should probably be using a reverse proxy such as nginx or caddy in a production environment.
+
+In this setup cloud-server should listen on a high port such as 9080 (or even a unix socket), and your proxy will handle HTTP(S) connections and forward requests to the cloud server. You should make sure that the port that cloud-server is listening on is not open.
 
 Here's a sample nginx config that uses SSL to secure the connection:
 
 ```cfg
 server {
-        listen 443 ssl http2; # or listen 80; if not using ssl
-        listen [::]:443 ssl http2; # or listen [::]:80; if not using ssl
-        ssl_certificate /path/to/your/ssl/cert; # remove if not using ssl
-        ssl_certificate_key /path/to/your/ssl/key; # remove if not using ssl
-        server_name clouddata.yourdomain.com; # update to your domain name
+        listen 443 ssl http2;
+        ssl_certificate /path/to/your/ssl/cert;
+        ssl_certificate_key /path/to/your/ssl/key;
+        server_name clouddata.yourdomain.com;
         location / {
-                proxy_pass http://127.0.0.1:9080; # change port for your setup
+                proxy_pass http://127.0.0.1:9080;
                 proxy_http_version 1.1;
                 proxy_set_header Upgrade $http_upgrade;
                 proxy_set_header Connection "upgrade";
@@ -54,3 +72,5 @@ server {
         }
 }
 ```
+
+You may also want to make a systemd service file for the server, but this is left as an exercise to the reader.

@@ -1,11 +1,13 @@
-const ConnectionError = require('./ConnectionError');
-
 /**
  * @typedef {import('./Client')} Client
  */
 
 /**
  * @typedef {string} RoomID A unique ID for a Room.
+ */
+
+/**
+ * @typedef {string|number} Value A value stored in a variable in a Room.
  */
 
 class Room {
@@ -21,7 +23,7 @@ class Room {
     this.id = id;
     /**
      * The variables that are within this room.
-     * @type {Map<string, string>}
+     * @type {Map<string, Value>}
      * @private
      * @readonly
      */
@@ -43,7 +45,7 @@ class Room {
     /**
      * Maximum number of clients that can be connected to this room.
      */
-    this.maxClients = 64;
+    this.maxClients = 128;
   }
 
   /**
@@ -56,7 +58,7 @@ class Room {
       throw new Error('Client is already added to this Room.');
     }
     if (this.clients.length >= this.maxClients) {
-      throw new ConnectionError(ConnectionError.Overloaded, 'Too many clients are connected to this room.');
+      throw new Error('Too many clients are connected to this room.');
     }
     this.clients.push(client);
   }
@@ -85,7 +87,7 @@ class Room {
 
   /**
    * Get a map of all variables.
-   * @returns {Map<string, string>} All variables, and their value.
+   * @returns {Map<string, Value>} All variables, and their value.
    */
   getAllVariables() {
     return this.variables;
@@ -112,7 +114,7 @@ class Room {
    * Set an existing variable to a new value.
    * This method does not inform clients of the change.
    * @param {string} name The name of the variable
-   * @param {string} value The value of the variable
+   * @param {Value} value The value of the variable
    * @throws Will throw if the variable does not exist.
    */
   set(name, value) {
@@ -120,6 +122,32 @@ class Room {
       throw new Error('Variable does not exist');
     }
     this.variables.set(name, value);
+  }
+
+  /**
+   * Delete a variable.
+   * @param {string} name The name of the variable
+   * @throws Will throw if the variable does not exist.
+   */
+  delete(name) {
+    if (!this.has(name)) {
+      throw new Error('Variable does not exist');
+    }
+    this.variables.delete(name);
+  }
+
+  /**
+   * Get a variable.
+   * @param {string} name The name of the variable
+   * @returns {Value} Variable value.
+   * @throws Will throw if the variable does not exist.
+   */
+  get(name) {
+    const value = this.variables.get(name);
+    if (typeof value === 'undefined') {
+      throw new Error('Variable does not exist');
+    }
+    return value;
   }
 
   /**
@@ -143,24 +171,6 @@ class Room {
       // multiple clients from different IPs cannot share the same username
       // todo: .ip can be anonymized. Should we require non-anonymized IPs here?
       if (otherClient.username.toLowerCase() === username && otherClient.ip !== client.ip) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Determine whether a list of variable names matches the names of the variables in this room.
-   * Case sensitive, order doesn't matter.
-   * @param {string[]} variables The list of variable names. Must not contain duplicates.
-   * @returns {boolean}
-   */
-  matchesVariableList(variables) {
-    if (variables.length !== this.variables.size) {
-      return false;
-    }
-    for (const variableName of this.getAllVariables().keys()) {
-      if (variables.indexOf(variableName) === -1) {
         return false;
       }
     }

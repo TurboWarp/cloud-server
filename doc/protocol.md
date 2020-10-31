@@ -1,120 +1,116 @@
 This is the protocol used by cloud-server.
 
-This is not compatible with the protocol used by Scratch 3.
+It is based on the protocol used by Scratch 3. A client compatible with Scratch 3's protocol should be compatible with cloud-server, unless you're doing something extremely unusual.
 
-# Shared Protocol
+## Overview
 
-All messages send between the client and server use JSON to encode the message. All properties must be defined. Additional properties are ignored.
+Clients connect to the server with a WebSocket connection. Messages are encoded as text frames containing JSON objects.
 
-All messages being sent either way must conform to this base interface:
+The JSON should have no formatting, ie. it should not contain newlines. The examples shown here contain newlines for readability.
 
-```ts
-interface Message {
-  // The type of message being sent
-  kind: string;
+If the client sends something invalid or does an invalid operation, the connection will be closed.
+
+## Handshake
+
+When a client connects to the server, it should first send a handshake message containing project ID and username:
+
+```json
+{
+  "method": "handshake",
+  "project_id": "1234567",
+  "user": "ExampleUsername"
 }
 ```
 
-Different types of messages are defined below
+If the handshake was unsuccessful, the connection will be closed. If it was successful, there will be no response.
 
-# Server -> Client Protocol
+## Sending updates
 
-The server to client protocol supports sending multiple messages in a single data frame.
-To do this, each JSON message is separated by a newline (\n). This is *not* a JSON list.
-Messages should be processed in the order they were received.
+### set
 
-## set
+Clients send variable updates to the server:
 
-set messages change a variable.
-
-```ts
-interface SetMessage extends Message {
-  kind: 'set';
-  // The name of the variable.
-  variable: string;
-  // The new value of the variable.
-  value: string;
+```json
+{
+  "method": "set",
+  "name": "☁ variable",
+  "value": "123"
 }
 ```
+
+If the variable value is invalid, the message will be ignored. If the variable does not exist, it will be created.
+
+Value can be encoded as either as string or as a number.
+
+### create
+
+Create is treated the same as set:
+
+```json
+{
+  "method": "create",
+  "name": "☁ variable",
+  "value": "123"
+}
+```
+
+### rename
+
+Variables can be renamed:
+
+```json
+{
+  "method": "rename",
+  "name": "☁ variable",
+  "new_name": "☁ other variable"
+}
+```
+
+If the old variable name does not exist or the new variable name is invalid, the connection is closed.
+
+### delete
+
+Variables can be deleted:
+
+```json
+{
+  "method": "delete",
+  "name": "☁ variable"
+}
+```
+
+If the old variable name does not exist, the connection is closed.
+
+### user and project_id
+
+All messages sent from Scratch 3 also contain the `user` and `project_id` properties. cloud-server ignores these properties, except on "handshake" messages, where they are required.
+
+## Receiving updates
+
+When cloud-server receives an update from a client, it will send a set message to every other client connected to that room:
+
+```json
+{
+  "method": "set",
+  "name": "☁ variable",
+  "value": "456"
+}
+```
+
+Multiple set messages may be sent in one message where each message is separated by a newline (`\n`)
 
 ## Status Codes
 
-These are the status codes that the server sends to the client when closing a connection. The reason field is not used.
+### Server -> Client
 
 ```
-1xxx  Protocol Errors
-  WebSocket errors.
-  No special meaning is assigned to these status codes.
-
 4000  Generic Error
   When the client violates the protocol.
 
-4001  Incompatibility
-  When the connection is unable to continue due to an unfixable compatibility issue.
-  For example, when the variables provided by the client do not match those in the room.
-
 4002  Username Error
   When there is a problem with the provided username that can be solved by changing the username.
-  For example, if the name is too short, too long, already in use, or is deemed unsafe.
+  For example, if the name is too short, too long, already in use, or is deemed naughty.
 
 4003  Overloaded
-  When the server or room is full and can not continue the connection.
-
-4004  Try Again Later
-  When the client has done an operation that is invalid at this time, but would have been valid if sent later.
-  For example, when the client sends too many messages in a given period of time.
-```
-
-# Client -> Server Protocol
-
-All messages sent to the server are JSON-encoded. There must be exactly one JSON object per message.
-
-## handshake
-
-'handshake' messages prepare the connection.
-The first message from the client *must* be a handshake message.
-
-```ts
-interface HandshakeMessage extends Message {
-  kind: 'handshake';
-  // The ID of the room the client would like to join or create.
-  room: string;
-  // The client's username.
-  username: string;
-  // Variables known to the client, and their value.
-  // This is used for:
-  //  - setting the initial values of variables in a room
-  //  - disconnecting the client (by Incompatibility) if the variable names provided do not match what the room has
-  variables: { [s: string]: string; };
-}
-```
-
-## set
-'set' messages change a variable globally.
-After a set is received, the server will inform all other connected clients of the change with a 'set' message.
-The server may silently ignore this message, or disconnect the client if it is invalid.
-
-```ts
-interface SetMessage extends Message {
-  kind: 'set';
-  // The name of the variable
-  variable: string;
-  // The new value of the variable
-  value: string;
-}
-```
-
-## Status Codes
-
-These are the status codes that a client sends to the server when closing a connection. The reason field is not used. These values are only used for logging.
-
-```
-1000  Normal Closure
-  The WebSocket has closed because the intended purpose has been served.
-
-1001  Going Away
-  The connection was abruptly closed by eg. the user navigating to a different page.
-
-4100  Username Change
-  The client's username changed.
+  When the server or room is full
 ```

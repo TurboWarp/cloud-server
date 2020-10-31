@@ -12,9 +12,7 @@ class ConnectionError extends Error {
 
 // See protocol.md
 ConnectionError.Error = 4000;
-ConnectionError.Incompatibility = 4001;
 ConnectionError.Username = 4002;
 ConnectionError.Overloaded = 4003;
-ConnectionError.TryAgainLater = 4004;
 
 module.exports = ConnectionError;

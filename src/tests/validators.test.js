@@ -8,12 +8,13 @@ test('isValidUsername', () => {
   expect(validators.isValidUsername(' griffpatch')).toBe(false);
   expect(validators.isValidUsername('abcdé')).toBe(false);
   expect(validators.isValidUsername('')).toBe(false);
-  expect(validators.isValidUsername('e')).toBe(false);
-  expect(validators.isValidUsername('ee')).toBe(false);
+  expect(validators.isValidUsername('e')).toBe(true);
+  expect(validators.isValidUsername('ee')).toBe(true);
   expect(validators.isValidUsername('eee')).toBe(true);
   expect(validators.isValidUsername('e'.repeat(19))).toBe(true);
   expect(validators.isValidUsername('e'.repeat(20))).toBe(true);
   expect(validators.isValidUsername('e'.repeat(21))).toBe(false);
+  expect(validators.isValidUsername('ScratchCat')).toBe(false);
   expect(validators.isValidUsername('fuck')).toBe(false);
   expect(validators.isValidUsername(null)).toBe(false);
   expect(validators.isValidUsername(undefined)).toBe(false);
@@ -40,7 +41,6 @@ test('isValidUsername', () => {
   expect(validators.isValidUsername('SapphireDemon-')).toBe(true);
   expect(validators.isValidUsername('AnExtremelyLongName')).toBe(true);
   expect(validators.isValidUsername('PotatoAnimator')).toBe(true);
-  expect(validators.isValidUsername('ScratchCat')).toBe(true);
   expect(validators.isValidUsername('EliMendez19Test')).toBe(true);
   expect(validators.isValidUsername('BESTERNOOB')).toBe(true);
   expect(validators.isValidUsername('cs123123123')).toBe(true);
@@ -73,20 +73,6 @@ test('isValidRoomID', () => {
   expect(validators.isValidRoomID({})).toBe(false);
 });
 
-test('isValidVariableMap', () => {
-  expect(validators.isValidVariableMap({})).toBe(false);
-  expect(validators.isValidVariableMap('{}')).toBe(false);
-  expect(validators.isValidVariableMap(4)).toBe(false);
-  expect(validators.isValidVariableMap({'hello': '123'})).toBe(true);
-  expect(validators.isValidVariableMap({'hello': '123', 'foo': 'bar'})).toBe(true);
-  expect(validators.isValidVariableMap(null)).toBe(false);
-  expect(validators.isValidVariableMap(undefined)).toBe(false);
-  expect(validators.isValidVariableMap(true)).toBe(false);
-  expect(validators.isValidVariableMap(false)).toBe(false);
-  expect(validators.isValidVariableMap([])).toBe(false);
-  expect(validators.isValidVariableMap([1, 2, 3])).toBe(false);
-});
-
 test('isValidVariableName', () => {
   expect(validators.isValidVariableName('☁ Foo')).toBe(true);
   expect(validators.isValidVariableName('☁ this is a pretty long variable name but not too long')).toBe(true);
@@ -108,8 +94,12 @@ test('isValidVariableName', () => {
 
 test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue({})).toBe(false);
+  expect(validators.isValidVariableValue({1:2})).toBe(false);
   expect(validators.isValidVariableValue('{}')).toBe(false);
+  expect(validators.isValidVariableValue('[object Object]')).toBe(false);
   expect(validators.isValidVariableValue([])).toBe(false);
+  expect(validators.isValidVariableValue([1])).toBe(false);
+  expect(validators.isValidVariableValue([1,2,3])).toBe(false);
   expect(validators.isValidVariableValue('[]')).toBe(false);
   expect(validators.isValidVariableValue(true)).toBe(false);
   expect(validators.isValidVariableValue('true')).toBe(false);
@@ -121,6 +111,9 @@ test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue('undefined')).toBe(false);
   expect(validators.isValidVariableValue(Infinity)).toBe(false);
   expect(validators.isValidVariableValue('Infinity')).toBe(false);
+  expect(validators.isValidVariableValue(Infinity)).toBe(false);
+  expect(validators.isValidVariableValue('-Infinity')).toBe(false);
+  expect(validators.isValidVariableValue(-Infinity)).toBe(false);
   expect(validators.isValidVariableValue(NaN)).toBe(false);
   expect(validators.isValidVariableValue('NaN')).toBe(false);
   expect(validators.isValidVariableValue('abcde')).toBe(false);
@@ -131,16 +124,24 @@ test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue('. ')).toBe(false);
   expect(validators.isValidVariableValue(' .')).toBe(false);
   expect(validators.isValidVariableValue('..')).toBe(false);
-  expect(validators.isValidVariableValue(4)).toBe(false);
   expect(validators.isValidVariableValue('-')).toBe(false);
   expect(validators.isValidVariableValue('--')).toBe(false);
   expect(validators.isValidVariableValue('- ')).toBe(false);
   expect(validators.isValidVariableValue(' -')).toBe(false);
   expect(validators.isValidVariableValue('-2500')).toBe(true);
+  expect(validators.isValidVariableValue(-2500)).toBe(true);
   expect(validators.isValidVariableValue('2500')).toBe(true);
+  expect(validators.isValidVariableValue(2500)).toBe(true);
+  expect(validators.isValidVariableValue('-0.0')).toBe(true);
+  expect(validators.isValidVariableValue('-0.12')).toBe(true);
   expect(validators.isValidVariableValue('-0')).toBe(true);
+  expect(validators.isValidVariableValue(-0)).toBe(true);
+  expect(validators.isValidVariableValue('0.0')).toBe(true);
+  expect(validators.isValidVariableValue('0.1')).toBe(true);
   expect(validators.isValidVariableValue('0')).toBe(true);
+  expect(validators.isValidVariableValue(0)).toBe(true);
   expect(validators.isValidVariableValue('1')).toBe(true);
+  expect(validators.isValidVariableValue(1)).toBe(true);
   expect(validators.isValidVariableValue('4-')).toBe(false);
   expect(validators.isValidVariableValue('4 ')).toBe(false);
   expect(validators.isValidVariableValue(' 4')).toBe(false);
@@ -151,6 +152,10 @@ test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue('-4.')).toBe(true);
   expect(validators.isValidVariableValue('-4')).toBe(true);
   expect(validators.isValidVariableValue('-4.0')).toBe(true);
+  expect(validators.isValidVariableValue('-4.00')).toBe(true);
+  expect(validators.isValidVariableValue('-4.000000')).toBe(true);
+  expect(validators.isValidVariableValue('-4.000000.')).toBe(false);
+  expect(validators.isValidVariableValue('-4.000000.0')).toBe(false);
   expect(validators.isValidVariableValue('.32')).toBe(true);
   expect(validators.isValidVariableValue('-.32')).toBe(true);
   expect(validators.isValidVariableValue('--4')).toBe(false);
@@ -158,25 +163,28 @@ test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue('00003.3330000')).toBe(true);
   expect(validators.isValidVariableValue('-00003.3330000')).toBe(true);
   expect(validators.isValidVariableValue('3..3')).toBe(false);
-  expect(validators.isValidVariableValue('3e3')).toBe(false);
-  expect(validators.isValidVariableValue('-3e3')).toBe(false);
+  expect(validators.isValidVariableValue(0x03)).toBe(true);
   expect(validators.isValidVariableValue('0x03')).toBe(false);
   expect(validators.isValidVariableValue('-0x03')).toBe(false);
-  expect(validators.isValidVariableValue('1e100')).toBe(false);
-  expect(validators.isValidVariableValue('1e+100')).toBe(true);
-  expect(validators.isValidVariableValue('4.983873181796813e+128')).toBe(true);
-  expect(validators.isValidVariableValue('-4.983873181796813e+128')).toBe(true);
-  expect(validators.isValidVariableValue('-4.983873181796813e+255')).toBe(true);
-  expect(validators.isValidVariableValue('4.983873181796813e-128')).toBe(true);
-  expect(validators.isValidVariableValue('-4.983873181796813e-128')).toBe(true);
-  expect(validators.isValidVariableValue('-4.983873181796813e-255')).toBe(true);
-  expect(validators.isValidVariableValue('4.983873181796813e+128.5')).toBe(false);
-  expect(validators.isValidVariableValue('4.983873181796813e128')).toBe(false);
-  expect(validators.isValidVariableValue('4.983873181796813e+e128')).toBe(false);
-  expect(validators.isValidVariableValue('4.983873181796813ee+128')).toBe(false);
-  expect(validators.isValidVariableValue('4.983873181796813e')).toBe(false);
-  expect(validators.isValidVariableValue('4.983873181796813e 128')).toBe(false);
-  expect(validators.isValidVariableValue('5e+e+10')).toBe(false);
+  expect(validators.isValidVariableValue('3n')).toBe(false);
+  expect(validators.isValidVariableValue('1,000')).toBe(false);
+  expect(validators.isValidVariableValue(1e+100)).toBe(true);
+  expect(validators.isValidVariableValue(0.1e+100)).toBe(true);
+  expect(validators.isValidVariableValue(-1e+100)).toBe(true);
+  expect(validators.isValidVariableValue(1e-100)).toBe(true);
+  expect(validators.isValidVariableValue(-1e-100)).toBe(true);
+  expect(validators.isValidVariableValue(-1.5e-101)).toBe(true);
+  expect(validators.isValidVariableValue(1e+0)).toBe(true);
+  expect(validators.isValidVariableValue(4.983873181796813e+128)).toBe(true);
+  expect(validators.isValidVariableValue(-4.983873181796813e+128)).toBe(true);
+  expect(validators.isValidVariableValue(-4.983873181796813e+10000)).toBe(false);
+  expect(validators.isValidVariableValue('1e+100')).toBe(false);
+  expect(validators.isValidVariableValue('4.983873181796813e+128')).toBe(false);
+  expect(validators.isValidVariableValue('01e+100')).toBe(false);
+  expect(validators.isValidVariableValue('1e+10')).toBe(false);
+  expect(validators.isValidVariableValue('1e1')).toBe(false);
+  expect(validators.isValidVariableValue('1E1')).toBe(false);
+  expect(validators.isValidVariableValue('-1e+10')).toBe(false);
   // long vars
   expect(validators.isValidVariableValue('-' + '1'.repeat(100))).toBe(true);
   expect(validators.isValidVariableValue('-' + '1'.repeat(100) + '.' + '1'.repeat(100))).toBe(true);
@@ -185,7 +193,7 @@ test('isValidVariableValue', () => {
     expect(validators.isValidVariableValue('-' + '1'.repeat(i))).toBe(true);
   }
   // too long
-  expect(validators.isValidVariableValue('1'.repeat(10000))).toBe(false);
+  expect(validators.isValidVariableValue('1'.repeat(100000))).toBe(false);
   // ascii neighbors to 0, 9
   expect(validators.isValidVariableValue('/')).toBe(false);
   expect(validators.isValidVariableValue(':')).toBe(false);
@@ -196,5 +204,5 @@ test('isValidVariableValue', () => {
   expect(validators.isValidVariableValue('081106020130142912311419272312361629046502010307096610016503070766080107010201020125010301')).toBe(true); // https://scratch.mit.edu/projects/335884915/
   expect(validators.isValidVariableValue('1210272429390012102724293900121027242939001210272429390012102724293900291714271413163034373839400029171427141316303437383940002917142714131630343738394000')).toBe(true); // https://scratch.mit.edu/projects/398782663/
   expect(validators.isValidVariableValue('47414048363737383938413738454036374100404438483900291412172222102337004200450045004500450044454240404500')).toBe(true); // https://scratch.mit.edu/projects/408252905/
-  expect(validators.isValidVariableValue('3.2959163851126096e+128')).toBe(true); // https://scratch.mit.edu/projects/408252905/
+  expect(validators.isValidVariableValue(3.2959163851126096e+128)).toBe(true); // https://scratch.mit.edu/projects/408252905/
 });

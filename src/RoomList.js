@@ -1,7 +1,6 @@
 const Room = require('./Room');
 const ConnectionError = require('./ConnectionError');
 const logger = require('./logger');
-const validators = require('./validators');
 
 /** Delay between janitor runs. */
 const JANITOR_INTERVAL = 1000 * 60;
@@ -58,11 +57,10 @@ class RoomList {
   /**
    * Create a new Room
    * @param {RoomID} id The room ID
-   * @param {{ [s: string]: string }} initialData The variables to create and their value
    * @returns {Room} A new room
    * @throws Will throw if there are too many rooms.
    */
-  create(id, initialData) {
+  create(id) {
     if (this.rooms.size >= this.maxRooms) {
       // TODO: it may be worthwhile to call janitor() and check again
       throw new ConnectionError(ConnectionError.Overloaded, 'Too many rooms');
@@ -71,32 +69,12 @@ class RoomList {
       throw new Error('Room already exists');
     }
     const room = new Room(id);
-    this.setRoomData(room, initialData);
     // It is important we update the room ID map at the end as setRoomData may throw.
     this.rooms.set(id, room);
     if (this.enableLogging) {
       logger.info('Created room: ' + id);
     }
     return room;
-  }
-
-  /**
-   * Set the data of a Room to that of a variable map.
-   * @private
-   * @param {Room} room The Room
-   * @param {*} data 
-   */
-  setRoomData(room, data) {
-    for (const variableName of Object.keys(data)) {
-      if (!validators.isValidVariableName(variableName)) {
-        throw new Error(`Invalid variable name for room ${room.id}: ${variableName}`);
-      }
-      let variableValue = data[variableName];
-      if (!validators.isValidVariableValue(variableValue)) {
-        variableValue = '0';
-      }
-      room.create(variableName, variableValue);
-    }
   }
 
   /**

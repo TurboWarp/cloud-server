@@ -4,15 +4,16 @@ const Client = require('./Client');
 const RoomList = require('./RoomList');
 const ConnectionError = require('./ConnectionError');
 const ConnectionManager = require('./ConnectionManager');
-const RateLimiter = require('./RateLimiter');
 const validators = require('./validators');
 const logger = require('./logger');
 const naughty = require('./naughty');
+const config = require('./config');
 
 const wss = new WebSocket.Server({
-  noServer: true,
-  clientTracking: false,
+  noServer: true, // we setup the server on our own
+  clientTracking: false, // we do our own tracking
   maxPayload: 1024 * 1024, // 1 MB should be plenty
+  perMessageDeflate: config.perMessageDeflate,
 });
 
 const rooms = new RoomList();
@@ -30,7 +31,7 @@ logger.info(`Naughty word detector has ${naughty.getTotalBlockedPhrases()} block
  */
 function isValidMessage(data) {
   // @ts-ignore
-  return !!data && typeof data === 'object' && typeof data.kind === 'string';
+  return !!data && typeof data === 'object' && typeof data.method === 'string';
 }
 
 /**
@@ -49,27 +50,25 @@ function parseMessage(data) {
 /**
  * Create a "set" message to send to clients to set a variable.
  * @param {string} name The name of the variable.
- * @param {string} value The variable's new value.
+ * @param {string|number} value The variable's new value.
  * @returns {string} The stringified JSON of the message.
  */
 function createSetMessage(name, value) {
   return JSON.stringify({
-    kind: 'set',
-    var: name,
+    method: 'set',
+    name: name,
     value: value,
   });
 }
 
 wss.on('connection', (ws, req) => {
   const client = new Client(ws, req);
-  const rateLimiter = new RateLimiter(100, 1000);
 
   connectionManager.handleConnect(client);
 
-  function performHandshake(roomId, username, variables) {
+  function performHandshake(roomId, username) {
     if (client.room) throw new ConnectionError(ConnectionError.Error, 'Already performed handshake');
     if (!validators.isValidRoomID(roomId)) throw new ConnectionError(ConnectionError.Error, 'Invalid room ID: ' + roomId);
-    if (!validators.isValidVariableMap(variables)) throw new ConnectionError(ConnectionError.Error, 'Invalid variable map');
     if (!validators.isValidUsername(username)) throw new ConnectionError(ConnectionError.Username, 'Invalid username: '  + username);
 
     client.username = username;
@@ -78,9 +77,6 @@ wss.on('connection', (ws, req) => {
       const room = rooms.get(roomId);
       if (!room.isUsernameAvailable(username, client)) {
         throw new ConnectionError(ConnectionError.Username, 'Username is unavailable: ' + username);
-      }
-      if (!room.matchesVariableList(Object.keys(variables))) {
-        throw new ConnectionError(ConnectionError.Incompatibility, 'Variable list does not match.');
       }
       client.setRoom(room);
 
@@ -91,12 +87,37 @@ wss.on('connection', (ws, req) => {
       room.getAllVariables().forEach((value, name) => {
         messages.push(createSetMessage(name, value));
       });
-      client.send(messages.join('\n'));
+      if (messages.length > 0) {
+        client.send(messages.join('\n'));
+      }
     } else {
-      client.setRoom(rooms.create(roomId, variables));
+      client.setRoom(rooms.create(roomId));
     }
 
     client.log('Joined room');
+  }
+
+  function performCreate(variable, value) {
+    performSet(variable, value);
+  }
+
+  function performDelete(variable) {
+    if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
+
+    client.room.delete(variable);
+  }
+
+  function performRename(oldName, newName) {
+    if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
+
+    if (!validators.isValidVariableValue(newName)) {
+      throw new Error(`Invalid variable name: ${newName}`);
+    }
+
+    // get throws if old name does not exist
+    const value = client.room.get(oldName);
+    client.room.delete(oldName);
+    client.room.set(newName, value);
   }
 
   function performSet(variable, value) {
@@ -104,10 +125,15 @@ wss.on('connection', (ws, req) => {
 
     if (!validators.isValidVariableValue(value)) {
       // silently ignore
+      logger.debug('Ignoring invalid value: ' + value);
       return;
     }
 
-    client.room.set(variable, value);
+    if (client.room.has(variable)) {
+      client.room.set(variable, value);
+    } else {
+      client.room.create(variable, value);
+    }
 
     // Generate the send message only when a client will actually hear it.
     const clients = client.room.getClients();
@@ -122,24 +148,32 @@ wss.on('connection', (ws, req) => {
   }
 
   function processMessage(data) {
-    if (rateLimiter.rateLimited()) {
-      throw new ConnectionError(ConnectionError.TryAgainLater, `Too many messages (last in period: ${rateLimiter.timeSinceLastOperationInPeriod()}ms ago}`);
-    }
-
     const message = parseMessage(data.toString());
-    const kind = message.kind;
+    const method = message.method;
 
-    switch (kind) {
+    switch (method) {
       case 'handshake':
-        performHandshake(message.id, message.username, message.variables);
+        performHandshake(message.project_id, message.user);
         break;
 
       case 'set':
-        performSet(message.var, message.value);
+        performSet(message.name, message.value);
+        break;
+
+      case 'create':
+        performCreate(message.name, message.value);
+        break;
+
+      case 'delete':
+        performDelete(message.name);
+        break;
+
+      case 'rename':
+        performRename(message.name, message.new_name);
         break;
 
       default:
-        throw new ConnectionError(ConnectionError.Error, 'Unknown message kind: ' + kind);
+        throw new ConnectionError(ConnectionError.Error, 'Unknown message method: ' + method);
     }
   }
 
@@ -168,9 +202,9 @@ wss.on('connection', (ws, req) => {
     client.close(ConnectionError.Error);
   });
 
-  ws.on('close', (code, reason) => {
+  ws.on('close', (code) => {
     connectionManager.handleDisconnect(client);
-    client.log(`Connection closed: code ${code} reason ${reason}`);
+    client.log(`Connection closed: code ${code}`);
     client.close(ConnectionError.Error);
   });
 
