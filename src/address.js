@@ -1,5 +1,4 @@
 const config = require('./config');
-const ipAnonymize = require('ip-anonymize')
 
 /**
  * Extract the value of the x-forwarded-for header.
@@ -17,15 +16,6 @@ function getForwardedFor(headers) {
 }
 
 /**
- * Anonymize an address by removing some of the bits.
- * @param {string} address The address to anonymize.
- * @returns {?string} Anonymized address.
- */
-function anonymizeAddress(address) {
-  return ipAnonymize(address, 16, 48);
-}
-
-/**
  * Get the remote IP address of a request.
  * Follows config values set in config.js.
  * @param {?import('http').IncomingMessage} req The incoming HTTP(S) request.
@@ -34,6 +24,10 @@ function anonymizeAddress(address) {
 function getAddress(req) {
   if (req === null) {
     return '(req missing)';
+  }
+
+  if (config.anonymizeAddresses) {
+    return '(anonymized)';
   }
 
   let address = req.socket.remoteAddress || '(remoteAddress missing)';
@@ -45,16 +39,8 @@ function getAddress(req) {
     }
   }
 
-  if (config.anonymizeAddresses) {
-    const anonymized = anonymizeAddress(address);
-    if (anonymized !== null) {
-      address = anonymized;
-    }
-  }
-
   return address;
 }
 
 module.exports.getForwardedFor = getForwardedFor;
 module.exports.getAddress = getAddress;
-module.exports.anonymizeAddress = anonymizeAddress;

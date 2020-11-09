@@ -11,7 +11,7 @@ module.exports = {
   // enable to read x-forwarded-for
   trustProxy: process.env.TRUST_PROXY === 'true',
 
-  // truncates some parts of IP addresses
+  // removes IP addresses from logs
   anonymizeAddresses: process.env.ANONYMIZE_ADDRESSES === 'true',
 
   // change this to an object to enable the WebSocket per-message deflate extension

@@ -41,7 +41,7 @@ On unix-like systems, port can also be a path to a unix socket. By default cloud
 
 If you use a reverse proxy, set the `trustProxy` property (or `TRUST_PROXY` environment variable) to `true` so that logs contain the user's IP address instead of your proxy's.
 
-Set `anonymizeAddresses` to `true` if you want IP addresses to be partially anonymized.
+Set `anonymizeAddresses` to `true` if you want IP addresses to be not be logged.
 
 Set `perMessageDeflate` to an object to enable "permessage-deflate", which uses compression to reduce the bandwidth of data transfers. This can lead to poor performance and catastrophic memory fragmentation on Linux (https://github.com/nodejs/node/issues/8871). See here for options: https://github.com/websockets/ws/blob/master/doc/ws.md#new-websocketserveroptions-callback (look for `perMessageDeflate`)
 
