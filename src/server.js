@@ -75,9 +75,6 @@ wss.on('connection', (ws, req) => {
 
     if (rooms.has(roomId)) {
       const room = rooms.get(roomId);
-      if (!room.isUsernameAvailable(username, client)) {
-        throw new ConnectionError(ConnectionError.Username, 'Username is unavailable: ' + username);
-      }
       client.setRoom(room);
 
       // Send the data of all the variables in the room to the client.

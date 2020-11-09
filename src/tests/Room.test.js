@@ -92,28 +92,6 @@ test('get', () => {
   expect(room.get('☁ foo')).toBe('1234');
 });
 
-test('isUsernameAvailable', () => {
-  const room = new Room('1234');
-
-  const newClient = (ip, username) => {
-    const client = new Client(null, null);
-    client.ip = ip;
-    client.username = username || '';
-    return client;
-  };
-
-  expect(room.isUsernameAvailable('abc', newClient('1.1.1.1'))).toBe(true);
-  expect(room.isUsernameAvailable('abc', newClient('8.8.8.8'))).toBe(true);
-  room.addClient(newClient('1.1.1.1', 'abc'));
-  expect(room.isUsernameAvailable('abc', newClient('1.1.1.1'))).toBe(true);
-  expect(room.isUsernameAvailable('abc', newClient('8.8.8.8'))).toBe(false);
-  expect(room.isUsernameAvailable('xyz', newClient('1.1.1.1'))).toBe(true);
-  expect(room.isUsernameAvailable('xyz', newClient('8.8.8.8'))).toBe(true);
-  room.addClient(newClient('8.8.8.8', 'xyz'));
-  expect(room.isUsernameAvailable('xyz', newClient('1.1.1.1'))).toBe(false);
-  expect(room.isUsernameAvailable('xyz', newClient('8.8.8.8'))).toBe(true);
-});
-
 test('maxClients', () => {
   const room = new Room('1234');
   room.maxClients = 10;
