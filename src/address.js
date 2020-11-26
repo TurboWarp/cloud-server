@@ -27,7 +27,7 @@ function getAddress(req) {
   }
 
   if (config.anonymizeAddresses) {
-    return '(anonymized)';
+    return '0.0.0.0';
   }
 
   let address = req.socket.remoteAddress || '(remoteAddress missing)';
