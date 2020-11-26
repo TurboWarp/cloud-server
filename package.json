@@ -15,7 +15,7 @@
     "serve-static": "^1.14.1",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.0",
-    "ws": "^7.3.1"
+    "ws": "^7.4.0"
   },
   "devDependencies": {
     "@types/finalhandler": "^1.1.0",
@@ -24,7 +24,7 @@
     "@types/serve-static": "^1.13.4",
     "@types/ws": "^7.2.6",
     "jest": "^26.2.2",
-    "typescript": "^4.0.3"
+    "typescript": "^4.1.2"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.1"
