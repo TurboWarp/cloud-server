@@ -18,5 +18,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "allowUnreachableCode": false,
-  }
+  },
+  "exclude": [
+    "doc/**"
+  ]
 }
