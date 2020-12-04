@@ -1,5 +1,6 @@
 const Room = require('./Room');
 const address = require('./address');
+const {parseUsername} = require('./username');
 const logger = require('./logger');
 
 class Client {
@@ -49,14 +50,14 @@ class Client {
    * @private
    */
   updateLogPrefix() {
-    this.prefix = '[' + this.ip;
+    this.logPrefix = '[' + this.ip;
     if (this.username !== '') {
-      this.prefix += ' "' + this.username + '"';
+      this.logPrefix += ' "' + this.username + '"';
     }
     if (this.room !== null) {
-      this.prefix += ' in ' + this.room.id;
+      this.logPrefix += ' in ' + this.room.id;
     }
-    this.prefix += ']';
+    this.logPrefix += ']';
   }
 
   /**
@@ -135,7 +136,7 @@ class Client {
    * @param {string} username The new username
    */
   setUsername(username) {
-    this.username = username;
+    this.username = parseUsername(username);
     this.updateLogPrefix();
   }
 
