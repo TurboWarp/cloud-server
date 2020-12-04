@@ -71,7 +71,7 @@ wss.on('connection', (ws, req) => {
     if (!validators.isValidRoomID(roomId)) throw new ConnectionError(ConnectionError.Error, 'Invalid room ID: ' + roomId);
     if (!validators.isValidUsername(username)) throw new ConnectionError(ConnectionError.Username, 'Invalid username: '  + username);
 
-    client.username = username;
+    client.setUsername(username);
 
     if (rooms.has(roomId)) {
       const room = rooms.get(roomId);

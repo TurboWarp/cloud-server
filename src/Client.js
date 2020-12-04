@@ -126,6 +126,14 @@ class Client {
   }
 
   /**
+   * Set the username of this client.
+   * @param {string} username The new username
+   */
+  setUsername(username) {
+    this.username = username;
+  }
+
+  /**
    * Send a ping message to this Client.
    */
   ping() {

@@ -14,6 +14,9 @@ module.exports = {
   // removes IP addresses from logs
   anonymizeAddresses: process.env.ANONYMIZE_ADDRESSES === 'true',
 
+  // anonymize generated usernames like "player123456"
+  anonymizeGeneratedUsernames: true,
+
   // change this to an object to enable the WebSocket per-message deflate extension
   perMessageDeflate: false,
 
