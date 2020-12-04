@@ -36,23 +36,27 @@ class Client {
      * Whether this client has responded to most recent ping request yet.
      */
     this.respondedToPing = true;
+    /**
+     * The prefix used in log messages.
+     * @private
+     */
+    this.logPrefix = '[]';
+    this.updateLogPrefix();
   }
 
   /**
-   * Get the prefix used in log messages.
+   * Update the log prefix of this client.
    * @private
-   * @returns {string}
    */
-  getLogPrefix() {
-    let prefix = '[' + this.ip;
+  updateLogPrefix() {
+    this.prefix = '[' + this.ip;
     if (this.username !== '') {
-      prefix += ' "' + this.username + '"';
+      this.prefix += ' "' + this.username + '"';
     }
     if (this.room !== null) {
-      prefix += ' in ' + this.room.id;
+      this.prefix += ' in ' + this.room.id;
     }
-    prefix += ']';
-    return prefix;
+    this.prefix += ']';
   }
 
   /**
@@ -60,7 +64,7 @@ class Client {
    * @param {string} message
    */
   log(message) {
-    logger.info(this.getLogPrefix() + ' ' + message);
+    logger.info(this.logPrefix + ' ' + message);
   }
 
   /**
@@ -68,7 +72,7 @@ class Client {
    * @param {string} message
    */
   warn(message) {
-    logger.warn(this.getLogPrefix() + ' ' + message);
+    logger.warn(this.logPrefix + ' ' + message);
   }
 
   /**
@@ -76,7 +80,7 @@ class Client {
    * @param {string} message
    */
   error(message) {
-    logger.error(this.getLogPrefix() + ' ' + message);
+    logger.error(this.logPrefix + ' ' + message);
   }
 
   /**
@@ -123,6 +127,7 @@ class Client {
     }
     room.addClient(this);
     this.room = room;
+    this.updateLogPrefix();
   }
 
   /**
@@ -131,6 +136,7 @@ class Client {
    */
   setUsername(username) {
     this.username = username;
+    this.updateLogPrefix();
   }
 
   /**
