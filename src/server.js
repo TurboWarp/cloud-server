@@ -150,7 +150,7 @@ wss.on('connection', (ws, req) => {
 
     switch (method) {
       case 'handshake':
-        performHandshake(message.project_id, message.user);
+        performHandshake('' + message.project_id, message.user);
         break;
 
       case 'set':
