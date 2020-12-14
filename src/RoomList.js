@@ -6,6 +6,8 @@ const logger = require('./logger');
 const JANITOR_INTERVAL = 1000 * 60;
 /** Time a room must be empty for before it may be removed by the janitor. */
 const JANITOR_THRESHOLD = 1000 * 60 * 60;
+/** Maximum amount of rooms that can exist at once. Empty rooms are included in this limit. */
+const MAX_ROOMS = 1024;
 
 /**
  * @typedef {import('./Room').RoomID} RoomID
@@ -23,7 +25,7 @@ class RoomList {
      * Maximum amount of rooms that can exist at once.
      * @type {number}
      */
-    this.maxRooms = 512;
+    this.maxRooms = MAX_ROOMS;
     /** Enable or disable logging of events to the console. */
     this.enableLogging = false;
     this.janitor = this.janitor.bind(this);
