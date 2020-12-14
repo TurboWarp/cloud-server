@@ -5,7 +5,7 @@ const logger = require('./logger');
 /** Delay between janitor runs. */
 const JANITOR_INTERVAL = 1000 * 60;
 /** Time a room must be empty for before it may be removed by the janitor. */
-const JANITOR_THRESHOLD = 1000 * 60 * 10;
+const JANITOR_THRESHOLD = 1000 * 60 * 60;
 
 /**
  * @typedef {import('./Room').RoomID} RoomID
