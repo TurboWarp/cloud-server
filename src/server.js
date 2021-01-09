@@ -91,7 +91,8 @@ wss.on('connection', (ws, req) => {
       client.setRoom(rooms.create(roomId));
     }
 
-    client.log('Joined room');
+    // @ts-expect-error
+    client.log(`Joined room (peers: ${client.room.getClients().length})`);
   }
 
   function performCreate(variable, value) {
