@@ -233,6 +233,6 @@ wss.on('close', () => {
   rooms.destroy();
 });
 
-setInterval(sendBuffered, 1000 / 1000);
+setInterval(sendBuffered, 1000 / 60);
 
 module.exports = wss;
