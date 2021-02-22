@@ -49,7 +49,6 @@ test('isValidUsername', () => {
   expect(validators.isValidUsername('KidArachnid')).toBe(true);
   expect(validators.isValidUsername('--FlamingGames--')).toBe(true);
   expect(validators.isValidUsername('Executec')).toBe(true);
-  expect(validators.isValidUsername('scratchdinoyou')).toBe(true);
   expect(validators.isValidUsername('Jethrochannz')).toBe(true);
   expect(validators.isValidUsername('DaBaconBossOfBosses')).toBe(true);
   expect(validators.isValidUsername('or2017')).toBe(true);
