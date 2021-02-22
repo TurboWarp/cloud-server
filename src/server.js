@@ -61,6 +61,22 @@ function createSetMessage(name, value) {
   });
 }
 
+const buffered = new Map();
+function sendBuffered() {
+  for (const [client, messages] of buffered.entries()) {
+    client.send(messages.join('\n'));
+  }
+  buffered.clear();
+}
+
+function sendToClient(client, message) {
+  if (buffered.has(client)) {
+    buffered.get(client).push(message);
+  } else {
+    buffered.set(client, [message]);
+  }
+}
+
 wss.on('connection', (ws, req) => {
   const client = new Client(ws, req);
 
@@ -139,7 +155,7 @@ wss.on('connection', (ws, req) => {
       const message = createSetMessage(variable, value);
       for (const otherClient of clients) {
         if (client !== otherClient) {
-          otherClient.send(message);
+          sendToClient(otherClient, message);
         }
       }
     }
@@ -216,5 +232,7 @@ wss.on('close', () => {
   connectionManager.stop();
   rooms.destroy();
 });
+
+setInterval(sendBuffered, 1000 / 1000);
 
 module.exports = wss;
