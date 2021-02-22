@@ -15,7 +15,6 @@ test('isValidUsername', () => {
   expect(validators.isValidUsername('e'.repeat(20))).toBe(true);
   expect(validators.isValidUsername('e'.repeat(21))).toBe(false);
   expect(validators.isValidUsername('ScratchCat')).toBe(false);
-  expect(validators.isValidUsername('fuck')).toBe(false);
   expect(validators.isValidUsername(null)).toBe(false);
   expect(validators.isValidUsername(undefined)).toBe(false);
   expect(validators.isValidUsername(true)).toBe(false);
