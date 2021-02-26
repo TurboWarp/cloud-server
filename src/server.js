@@ -68,8 +68,14 @@ wss.on('connection', (ws, req) => {
 
   function performHandshake(roomId, username) {
     if (client.room) throw new ConnectionError(ConnectionError.Error, 'Already performed handshake');
-    if (!validators.isValidRoomID(roomId)) throw new ConnectionError(ConnectionError.Error, 'Invalid room ID: ' + roomId);
-    if (!validators.isValidUsername(username)) throw new ConnectionError(ConnectionError.Username, 'Invalid username: '  + username);
+    if (!validators.isValidRoomID(roomId)) {
+      const roomToLog = `${roomId}`.substr(0, 100);
+      throw new ConnectionError(ConnectionError.Error, 'Invalid room ID: ' + roomToLog);
+    }
+    if (!validators.isValidUsername(username)) {
+      const usernameToLog = `${username}`.substr(0, 100);
+      throw new ConnectionError(ConnectionError.Username, 'Invalid username: '  + usernameToLog);
+    }
 
     client.setUsername(username);
 
