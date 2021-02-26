@@ -20,7 +20,7 @@
   "devDependencies": {
     "@types/finalhandler": "^1.1.0",
     "@types/jest": "^26.0.19",
-    "@types/node": "^14.14.14",
+    "@types/node": "^14.14.31",
     "@types/serve-static": "^1.13.8",
     "@types/ws": "^7.4.0",
     "jest": "^26.6.3",
