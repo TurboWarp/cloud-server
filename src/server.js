@@ -63,10 +63,12 @@ function createSetMessage(name, value) {
 
 const buffered = new Map();
 function sendBuffered() {
-  for (const [client, messages] of buffered.entries()) {
-    client.send(messages.join('\n'));
+  if (buffered.size > 0) {
+    for (const [client, messages] of buffered.entries()) {
+      client.send(messages.join('\n'));
+    }
+    buffered.clear();
   }
-  buffered.clear();
 }
 
 function sendToClient(client, message) {
