@@ -72,11 +72,19 @@ function sendBuffered() {
 }
 
 function sendToClient(client, message) {
-  if (buffered.has(client)) {
-    buffered.get(client).push(message);
+  if (config.bufferSends) {
+    if (buffered.has(client)) {
+      buffered.get(client).push(message);
+    } else {
+      buffered.set(client, [message]);
+    }
   } else {
-    buffered.set(client, [message]);
+    client.send(message);
   }
+}
+
+if (config.bufferSends) {
+  setInterval(sendBuffered, 1000 / config.bufferSends);
 }
 
 wss.on('connection', (ws, req) => {
@@ -234,7 +242,5 @@ wss.on('close', () => {
   connectionManager.stop();
   rooms.destroy();
 });
-
-setInterval(sendBuffered, 1000 / 60);
 
 module.exports = wss;

@@ -20,6 +20,10 @@ module.exports = {
   // change this to an object to enable the WebSocket per-message deflate extension
   perMessageDeflate: false,
 
+  // If set to a non-zero number, sends will be buffered to this many per second
+  // This can significantly improve performance
+  bufferSends: 60,
+
   logging: {
     console: true,
 
