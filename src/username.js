@@ -1,6 +1,6 @@
 const config = require('./config');
 
-const ANONYMIZE = /^player\d{2,7}$/;
+const ANONYMIZE = /^player\d{2,7}$/i;
 
 /**
  * Anonymize a generated username, or return it unmodified
