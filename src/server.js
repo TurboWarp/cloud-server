@@ -92,16 +92,18 @@ wss.on('connection', (ws, req) => {
 
   connectionManager.handleConnect(client);
 
-  function performHandshake(roomId, username) {
+  async function performHandshake(roomId, username) {
     if (client.room) throw new ConnectionError(ConnectionError.Error, 'Already performed handshake');
     if (!validators.isValidRoomID(roomId)) {
       const roomToLog = `${roomId}`.substr(0, 100);
       throw new ConnectionError(ConnectionError.Error, 'Invalid room ID: ' + roomToLog);
     }
-    if (!validators.isValidUsername(username)) {
+    if (!await validators.isValidUsername(username)) {
       const usernameToLog = `${username}`.substr(0, 100);
       throw new ConnectionError(ConnectionError.Username, 'Invalid username: '  + usernameToLog);
     }
+    // Check again that client is not in a room as username validation is async (possible race condition)
+    if (client.room) throw new ConnectionError(ConnectionError.Error, 'Already performed handshake');
 
     client.setUsername(username);
 
@@ -177,13 +179,13 @@ wss.on('connection', (ws, req) => {
     }
   }
 
-  function processMessage(data) {
+  async function processMessage(data) {
     const message = parseMessage(data.toString());
     const method = message.method;
 
     switch (method) {
       case 'handshake':
-        performHandshake('' + message.project_id, message.user);
+        await performHandshake('' + message.project_id, message.user)
         break;
 
       case 'set':
@@ -209,14 +211,14 @@ wss.on('connection', (ws, req) => {
 
   client.log('Connection opened');
 
-  ws.on('message', (data) => {
+  ws.on('message', async (data) => {
     // Ignore data after the socket is closed
     if (ws.readyState !== ws.OPEN) {
       return;
     }
 
     try {
-      processMessage(data);
+      await processMessage(data);
     } catch (error) {
       client.error('Error handling connection: ' + error);
       if (error instanceof ConnectionError) {
