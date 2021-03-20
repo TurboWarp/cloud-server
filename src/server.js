@@ -5,6 +5,7 @@ const RoomList = require('./RoomList');
 const ConnectionError = require('./ConnectionError');
 const ConnectionManager = require('./ConnectionManager');
 const validators = require('./validators');
+const usernameUtils = require('./username');
 const logger = require('./logger');
 const naughty = require('./naughty');
 const config = require('./config');
@@ -98,7 +99,7 @@ wss.on('connection', (ws, req) => {
       const roomToLog = `${roomId}`.substr(0, 100);
       throw new ConnectionError(ConnectionError.Error, 'Invalid room ID: ' + roomToLog);
     }
-    if (!await validators.isValidUsername(username)) {
+    if (!await usernameUtils.isValidUsername(username)) {
       const usernameToLog = `${username}`.substr(0, 100);
       throw new ConnectionError(ConnectionError.Username, 'Invalid username: '  + usernameToLog);
     }
