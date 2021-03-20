@@ -2,6 +2,7 @@ const naughty = require('./naughty');
 const fetch = require('node-fetch');
 const logger = require('./logger');
 const config = require('./config');
+const https = require('https');
 
 /** Maximum length of usernames, inclusive. */
 const MAX_LENGTH = 20;
@@ -35,6 +36,10 @@ function isGenerated(username) {
   return ANONYMIZE.test(username);
 }
 
+const agent = new https.Agent({
+  keepAlive: true
+});
+
 /**
  * @param {unknown} username
  * @returns {Promise<boolean>}
@@ -55,7 +60,9 @@ function isValidUsername(username) {
   return fetch(API.replace('$username', username), {
     headers: {
       referer: 'username-validation.clouddata.turbowarp.org'
-    }
+    },
+    timeout: 1000 * 10,
+    agent
   })
     .then((res) => {
       if (res.ok) {
