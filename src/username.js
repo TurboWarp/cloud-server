@@ -14,6 +14,7 @@ const VALID_REGEX = /^[a-z0-9_-]+$/i;
 const API = 'https://trampoline.turbowarp.org/proxy/users/$username';
 /** Regex of usernames to anonymize. */
 const ANONYMIZE = /^player\d{1,9}$/i;
+const MIN_ACCOUNT_AGE = 1000 * 60 * 60 * 24;
 
 /**
  * Anonymize a generated username, or return it unmodified
@@ -66,12 +67,17 @@ function isValidUsername(username) {
   })
     .then((res) => {
       if (res.ok) {
-        return true;
+        return res.json();
       }
       if (res.status === 404) {
         return false;
       }
       throw new Error(`Unexpected status code: ${res.status}`);
+    })
+    .then((data) => {
+      const joined = new Date(data.history.joined);
+      const age = Date.now() - joined.valueOf();
+      return age >= MIN_ACCOUNT_AGE;
     })
     .catch((err) => {
       logger.error(err);
