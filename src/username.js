@@ -67,17 +67,17 @@ function isValidUsername(username) {
   })
     .then((res) => {
       if (res.ok) {
-        return res.json();
+        return res.json()
+          .then((data) => {
+            const joined = new Date(data.history.joined);
+            const age = Date.now() - joined.valueOf();
+            return age >= MIN_ACCOUNT_AGE;
+          });
       }
       if (res.status === 404) {
         return false;
       }
       throw new Error(`Unexpected status code: ${res.status}`);
-    })
-    .then((data) => {
-      const joined = new Date(data.history.joined);
-      const age = Date.now() - joined.valueOf();
-      return age >= MIN_ACCOUNT_AGE;
     })
     .catch((err) => {
       logger.error(err);
