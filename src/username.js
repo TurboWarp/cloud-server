@@ -58,6 +58,7 @@ function isValidUsername(username) {
   if (isGenerated(username)) {
     return Promise.resolve(true);
   }
+  const start = Date.now();
   fetch(API.replace('$username', username), {
     headers: {
       referer: 'username-validation.clouddata.turbowarp.org'
@@ -84,7 +85,9 @@ function isValidUsername(username) {
       return true;
     })
     .then((valid) => {
-      logger.info(`username-validate-staging: ${username} is ${valid ? 'valid' : 'invalid'}`);
+      const end = Date.now();
+      const time = end - start;
+      logger.info(`username-validate-staging: ${username} is ${valid ? 'valid' : 'invalid'} (${Math.round(time)}ms)`);
     });
   return Promise.resolve(true);
 };
