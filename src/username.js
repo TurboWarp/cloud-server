@@ -59,7 +59,7 @@ function isValidUsername(username) {
     return Promise.resolve(true);
   }
   const start = Date.now();
-  fetch(API.replace('$username', username), {
+  return fetch(API.replace('$username', username), {
     headers: {
       referer: 'username-validation.clouddata.turbowarp.org'
     },
@@ -87,9 +87,9 @@ function isValidUsername(username) {
     .then((valid) => {
       const end = Date.now();
       const time = end - start;
-      logger.info(`username-validate-staging: ${username} is ${valid ? 'valid' : 'invalid'} (${Math.round(time)}ms)`);
+      logger.info(`username-validate-prod: ${username} is ${valid ? 'valid' : 'invalid'} (${Math.round(time)}ms)`);
+      return valid;
     });
-  return Promise.resolve(true);
 };
 
 module.exports.parseUsername = parseUsername;
