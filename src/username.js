@@ -75,7 +75,7 @@ function isValidUsername(username) {
             return age >= MIN_ACCOUNT_AGE;
           });
       }
-      if (res.status === 404) {
+      if (res.status === 404 || res.status === 400) {
         return false;
       }
       throw new Error(`Unexpected status code: ${res.status}`);
