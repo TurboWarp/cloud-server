@@ -103,8 +103,9 @@ wss.on('connection', (ws, req) => {
       const usernameToLog = `${username}`.substr(0, 100);
       throw new ConnectionError(ConnectionError.Username, 'Invalid username: '  + usernameToLog);
     }
-    // Check again that client is not in a room as username validation is async (possible race condition)
+    // Check race conditions
     if (client.room) throw new ConnectionError(ConnectionError.Error, 'Already performed handshake');
+    if (!client.ws) throw new ConnectionError(ConnectionError.Error, 'Connection already closed');
 
     client.setUsername(username);
 
