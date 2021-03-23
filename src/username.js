@@ -15,6 +15,7 @@ const API = 'https://trampoline.turbowarp.org/proxy/users/$username';
 /** Regex of usernames to anonymize. */
 const ANONYMIZE = /^player\d{1,9}$/i;
 const MIN_ACCOUNT_AGE = 1000 * 60 * 60 * 24;
+const REFERER = 'https://username-validation.clouddata.turbowarp.org/';
 
 /**
  * Anonymize a generated username, or return it unmodified
@@ -61,7 +62,7 @@ function isValidUsername(username) {
   const start = Date.now();
   return fetch(API.replace('$username', username), {
     headers: {
-      referer: 'username-validation.clouddata.turbowarp.org'
+      referer: REFERER
     },
     timeout: 1000 * 10,
     agent
