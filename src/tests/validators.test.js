@@ -191,7 +191,7 @@ test('isValidVariableValue', () => {
     expect(validators.isValidVariableValue('-' + '1'.repeat(i))).toBe(true);
   }
   // too long
-  expect(validators.isValidVariableValue('1'.repeat(100000))).toBe(false);
+  expect(validators.isValidVariableValue('1'.repeat(1000000))).toBe(false);
   // ascii neighbors to 0, 9
   expect(validators.isValidVariableValue('/')).toBe(false);
   expect(validators.isValidVariableValue(':')).toBe(false);
