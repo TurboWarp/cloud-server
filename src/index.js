@@ -10,6 +10,10 @@ const wss = require('./server');
 // We serve static files over HTTP
 const serve = serveStatic('public');
 const server = http.createServer(function handler(req, res) {
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Permissions-Policy', 'interest-cohort=()');
   // @ts-ignore
   serve(req, res, finalhandler(req, res));
 });
