@@ -6,7 +6,7 @@ const VARIABLE_NAME_CLOUD_PREFIX = '☁ ';
 const VARIABLE_NAME_MAX_LENGTH = 1024;
 
 /** The maximum length of a variable's value. */
-const VALUE_MAX_LENGTH = 10000;
+const VALUE_MAX_LENGTH = 100000;
 
 /** Maximum length of usernames, inclusive. */
 const USERNAME_MAX_LENGTH = 20;
