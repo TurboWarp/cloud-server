@@ -1,6 +1,8 @@
 /*
 Example client for Node.js
 
+To run in a WebBrowser, remove "const WebSocket = require('ws');" as no dependencies are required.
+
 Dependencies:
 npm i ws
 
