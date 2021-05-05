@@ -1,8 +1,6 @@
 /*
 Example client for Node.js
 
-To run in a WebBrowser, remove "const WebSocket = require('ws');" as no dependencies are required.
-
 Dependencies:
 npm i ws
 
@@ -54,6 +52,7 @@ ws.onmessage = (event) => {
   for (const message of event.data.split("\n")) {
     const obj = JSON.parse(message);
     if (obj.method === "set") {
+      variables[obj.name] = obj.value;
       console.log(`Server set variable: ${obj.name} = ${obj.value}`);
     }
   }
