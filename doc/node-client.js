@@ -37,13 +37,16 @@ ws.onopen = () => {
     user: "ExampleUsername"
   }));
 
-  // To set a variable:
-  // You must do this AFTER handshake
-  setVariable("☁ variable", "1");
+  // Due to a temporary backend bug, wait a little bit before sending the first message.
+  setTimeout(() => {
+    // To set a variable:
+    // You must do this AFTER handshake
+    setVariable("☁ variable", "1");
 
-  // Use setInterval to constantly update a variable
-  setInterval(() => {
-    setVariable("☁ variable", Math.random());
+    // Use setInterval to constantly update a variable
+    setInterval(() => {
+      setVariable("☁ variable", Math.random());
+    }, 1000);
   }, 1000);
 };
 
