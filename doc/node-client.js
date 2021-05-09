@@ -37,7 +37,7 @@ ws.onopen = () => {
     user: "ExampleUsername"
   }));
 
-  // Due to a temporary backend bug, wait a little bit before sending the first message.
+  // Due to a temporary backend bug, wait a little bit before setting a variable (otherwise the connnection gets closed abruptly)
   setTimeout(() => {
     // To set a variable:
     // You must do this AFTER handshake
