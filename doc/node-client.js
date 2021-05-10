@@ -37,13 +37,16 @@ ws.onopen = () => {
     user: "ExampleUsername"
   }));
 
-  // To set a variable:
-  // You must do this AFTER handshake
-  setVariable("☁ variable", "1");
+  // Due to a temporary backend bug, wait a little bit before setting a variable (otherwise the connnection gets closed abruptly)
+  setTimeout(() => {
+    // To set a variable:
+    // You must do this AFTER handshake
+    setVariable("☁ variable", "1");
 
-  // Use setInterval to constantly update a variable
-  setInterval(() => {
-    setVariable("☁ variable", Math.random());
+    // Use setInterval to constantly update a variable
+    setInterval(() => {
+      setVariable("☁ variable", Math.random());
+    }, 1000);
   }, 1000);
 };
 
@@ -52,6 +55,7 @@ ws.onmessage = (event) => {
   for (const message of event.data.split("\n")) {
     const obj = JSON.parse(message);
     if (obj.method === "set") {
+      variables[obj.name] = obj.value;
       console.log(`Server set variable: ${obj.name} = ${obj.value}`);
     }
   }
