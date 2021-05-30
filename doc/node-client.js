@@ -10,7 +10,7 @@ Use getVariable("☁ variable") to read variables.
 
 const WebSocket = require('ws');
 
-const ws = new WebSocket("wss://clouddata.turbowarp.org");
+const ws = new WebSocket("ws://localhost:9080");
 const variables = {};
 
 function setVariable(name, value) {
@@ -37,16 +37,13 @@ ws.onopen = () => {
     user: "ExampleUsername"
   }));
 
-  // Due to a temporary backend bug, wait a little bit before setting a variable (otherwise the connnection gets closed abruptly)
-  setTimeout(() => {
-    // To set a variable:
-    // You must do this AFTER handshake
-    setVariable("☁ variable", "1");
+  // To set a variable:
+  // You must do this AFTER handshake
+  setVariable("☁ variable", "1");
 
-    // Use setInterval to constantly update a variable
-    setInterval(() => {
-      setVariable("☁ variable", Math.random());
-    }, 1000);
+  // Use setInterval to constantly update a variable
+  setInterval(() => {
+    setVariable("☁ variable", Math.random());
   }, 1000);
 };
 
