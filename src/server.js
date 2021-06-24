@@ -108,6 +108,10 @@ wss.on('connection', (ws, req) => {
       const usernameToLog = `${username}`.substr(0, 100);
       throw new ConnectionError(ConnectionError.Username, 'Invalid username: '  + usernameToLog);
     }
+    if (!client.ws) {
+      // Connection closed while validating username
+      return;
+    }
 
     client.setUsername(username);
 
