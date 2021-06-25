@@ -11,8 +11,6 @@ test('create', () => {
   expect(room1).toBeInstanceOf(Room);
   expect(room2).toBeInstanceOf(Room);
   expect(room1).not.toBe(room2);
-  expect(() => roomList.create('1')).toThrow();
-  expect(() => roomList.create('2')).toThrow();
 });
 
 test('has', () => {
@@ -58,11 +56,36 @@ test('remove', () => {
   expect(roomList.has('2')).toBe(false);
 });
 
-test('maxRooms', () => {
+test('maxProjects', () => {
   const roomList = new RoomList();
-  roomList.maxRooms = 10;
-  for (var i = 0; i < roomList.maxRooms; i++) {
+  roomList.maxProjects = 10;
+  for (var i = 0; i < roomList.maxProjects; i++) {
     roomList.create(i.toString());
   }
-  expect(() => roomList.create('10000')).toThrow();
+  expect(() => roomList.create('10000')).toThrow('Too many');
+});
+
+test('rollover', () => {
+  const roomList = new RoomList();
+  const one = roomList.create('1');
+  one.maxClients = 3;
+  one.addClient(new Client(null, null));
+  expect(roomList.get('1')).toBe(one);
+  expect(roomList.has('1')).toBe(true);
+  one.addClient(new Client(null, null));
+  expect(roomList.get('1')).toBe(one);
+  expect(roomList.has('1')).toBe(true);
+  one.addClient(new Client(null, null));
+  expect(() => roomList.get('1')).toThrow();
+  expect(roomList.has('1')).toBe(false);
+  const two = roomList.create('1');
+  expect(one).not.toBe(two);
+});
+
+test('maxRoomsPerProject', () => {
+  const roomList = new RoomList();
+  for (let i = 0; i < roomList.maxRoomsPerProject; i++) {
+    roomList.create('1');
+  }
+  expect(() => roomList.create('1')).toThrow('Too many');
 });

@@ -45,7 +45,7 @@ class Room {
     /**
      * Maximum number of clients that can be connected to this room.
      */
-    this.maxClients = 10;
+    this.maxClients = 4;
   }
 
   isFull() {

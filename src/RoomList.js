@@ -7,7 +7,8 @@ const JANITOR_INTERVAL = 1000 * 60;
 /** Time a room must be empty for before it may be removed by the janitor. */
 const JANITOR_THRESHOLD = 1000 * 60 * 60;
 /** Maximum amount of rooms that can exist at once. Empty rooms are included in this limit. */
-const MAX_ROOMS = 1024;
+const MAX_PROJECTS = 1024;
+const MAX_ROOMS_PER_PROJECT = 100;
 
 /**
  * @typedef {import('./Room').RoomID} RoomID
@@ -17,15 +18,16 @@ class RoomList {
   constructor() {
     /**
      * Map of RoomID to the Room with that ID.
-     * @type {Map<RoomID, Room>}
+     * @type {Map<RoomID, Room[]>}
      * @private
      */
     this.rooms = new Map();
     /**
-     * Maximum amount of rooms that can exist at once.
+     * Maximum amount of projects that can exist at once.
      * @type {number}
      */
-    this.maxRooms = MAX_ROOMS;
+    this.maxProjects = MAX_PROJECTS;
+    this.maxRoomsPerProject = MAX_ROOMS_PER_PROJECT;
     /** Enable or disable logging of events to the console. */
     this.enableLogging = false;
     this.janitor = this.janitor.bind(this);
@@ -39,7 +41,8 @@ class RoomList {
    * @returns {boolean} Whether the room exists
    */
   has(id) {
-    return this.rooms.has(id);
+    // @ts-ignore
+    return this.rooms.has(id) && this.rooms.get(id).some((i) => !i.isFull());
   }
 
   /**
@@ -49,11 +52,15 @@ class RoomList {
    * @throws Will throw if room does not exist
    */
   get(id) {
-    const room = this.rooms.get(id);
-    if (!room) {
+    const rooms = this.rooms.get(id);
+    if (!rooms) {
       throw new Error('Room does not exist');
     }
-    return room;
+    const room = rooms.find((i) => !i.isFull());
+    if (room) {
+      return room;
+    }
+    throw new Error('All rooms are full');
   }
 
   /**
@@ -63,16 +70,19 @@ class RoomList {
    * @throws Will throw if there are too many rooms.
    */
   create(id) {
-    if (this.rooms.size >= this.maxRooms) {
+    if (this.rooms.size >= this.maxProjects) {
       // TODO: it may be worthwhile to call janitor() and check again
-      throw new ConnectionError(ConnectionError.Overloaded, 'Too many rooms');
+      throw new ConnectionError(ConnectionError.Overloaded, 'Too many projects');
     }
-    if (this.has(id)) {
-      throw new Error('Room already exists');
+    const existingRooms = this.rooms.get(id) || [];
+    if (existingRooms.length === 0) {
+      this.rooms.set(id, existingRooms);
     }
-    const room = new Room(id);
-    // It is important we update the room ID map at the end as setRoomData may throw.
-    this.rooms.set(id, room);
+    if (existingRooms.length >= this.maxRoomsPerProject) {
+      throw new ConnectionError(ConnectionError.Overloaded, 'Too many rooms for this project');
+    }
+    const room = new Room(`${id}{${existingRooms.length}}`);
+    existingRooms.push(room);
     if (this.enableLogging) {
       logger.info('Created room: ' + id);
     }
@@ -85,9 +95,12 @@ class RoomList {
    * @throws Will throw if the room does not exist, or if the room has clients connected.
    */
   remove(id) {
-    const room = this.get(id);
-    if (room.getClients().length > 0) {
-      throw new Error('Clients are connected to this room');
+    const rooms = this.rooms.get(id);
+    if (!rooms) {
+      throw new Error('Project does not exist');
+    }
+    if (rooms.some((i) => i.getClients().length !== 0)) {
+      throw new Error('Project still has users');
     }
     this.rooms.delete(id);
     if (this.enableLogging) {
@@ -105,11 +118,10 @@ class RoomList {
     // so we'll collect the ids to remove first then remove them after.
     /** @type {RoomID[]} */
     const idsToRemove = [];
-    for (const [id, room] of this.rooms.entries()) {
-      if (room.getClients().length === 0) {
-        if (room.lastDisconnectTime < removalThreshold) {
-          idsToRemove.push(id);
-        }
+    for (const [id, rooms] of this.rooms.entries()) {
+      const allEmpty = rooms.every((i) => i.getClients().length === 0 && i.lastDisconnectTime < removalThreshold);
+      if (allEmpty) {
+        idsToRemove.push(id);
       }
     }
     for (const id of idsToRemove) {
