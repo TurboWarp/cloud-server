@@ -96,7 +96,9 @@ test('maxClients', () => {
   const room = new Room('1234');
   room.maxClients = 10;
   for (var i = 0; i < room.maxClients; i++) {
+    expect(room.isFull()).toBe(false);
     room.addClient(new Client(null, null));
   }
+  expect(room.isFull()).toBe(true);
   expect(() => room.addClient(new Client(null, null))).toThrow();
 });

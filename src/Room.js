@@ -45,7 +45,11 @@ class Room {
     /**
      * Maximum number of clients that can be connected to this room.
      */
-    this.maxClients = 128;
+    this.maxClients = 10;
+  }
+
+  isFull() {
+    return this.clients.length >= this.maxClients;
   }
 
   /**
@@ -57,7 +61,7 @@ class Room {
     if (this.clients.includes(client)) {
       throw new Error('Client is already added to this Room.');
     }
-    if (this.clients.length >= this.maxClients) {
+    if (this.isFull()) {
       throw new Error('Too many clients are connected to this room.');
     }
     this.clients.push(client);
