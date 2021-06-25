@@ -19,12 +19,6 @@ test('isValidUsername', async () => {
   expect(await username.isValidUsername(' griffpatch')).toBe(false);
   expect(await username.isValidUsername('abcdé')).toBe(false);
   expect(await username.isValidUsername('')).toBe(false);
-  expect(await username.isValidUsername('e')).toBe(true);
-  expect(await username.isValidUsername('ee')).toBe(true);
-  expect(await username.isValidUsername('eee')).toBe(true);
-  expect(await username.isValidUsername('e'.repeat(19))).toBe(true);
-  expect(await username.isValidUsername('e'.repeat(20))).toBe(true);
-  expect(await username.isValidUsername('e'.repeat(21))).toBe(false);
   expect(await username.isValidUsername('ScratchCat')).toBe(false);
   expect(await username.isValidUsername(null)).toBe(false);
   expect(await username.isValidUsername(undefined)).toBe(false);
