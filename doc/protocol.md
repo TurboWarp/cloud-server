@@ -113,4 +113,7 @@ Multiple set messages may be sent in one message where each message is separated
 
 4003  Overloaded
   When the server or room is full
+
+4004  Project Unavailable
+  When the supplied project ID is syntatically valid but unavailable for some reason.
 ```
