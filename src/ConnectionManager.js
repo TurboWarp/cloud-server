@@ -44,6 +44,9 @@ class ConnectionManager {
    * @returns {boolean}
    */
   isConnectionDead(client) {
+    if (!client.ws) {
+      return true;
+    }
     if (!client.respondedToPing) {
       // Clients that have not responded to the most recent ping are considered dead.
       return true;
