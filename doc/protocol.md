@@ -114,6 +114,9 @@ Multiple set messages may be sent in one message where each message is separated
 4003  Overloaded
   When the server or room is full
 
-4004  Closed to protect your security
+4004  Project Unavailable
+  When the supplied project ID is syntatically valid but unavailable for some reason.
+
+4005  Closed to protect your security
   When the client does something that compromises its security and the server closes the connection to force the client to fix its code.
 ```

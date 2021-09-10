@@ -94,7 +94,7 @@ wss.on('connection', (ws, req) => {
     logger.info('A connection was received and closed for security reasons.');
     // Sending an invalid message to the client should hopefully trigger a warning somewhere for them to see.
     ws.send('This connection is being closed to protect your security. The library you are using is putting your Scratch account at risk by sending us your login token for no reason. Please contact the author of that library and ask them to fix their code.');
-    ws.close(4004);
+    ws.close(4005);
     return;
   }
 
