@@ -89,6 +89,16 @@ if (config.bufferSends) {
 }
 
 wss.on('connection', (ws, req) => {
+  // We know of at least one library that sends Scratch session tokens to us for no reason.
+  // As this is putting accounts at unnecessary risk, refuse to accept the connection until they fix their code.
+  if (req.headers.cookie && req.headers.cookie.includes('scratchsessionsid=')) {
+    logger.info('A connection was received and closed for security reasons.');
+    // Sending an invalid message to the client should hopefully trigger a warning somewhere for them to see.
+    ws.send('This connection is being closed to protect your security. The library you are using is putting your Scratch account at risk by sending us your login token for no reason. Please contact the author of that library and ask them to fix their code.');
+    ws.close(4005);
+    return;
+  }
+
   const client = new Client(ws, req);
 
   let isHandshaking = false;
