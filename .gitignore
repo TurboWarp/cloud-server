@@ -1,5 +1,7 @@
 node_modules
 # Private filter list
 private.filter
+# Blocked project IDs
+filter.txt
 # Logs
 logs

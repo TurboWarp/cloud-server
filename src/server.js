@@ -6,6 +6,7 @@ const ConnectionError = require('./ConnectionError');
 const ConnectionManager = require('./ConnectionManager');
 const validators = require('./validators');
 const usernameUtils = require('./username');
+const isProjectBlocked = require('./room-filters');
 const logger = require('./logger');
 const naughty = require('./naughty');
 const config = require('./config');
@@ -114,6 +115,9 @@ wss.on('connection', (ws, req) => {
     if (!validators.isValidRoomID(roomId)) {
       const roomToLog = `${roomId}`.substr(0, 100);
       throw new ConnectionError(ConnectionError.Error, 'Invalid room ID: ' + roomToLog);
+    }
+    if (isProjectBlocked(roomId)) {
+      throw new ConnectionError(ConnectionError.ProjectUnavailable, 'Project blocked: ' + roomId);
     }
     if (!await usernameUtils.isValidUsername(username)) {
       const usernameToLog = `${username}`.substr(0, 100);
