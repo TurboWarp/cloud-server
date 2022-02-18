@@ -55,10 +55,10 @@ class Room {
    */
   addClient(client) {
     if (this.clients.includes(client)) {
-      throw new Error('Client is already added to this Room.');
+      throw new Error(`Client is already added to room ${this.id}`);
     }
     if (this.clients.length >= this.maxClients) {
-      throw new Error('Too many clients are connected to this room.');
+      throw new Error(`Too many clients are connected to room ${this.id}`);
     }
     this.clients.push(client);
   }
@@ -71,7 +71,7 @@ class Room {
   removeClient(client) {
     const index = this.clients.indexOf(client);
     if (index === -1) {
-      throw new Error('Client is not part of this Room.');
+      throw new Error(`Client is not part of room ${this.id}`);
     }
     this.clients.splice(index, 1);
     this.lastDisconnectTime = Date.now();
