@@ -14,7 +14,7 @@
     "finalhandler": "^1.1.2",
     "serve-static": "^1.14.2",
     "winston": "^3.4.0",
-    "winston-daily-rotate-file": "^4.6.0",
+    "winston-daily-rotate-file": "^4.6.1",
     "ws": "^8.5.0"
   },
   "devDependencies": {
