@@ -151,7 +151,7 @@ wss.on('connection', (ws, req) => {
   function performRename(oldName, newName) {
     if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
 
-    if (!validators.isValidVariableValue(newName)) {
+    if (!validators.isValidVariableName(newName)) {
       throw new Error(`Invalid variable name: ${newName}`);
     }
 
