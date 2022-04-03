@@ -24,6 +24,10 @@ module.exports = {
   // This can significantly improve performance
   bufferSends: 60,
 
+  enableRename: false,
+
+  enableDelete: false,
+
   logging: {
     console: true,
 

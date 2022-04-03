@@ -162,15 +162,23 @@ wss.on('connection', (ws, req) => {
   }
 
   function performDelete(variable) {
+    if (!config.enableDelete) {
+      return;
+    }
+
     if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
 
     client.room.delete(variable);
   }
 
   function performRename(oldName, newName) {
+    if (!config.enableRename) {
+      return;
+    }
+
     if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
 
-    if (!validators.isValidVariableValue(newName)) {
+    if (!validators.isValidVariableName(newName)) {
       throw new Error(`Invalid variable name: ${newName}`);
     }
 
