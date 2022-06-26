@@ -24,6 +24,15 @@ test('isValidVariableName', () => {
   expect(validators.isValidVariableName('☁')).toBe(false);
   expect(validators.isValidVariableName('☁ ')).toBe(false);
   expect(validators.isValidVariableName('☁ ' + 'e'.repeat(10000))).toBe(false);
+  expect(validators.isValidVariableName(':cloud: Foo')).toBe(true);
+  expect(validators.isValidVariableName(':cloud: this is a pretty long variable name but not too long')).toBe(true);
+  expect(validators.isValidVariableName(':cloud: 123')).toBe(true);
+  expect(validators.isValidVariableName(' :cloud: 123')).toBe(false);
+  expect(validators.isValidVariableName(':cloud: null')).toBe(true);
+  expect(validators.isValidVariableName('null')).toBe(false);
+  expect(validators.isValidVariableName(':cloud:')).toBe(false);
+  expect(validators.isValidVariableName(':cloud: ')).toBe(false);
+  expect(validators.isValidVariableName(':cloud: ' + 'e'.repeat(10000))).toBe(false);
   expect(validators.isValidVariableName(123)).toBe(false);
   expect(validators.isValidVariableName(null)).toBe(false);
   expect(validators.isValidVariableName(undefined)).toBe(false);
