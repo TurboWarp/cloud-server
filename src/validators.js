@@ -1,7 +1,7 @@
 const naughty = require('./naughty');
 
-/** A required prefix that must appear at the beginning of all variable's names. */
-const VARIABLE_NAME_CLOUD_PREFIX = '☁ ';
+/** List of possible prefixes that must appear at the beginning of all variable's names. */
+const CLOUD_PREFIXES = ['☁ ', ':cloud: '];
 /** The maximum length of a variable's name. Scratch does not seem to restrict this but we don't want overly long variable names regardless. */
 const VARIABLE_NAME_MAX_LENGTH = 1024;
 
@@ -36,7 +36,13 @@ module.exports.isValidRoomID = function(id) {
  * @returns {boolean}
  */
 module.exports.isValidVariableName = function(name) {
-  return typeof name === 'string' && name.startsWith(VARIABLE_NAME_CLOUD_PREFIX) && name.length > VARIABLE_NAME_CLOUD_PREFIX.length && name.length < VARIABLE_NAME_MAX_LENGTH;
+  if (typeof name !== 'string') return false;
+  if (name.length > VARIABLE_NAME_MAX_LENGTH) return false;
+  for (const prefix of CLOUD_PREFIXES) {
+    if (name === prefix) return false;
+    if (name.startsWith(prefix)) return true;
+  }
+  return false;
 };
 
 /**
