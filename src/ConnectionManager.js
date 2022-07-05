@@ -27,37 +27,28 @@ class ConnectionManager {
       logger.info(`Pinging ${this.clients.size} clients...`);
     }
     this.clients.forEach((client) => {
-      if (this.isConnectionDead(client)) {
-        client.timedOut();
+      if (!client.ws) {
+        client.timedOut('no ws');
         return;
+      }
+
+      if (!client.respondedToPing) {
+        // Clients that have not responded to the most recent ping are considered dead.
+        client.timedOut('no pong');
+        return;
+      }
+
+      if (client.room === null) {
+        if (client.connectedAt < Date.now() - TIMEOUT) {
+          // Clients that have not joined a room in a reasonable time are considered dead.
+          client.timedOut('no handshake');
+          return;
+        }
       }
 
       // Clients are sent a ping, and expected to respond to the ping by the time the next ping will be sent.
       client.ping();
     });
-  }
-
-  /**
-   * Determine whether a Client's connection is likely dead.
-   * @private
-   * @param {Client} client The connected Client.
-   * @returns {boolean}
-   */
-  isConnectionDead(client) {
-    if (!client.ws) {
-      return true;
-    }
-    if (!client.respondedToPing) {
-      // Clients that have not responded to the most recent ping are considered dead.
-      return true;
-    }
-    if (client.room === null) {
-      if (client.connectedAt < Date.now() - TIMEOUT) {
-        // Clients that have not joined a room in a reasonable time are considered dead.
-        return true;
-      }
-    }
-    return false;
   }
 
   /**
