@@ -150,14 +150,17 @@ class Client {
     }
   }
 
-  timedOut() {
+  /**
+   * @param {string} reason Reason for time out, included in logs.
+   */
+  timedOut(reason) {
     if (this.ws !== null) {
       // terminate will then run the proper onclose handlers
       this.ws.terminate();
     } else {
-      this.log('Timed out but not connected?');
+      this.log(`Timed out but not connected: ${reason}`);
     }
-    this.log('Timed out');
+    this.log(`Timed out: ${reason}`);
   }
 }
 
