@@ -1,6 +1,7 @@
 const Room = require('./Room');
 const ConnectionError = require('./ConnectionError');
 const logger = require('./logger');
+const db = require('./db');
 
 /** Delay between janitor runs. */
 const JANITOR_INTERVAL = 1000 * 60;
@@ -76,6 +77,14 @@ class RoomList {
     if (this.enableLogging) {
       logger.info('Created room: ' + id);
     }
+
+    const initialData = db.getVariables(id);
+    if (initialData) {
+      for (const variableName of Object.keys(initialData)) {
+        room.forceSet(variableName, initialData[variableName]);
+      }
+    }
+
     return room;
   }
 
@@ -86,6 +95,9 @@ class RoomList {
    */
   remove(id) {
     const room = this.get(id);
+
+    db.setVariables(room.id, room.getAllVariablesAsObject());
+
     if (room.getClients().length > 0) {
       throw new Error('Clients are connected to this room');
     }

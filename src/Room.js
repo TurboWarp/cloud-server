@@ -101,6 +101,19 @@ class Room {
   }
 
   /**
+   * Get an object of all variables.
+   * @returns {Record<string, Value>}
+   */
+  getAllVariablesAsObject() {
+    /** @type {Record<string, Value>} */
+    const result = {};
+    for (const [name, value] of this.variables.entries()) {
+      result[name] = value;
+    }
+    return result;
+  }
+
+  /**
    * Create a new variable.
    * This method does not inform clients of the change.
    * @param {string} name The name of the variable
@@ -128,6 +141,15 @@ class Room {
     if (!this.has(name)) {
       throw new Error('Variable does not exist');
     }
+    this.variables.set(name, value);
+  }
+
+  /**
+   * Forcibly set or create a variable's value. Ignores maximum variable restriction.
+   * @param {string} name
+   * @param {Value} value
+   */
+  forceSet(name, value) {
     this.variables.set(name, value);
   }
 
