@@ -1,12 +1,13 @@
 const naughty = require('./naughty');
+const config = require('./config');
 
 /** List of possible prefixes that must appear at the beginning of all variable's names. */
 const CLOUD_PREFIXES = ['☁ ', ':cloud: '];
 /** The maximum length of a variable's name. Scratch does not seem to restrict this but we don't want overly long variable names regardless. */
 const VARIABLE_NAME_MAX_LENGTH = 1024;
 
-/** The maximum length of a variable's value. */
-const VALUE_MAX_LENGTH = 100000;
+const VALUE_MAX_LENGTH = config.maxValueLength;
+const ALLOW_NON_NUMBER_VALUES = config.allowNonNumberValues;
 
 /** Maximum length of usernames, inclusive. */
 const USERNAME_MAX_LENGTH = 20;
@@ -50,6 +51,14 @@ module.exports.isValidVariableName = function(name) {
  * @returns {boolean}
  */
 module.exports.isValidVariableValue = function(value) {
+  if (ALLOW_NON_NUMBER_VALUES) {
+    if (typeof value !== 'number' && typeof value !== 'boolean' && typeof value !== 'string') {
+      return false;
+    }
+    const str = value.toString();
+    return str.length <= VALUE_MAX_LENGTH;
+  }
+
   if (typeof value === 'number') {
     // If the value is a number, we don't have to parse it because we already know it's valid.
     // NaN and [-]Infinity are not valid, however.

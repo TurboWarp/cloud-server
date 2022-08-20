@@ -15,6 +15,13 @@ module.exports = {
   //  - 'sqlite' to use a persistent sqlite database
   database: 'none',
 
+  // The maximum length of a variable value to allow. Values longer than this will
+  // be silently ignored.
+  maxValueLength: 100000,
+
+  // Whether to allow variable values that aren't numbers.
+  allowNonNumberValues: false,
+
   // Configures WebSocket per-message compression.
   // This can allow significant bandwidth reduction, but it can use a lot of CPU
   // and may cause catastrophic memory fragmentation on Linux.
