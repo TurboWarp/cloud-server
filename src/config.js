@@ -9,10 +9,10 @@ module.exports = {
   unixSocketPermissions: 0o777,
 
   // enable to read x-forwarded-for
-  trustProxy: process.env.TRUST_PROXY === 'true',
+  trustProxy: false,
 
   // removes IP addresses from logs
-  anonymizeAddresses: process.env.ANONYMIZE_ADDRESSES === 'true',
+  anonymizeAddresses: false,
 
   // anonymize generated usernames like "player123456"
   anonymizeGeneratedUsernames: true,
