@@ -22,6 +22,14 @@ module.exports = {
   // Whether to allow variable values that aren't numbers.
   allowNonNumberValues: false,
 
+  // The maximum number of variables to allow in one room. Additional variables will
+  // not be allowed.
+  maxVariablesPerRoom: 20,
+
+  // The maximum number of people that can be connected to a room at the same time.
+  // If another person tries to connect, their connection will be closed.
+  maxClientsPerRoom: 128,
+
   // Configures WebSocket per-message compression.
   // This can allow significant bandwidth reduction, but it can use a lot of CPU
   // and may cause catastrophic memory fragmentation on Linux.
