@@ -28,8 +28,11 @@ class RoomList {
     /** Enable or disable logging of events to the console. */
     this.enableLogging = false;
     this.janitor = this.janitor.bind(this);
+    this.autosave = this.autosave.bind(this);
     /** @private */
     this.janitorInterval = null;
+    /** @private */
+    this.autosaveInterval = null;
   }
 
   /**
@@ -127,11 +130,16 @@ class RoomList {
     }
   }
 
-  /**
-   * Begin the janitor timer.
-   */
-  startJanitor() {
-    this.janitorInterval = setInterval(this.janitor, JANITOR_INTERVAL)
+  autosave() {
+    logger.info('Autosaving');
+    for (const room of this.rooms.values()) {
+      db.setVariables(room.id, room.getAllVariablesAsObject());
+    }
+  }
+
+  startIntervals() {
+    this.janitorInterval = setInterval(this.janitor, JANITOR_INTERVAL);
+    this.autosaveInterval = setInterval(this.autosave, config.autosaveInterval * 1000);
   }
 
   /**
@@ -141,6 +149,9 @@ class RoomList {
   destroy() {
     if (this.janitorInterval) {
       clearInterval(this.janitorInterval);
+    }
+    if (this.autosaveInterval) {
+      clearInterval(this.autosaveInterval);
     }
   }
 }

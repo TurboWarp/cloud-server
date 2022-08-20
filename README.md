@@ -34,7 +34,7 @@ Edit src/config.js for additional settings. There's a lot of stuff in there and 
 
 By default, cloud-server does not use a database, so any variables will be lost when no one has been in a project for a short while or the server restarts.
 
-In src/config.js, you can change the `database` option to `'sqlite'` to instead persist variables in an sqlite database. Variables are saved when a room is automatically deleted for being empty and on a periodic schedule set by `TODO`. If the server dies unexpectedly, anything that wasn't yet saved will not be saved.
+In src/config.js, you can change the `database` option to `'sqlite'` to instead persist variables in an sqlite database. Variables are saved when a room is automatically deleted for being empty and on a periodic schedule set by `autosaveInterval`. If the server dies unexpectedly, anything that wasn't yet saved will not be saved.
 
 ## Production setup
 

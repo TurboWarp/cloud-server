@@ -20,7 +20,7 @@ const wss = new WebSocket.Server({
 
 const rooms = new RoomList();
 rooms.enableLogging = true;
-rooms.startJanitor();
+rooms.startIntervals();
 
 const connectionManager = new ConnectionManager();
 connectionManager.start();

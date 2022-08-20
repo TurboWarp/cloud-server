@@ -15,6 +15,10 @@ module.exports = {
   //  - 'sqlite' to use a persistent sqlite database
   database: 'none',
 
+  // Time, in seconds, between automatic database saves. Variables are also saved
+  // when a room is deleted for being empty for too long.
+  autosaveInterval: 60 * 60,
+
   // The maximum length of a variable value to allow. Values longer than this will
   // be silently ignored.
   maxValueLength: 100000,
