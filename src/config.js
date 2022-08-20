@@ -28,6 +28,9 @@ module.exports = {
 
   enableDelete: false,
 
+  // Either 'none' or 'sqlite'
+  database: 'none',
+
   logging: {
     console: true,
 

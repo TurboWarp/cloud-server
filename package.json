@@ -11,6 +11,7 @@
   "author": "GarboMuffin",
   "license": "MIT",
   "dependencies": {
+    "better-sqlite3": "^7.6.2",
     "finalhandler": "^1.2.0",
     "serve-static": "^1.15.0",
     "winston": "^3.7.2",
