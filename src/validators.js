@@ -1,4 +1,3 @@
-const naughty = require('./naughty');
 const config = require('./config');
 
 /** List of possible prefixes that must appear at the beginning of all variable's names. */
