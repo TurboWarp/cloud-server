@@ -15,17 +15,6 @@ module.exports = {
   //  - 'sqlite' to use a persistent sqlite database
   database: 'none',
 
-  // If you're behind a reverse proxy such as nginx or Cloudflare, this can be
-  // enabled so that the logs use the IP given by x-forwarded-for instead of the
-  // address of the socket.
-  trustProxy: false,
-
-  // Removes IP addresses from logs
-  anonymizeAddresses: false,
-
-  // Anonymize generated usernames like "player123456" to just "player"
-  anonymizeGeneratedUsernames: true,
-
   // Configures WebSocket per-message compression.
   // This can allow significant bandwidth reduction, but it can use a lot of CPU
   // and may cause catastrophic memory fragmentation on Linux.
@@ -62,6 +51,17 @@ module.exports = {
   // Empty rooms are included in this limit until they are removed by emptyRoomLife and
   // emptyRoomLifeInterval.
   maxRooms: 1024,
+
+  // If you're behind a reverse proxy such as nginx or Cloudflare, this can be
+  // enabled so that the logs use the IP given by x-forwarded-for instead of the
+  // address of the socket.
+  trustProxy: false,
+
+  // Removes IP addresses from logs
+  anonymizeAddresses: false,
+
+  // Anonymize generated usernames like "player123456" to just "player" in logs.
+  anonymizeGeneratedUsernames: true,
 
   logging: {
     // Whether logs should be printed to the console or not.
