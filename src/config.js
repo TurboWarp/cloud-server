@@ -45,6 +45,24 @@ module.exports = {
   // Enables variable deleting
   enableDelete: false,
 
+  // emptyRoomLife is the maximum-ish time, in seconds, a room will be kept in memory while no
+  // one is connected to it before it is automatically deleted. Depending on what the
+  // database option is set to, the variables will either be lost forever or saved to disk.
+  // (real maximum will be slightly higher: see emptyRoomLifeInterval below)
+  emptyRoomLife: 60 * 60,
+
+  // emptyRoomLife is enforced by a periodic timer. emptyRoomLife is multiplied by
+  // emptyRoomLifeInterval to determine how often this timer should run.
+  // For example, if emptyRoomLife is 60 minutes (3600 seconds) and this is 0.1, there will be
+  // 0.1 * 60 minutes = 6 minutes (360 seconds) between each check. This will allow a room
+  // to actually be empty for 66 minutes before being removed.
+  emptyRoomLifeInterval: 0.1,
+
+  // The maximum number of cloud variable rooms that can exist at once.
+  // Empty rooms are included in this limit until they are removed by emptyRoomLife and
+  // emptyRoomLifeInterval.
+  maxRooms: 1024,
+
   logging: {
     // Whether logs should be printed to the console or not.
     console: true,

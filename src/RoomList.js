@@ -1,14 +1,12 @@
 const Room = require('./Room');
 const ConnectionError = require('./ConnectionError');
 const logger = require('./logger');
+const config = require('./config');
 const db = require('./db');
 
-/** Delay between janitor runs. */
-const JANITOR_INTERVAL = 1000 * 60;
-/** Time a room must be empty for before it may be removed by the janitor. */
-const JANITOR_THRESHOLD = 1000 * 60 * 60;
-/** Maximum amount of rooms that can exist at once. Empty rooms are included in this limit. */
-const MAX_ROOMS = 1024;
+const JANITOR_THRESHOLD = config.emptyRoomLife * 1000;
+const JANITOR_INTERVAL = JANITOR_THRESHOLD * config.emptyRoomLifeInterval;
+const MAX_ROOMS = config.maxRooms;
 
 /**
  * @typedef {import('./Room').RoomID} RoomID
