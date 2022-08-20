@@ -4,4 +4,4 @@ private.filter
 # Logs
 logs
 # Database
-db
+/db
