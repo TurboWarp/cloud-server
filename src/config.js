@@ -30,6 +30,11 @@ module.exports = {
   // If another person tries to connect, their connection will be closed.
   maxClientsPerRoom: 128,
 
+  // If this is set to true, the server will validate usernames by talking to the
+  // Scratch API to check that an account with that username exists. Usernames that
+  // do not exist will be rejected.
+  validateUsernames: false,
+
   // Configures WebSocket per-message compression.
   // This can allow significant bandwidth reduction, but it can use a lot of CPU
   // and may cause catastrophic memory fragmentation on Linux.

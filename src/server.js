@@ -5,6 +5,8 @@ const RoomList = require('./RoomList');
 const ConnectionError = require('./ConnectionError');
 const ConnectionManager = require('./ConnectionManager');
 const validators = require('./validators');
+const usernameUtils = require('./username');
+const isProjectBlocked = require('./room-filters');
 const logger = require('./logger');
 const naughty = require('./naughty');
 const config = require('./config');
@@ -101,17 +103,37 @@ wss.on('connection', (ws, req) => {
 
   const client = new Client(ws, req);
 
+  let isHandshaking = false;
+  let processAfterHandshakeQueue = [];
+
   connectionManager.handleConnect(client);
 
-  function performHandshake(roomId, username) {
+  async function performHandshake(roomId, username) {
     if (client.room) throw new ConnectionError(ConnectionError.Error, 'Already performed handshake');
+
+    if (isHandshaking) throw new ConnectionError(ConnectionError.Error, 'Already handshaking');
+    isHandshaking = true;
+
     if (!validators.isValidRoomID(roomId)) {
       const roomToLog = `${roomId}`.substr(0, 100);
       throw new ConnectionError(ConnectionError.Error, 'Invalid room ID: ' + roomToLog);
     }
-    if (!validators.isValidUsername(username)) {
+
+    if (isProjectBlocked(roomId)) {
+      throw new ConnectionError(ConnectionError.ProjectUnavailable, 'Project blocked: ' + roomId);
+    }
+
+    if (
+      !usernameUtils.isValidUsername(username) ||
+      (config.validateUsernames && !await usernameUtils.isValidScratchAccount(username))
+    ) {
       const usernameToLog = `${username}`.substr(0, 100);
       throw new ConnectionError(ConnectionError.Username, 'Invalid username: '  + usernameToLog);
+    }
+
+    if (!client.ws || client.ws.readyState !== WebSocket.OPEN) {
+      // The connection was closed while we were validating the username.
+      return;
     }
 
     client.setUsername(username);
@@ -134,6 +156,12 @@ wss.on('connection', (ws, req) => {
 
     // @ts-expect-error
     client.log(`Joined room (peers: ${client.room.getClients().length})`);
+
+    isHandshaking = false;
+    for (const data of processAfterHandshakeQueue) {
+      processWithErrorHandling(data);
+    }
+    processAfterHandshakeQueue.length = 0;
   }
 
   function performCreate(variable, value) {
@@ -194,15 +222,21 @@ wss.on('connection', (ws, req) => {
     }
   }
 
-  function processMessage(data) {
+  async function processMessage(data) {
     const message = parseMessage(data.toString());
     const method = message.method;
 
-    switch (method) {
-      case 'handshake':
-        performHandshake('' + message.project_id, message.user);
-        break;
+    if (method === 'handshake') {
+      await performHandshake('' + message.project_id, message.user)
+      return;
+    }
 
+    if (isHandshaking) {
+      processAfterHandshakeQueue.push(data);
+      return;
+    }
+
+    switch (method) {
       case 'set':
         performSet(message.name, message.value);
         break;
@@ -224,6 +258,19 @@ wss.on('connection', (ws, req) => {
     }
   }
 
+  async function processWithErrorHandling(data) {
+    try {
+      await processMessage(data);
+    } catch (error) {
+      client.error('Error handling connection: ' + error);
+      if (error instanceof ConnectionError) {
+        client.close(error.code);
+      } else {
+        client.close(ConnectionError.Error);
+      }
+    }
+  }
+
   client.log('Connection opened');
 
   ws.on('message', (data, isBinary) => {
@@ -235,16 +282,7 @@ wss.on('connection', (ws, req) => {
       return;
     }
 
-    try {
-      processMessage(data);
-    } catch (error) {
-      client.error('Error handling connection: ' + error);
-      if (error instanceof ConnectionError) {
-        client.close(error.code);
-      } else {
-        client.close(ConnectionError.Error);
-      }
-    }
+    processWithErrorHandling(data);
   });
 
   ws.on('error', (error) => {

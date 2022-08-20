@@ -9,27 +9,12 @@ const VARIABLE_NAME_MAX_LENGTH = 1024;
 const VALUE_MAX_LENGTH = config.maxValueLength;
 const ALLOW_NON_NUMBER_VALUES = config.allowNonNumberValues;
 
-/** Maximum length of usernames, inclusive. */
-const USERNAME_MAX_LENGTH = 20;
-/** Minimum length of usernames, inclusive. */
-const USERNAME_MIN_LENGTH = 1;
-/** Regex for usernames to match. Letters, numbers, -, and _ */
-const USERNAME_REGEX = /^[a-z0-9_-]+$/i;
-
-/**
- * @param {unknown} username
- * @returns {boolean}
- */
-module.exports.isValidUsername = function(username) {
-  return typeof username === 'string' && username.length >= USERNAME_MIN_LENGTH && username.length <= USERNAME_MAX_LENGTH && USERNAME_REGEX.test(username) && !naughty(username);
-};
-
 /**
  * @param {unknown} id
  * @returns {boolean}
  */
 module.exports.isValidRoomID = function(id) {
-  return typeof id === 'string' && id.length > 0 && /^\d+$/.test(id);
+  return typeof id === 'string' && id.length > 0;
 };
 
 /**
