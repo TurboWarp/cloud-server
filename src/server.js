@@ -10,6 +10,7 @@ const isProjectBlocked = require('./room-filters');
 const logger = require('./logger');
 const naughty = require('./naughty');
 const config = require('./config');
+const stats = require('./stats');
 
 const wss = new WebSocket.Server({
   noServer: true, // we setup the server on our own
@@ -74,6 +75,7 @@ function sendBuffered() {
 }
 
 function sendToClient(client, message) {
+  stats.recordBytesSent(client, message.length);
   if (config.bufferSends) {
     if (buffered.has(client)) {
       buffered.get(client).push(message);
@@ -126,6 +128,8 @@ wss.on('connection', (ws, req) => {
     if (!client.ws || client.ws.readyState !== WebSocket.OPEN) {
       return;
     }
+
+    stats.recordConnection(client);
 
     client.setUsername(username);
 
@@ -274,6 +278,8 @@ wss.on('connection', (ws, req) => {
     if (isBinary) {
       return;
     }
+
+    stats.recordBytesReceived(client, data.length);
 
     processWithErrorHandling(data);
   });

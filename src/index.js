@@ -6,6 +6,7 @@ const serveStatic = require('serve-static');
 const logger = require('./logger');
 const config = require('./config');
 const wss = require('./server');
+const stats = require('./stats');
 
 // We serve static files over HTTP
 const serve = serveStatic('public');
@@ -30,6 +31,8 @@ server.on('close', function() {
   logger.info('Server closing');
   wss.close();
 });
+
+setInterval(stats.printStats, 1000 * 5);
 
 const port = config.port;
 server.listen(port, function() {

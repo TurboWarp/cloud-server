@@ -42,6 +42,10 @@ class Client {
      * @private
      */
     this.logPrefix = '[]';
+    /**
+     * @type {string}
+     */
+    this.userAgent = (req && req.headers['user-agent']) || 'none';
     this.updateLogPrefix();
   }
 
@@ -161,6 +165,16 @@ class Client {
       this.log(`Timed out but not connected: ${reason}`);
     }
     this.log(`Timed out: ${reason}`);
+  }
+
+  /**
+   * @returns {string}
+   */
+  getRoomId() {
+    if (!this.room) {
+      return 'no room';
+    }
+    return this.room.id;
   }
 }
 
