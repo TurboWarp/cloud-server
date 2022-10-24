@@ -32,7 +32,7 @@ server.on('close', function() {
   wss.close();
 });
 
-setInterval(stats.printStats, 1000 * 60 * 5);
+setInterval(stats.printStats, 1000 * 60 * 60);
 
 const port = config.port;
 server.listen(port, function() {
