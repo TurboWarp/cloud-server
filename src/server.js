@@ -129,8 +129,6 @@ wss.on('connection', (ws, req) => {
       return;
     }
 
-    stats.recordConnection(client);
-
     client.setUsername(username);
 
     if (rooms.has(roomId)) {
@@ -153,6 +151,8 @@ wss.on('connection', (ws, req) => {
 
     // @ts-expect-error
     client.log(`Joined room (peers: ${client.room.getClients().length})`);
+
+    stats.recordConnection(client);
 
     isHandshaking = false;
     for (const data of processAfterHandshakeQueue) {
