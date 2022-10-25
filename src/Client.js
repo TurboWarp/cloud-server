@@ -46,6 +46,10 @@ class Client {
      * @type {string}
      */
     this.userAgent = (req && req.headers['user-agent']) || 'none';
+    /**
+     * @type {string}
+     */
+    this.origin = (req && req.headers['origin']) || 'none';
     this.updateLogPrefix();
   }
 
