@@ -19,12 +19,18 @@ let stats = emptyStats();
 
 const printStats = () => {
   for (const [statName, data] of Object.entries(stats)) {
+    let sum = 0;
+    for (const dataValue of Object.values(data)) {
+      sum += dataValue;
+    }
+
     const sorted = Object.entries(data)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 100);
     logger.info(`stats: ${statName}`)
+    logger.info(`stats:  ${sum}\t(total)`)
     for (const [dataName, dataValue] of sorted) {
-      logger.info(`stats: ${dataValue}\t${dataName}`);
+      logger.info(`stats:  ${dataValue}\t${dataName}`);
     }
   }
 
