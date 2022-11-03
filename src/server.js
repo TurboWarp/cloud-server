@@ -64,26 +64,44 @@ function createSetMessage(name, value) {
   });
 }
 
-const buffered = new Map();
+/** @type {Map<Client, [string, string | number][]>} */
+const bufferedUpdates = new Map();
 function sendBuffered() {
-  if (buffered.size > 0) {
-    for (const [client, messages] of buffered.entries()) {
-      client.send(messages.join('\n'));
-    }
-    buffered.clear();
+  if (bufferedUpdates.size === 0) {
+    return;
   }
+  for (const [client, updates] of bufferedUpdates.entries()) {
+    const dataToSend = updates
+      .map(([name, value]) => createSetMessage(name, value))
+      .join('\n');
+    stats.recordBytesSent(client, dataToSend.length);
+    client.send(dataToSend);
+  }
+  bufferedUpdates.clear();
 }
 
-function sendToClient(client, message) {
-  stats.recordBytesSent(client, message.length);
+function sendSetMessageToClient(client, name, value) {
   if (config.bufferSends) {
-    if (buffered.has(client)) {
-      buffered.get(client).push(message);
-    } else {
-      buffered.set(client, [message]);
+    let clientMessages = bufferedUpdates.get(client);
+    if (!clientMessages) {
+      clientMessages = [];
+      bufferedUpdates.set(client, clientMessages);
     }
+
+    // If there is already a buffered update for this variable, replace it
+    for (const message of clientMessages) {
+      if (message[0] === name) {
+        message[1] = value;
+        return;
+      }
+    }
+
+    // Otherwise, add a new buffered update
+    clientMessages.push([name, value]);
   } else {
-    client.send(message);
+    const dataToSend = createSetMessage(name, value);
+    stats.recordBytesSent(client, dataToSend.length);
+    client.send(dataToSend);
   }
 }
 
@@ -207,14 +225,10 @@ wss.on('connection', (ws, req) => {
       client.room.create(variable, value);
     }
 
-    // Generate the send message only when a client will actually hear it.
     const clients = client.room.getClients();
-    if (clients.length > 1) {
-      const message = createSetMessage(variable, value);
-      for (const otherClient of clients) {
-        if (client !== otherClient) {
-          sendToClient(otherClient, message);
-        }
+    for (const otherClient of clients) {
+      if (client !== otherClient) {
+        sendSetMessageToClient(otherClient, variable, value);
       }
     }
   }
