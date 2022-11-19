@@ -27,6 +27,11 @@ class ConnectionManager {
       logger.info(`Pinging ${this.clients.size} clients...`);
     }
     this.clients.forEach((client) => {
+      if (!client.ws) {
+        client.timedOut('no ws');
+        return;
+      }
+
       if (!client.respondedToPing) {
         // Clients that have not responded to the most recent ping are considered dead.
         client.timedOut('no pong');

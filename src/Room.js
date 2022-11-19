@@ -1,3 +1,5 @@
+const config = require('./config');
+
 /**
  * @typedef {import('./Client')} Client
  */
@@ -41,11 +43,11 @@ class Room {
     /**
      * Maximum number of variables that can be within this room.
      */
-    this.maxVariables = 20;
+    this.maxVariables = config.maxVariablesPerRoom;
     /**
      * Maximum number of clients that can be connected to this room.
      */
-    this.maxClients = 128;
+    this.maxClients = config.maxClientsPerRoom;
   }
 
   /**
@@ -94,6 +96,26 @@ class Room {
   }
 
   /**
+   * @returns {boolean} true if there are any variables in the room.
+   */
+  hasAnyVariables() {
+    return this.variables.size !== 0;
+  }
+
+  /**
+   * Get an object of all variables.
+   * @returns {Record<string, Value>}
+   */
+  getAllVariablesAsObject() {
+    /** @type {Record<string, Value>} */
+    const result = {};
+    for (const [name, value] of this.variables.entries()) {
+      result[name] = value;
+    }
+    return result;
+  }
+
+  /**
    * Create a new variable.
    * This method does not inform clients of the change.
    * @param {string} name The name of the variable
@@ -121,6 +143,15 @@ class Room {
     if (!this.has(name)) {
       throw new Error('Variable does not exist');
     }
+    this.variables.set(name, value);
+  }
+
+  /**
+   * Forcibly set or create a variable's value. Ignores maximum variable restriction.
+   * @param {string} name
+   * @param {Value} value
+   */
+  forceSet(name, value) {
     this.variables.set(name, value);
   }
 

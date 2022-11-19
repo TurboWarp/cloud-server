@@ -1,13 +1,12 @@
 const Room = require('./Room');
 const ConnectionError = require('./ConnectionError');
 const logger = require('./logger');
+const config = require('./config');
+const db = require('./db');
 
-/** Delay between janitor runs. */
-const JANITOR_INTERVAL = 1000 * 60;
-/** Time a room must be empty for before it may be removed by the janitor. */
-const JANITOR_THRESHOLD = 1000 * 60 * 60;
-/** Maximum amount of rooms that can exist at once. Empty rooms are included in this limit. */
-const MAX_ROOMS = 1024;
+const JANITOR_THRESHOLD = config.emptyRoomLife * 1000;
+const JANITOR_INTERVAL = JANITOR_THRESHOLD * config.emptyRoomLifeInterval;
+const MAX_ROOMS = config.maxRooms;
 
 /**
  * @typedef {import('./Room').RoomID} RoomID
@@ -29,8 +28,11 @@ class RoomList {
     /** Enable or disable logging of events to the console. */
     this.enableLogging = false;
     this.janitor = this.janitor.bind(this);
+    this.autosave = this.autosave.bind(this);
     /** @private */
     this.janitorInterval = null;
+    /** @private */
+    this.autosaveInterval = null;
   }
 
   /**
@@ -76,6 +78,14 @@ class RoomList {
     if (this.enableLogging) {
       logger.info('Created room: ' + id);
     }
+
+    const initialData = db.getVariables(id);
+    if (initialData) {
+      for (const variableName of Object.keys(initialData)) {
+        room.forceSet(variableName, initialData[variableName]);
+      }
+    }
+
     return room;
   }
 
@@ -86,6 +96,9 @@ class RoomList {
    */
   remove(id) {
     const room = this.get(id);
+
+    db.setVariables(room.id, room.getAllVariablesAsObject());
+
     if (room.getClients().length > 0) {
       throw new Error('Clients are connected to this room');
     }
@@ -117,11 +130,16 @@ class RoomList {
     }
   }
 
-  /**
-   * Begin the janitor timer.
-   */
-  startJanitor() {
-    this.janitorInterval = setInterval(this.janitor, JANITOR_INTERVAL)
+  autosave() {
+    logger.info('Autosaving');
+    for (const room of this.rooms.values()) {
+      db.setVariables(room.id, room.getAllVariablesAsObject());
+    }
+  }
+
+  startIntervals() {
+    this.janitorInterval = setInterval(this.janitor, JANITOR_INTERVAL);
+    this.autosaveInterval = setInterval(this.autosave, config.autosaveInterval * 1000);
   }
 
   /**
@@ -131,6 +149,9 @@ class RoomList {
   destroy() {
     if (this.janitorInterval) {
       clearInterval(this.janitorInterval);
+    }
+    if (this.autosaveInterval) {
+      clearInterval(this.autosaveInterval);
     }
   }
 }

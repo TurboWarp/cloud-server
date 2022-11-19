@@ -10,9 +10,9 @@
     }
     .label {
       font-size: 9.45pt;
-      font-weight: bold;
       color: #575E75;
       white-space: pre;
+      margin: 5px 0;
     }
     .var {
       display: inline-block;
@@ -36,7 +36,18 @@
 
 <body>
   <h1 class="label">Cloud Data Server</h1>
-  <a href="https://github.com/TurboWarp/cloud-server" class="var cloud">Source Code</a>
+
+  <div href="https://github.com/TurboWarp/cloud-server" class="var cloud">Source Code</div>
+
+  <div class="label ip"></div>
+  <script>
+    (function() {
+      if (location.hostname) {
+        const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+        document.querySelector('.ip').textContent = `Connect with: ${protocol}://${location.hostname}`;
+      }
+    }());
+  </script>
 </body>
 
 </html>

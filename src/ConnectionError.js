@@ -14,5 +14,6 @@ class ConnectionError extends Error {
 ConnectionError.Error = 4000;
 ConnectionError.Username = 4002;
 ConnectionError.Overloaded = 4003;
+ConnectionError.ProjectUnavailable = 4004;
 
 module.exports = ConnectionError;

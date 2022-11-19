@@ -100,3 +100,12 @@ test('maxClients', () => {
   }
   expect(() => room.addClient(new Client(null, null))).toThrow();
 });
+
+test('hasAnyVariables', () => {
+  const room = new Room('1234');
+  expect(room.hasAnyVariables()).toBe(false);
+  room.create('☁ foo', '1234');
+  expect(room.hasAnyVariables()).toBe(true);
+  room.delete('☁ foo');
+  expect(room.hasAnyVariables()).toBe(false);
+});
