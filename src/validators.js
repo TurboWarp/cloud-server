@@ -28,7 +28,7 @@ module.exports.isValidUsername = function(username) {
  * @returns {boolean}
  */
 module.exports.isValidRoomID = function(id) {
-  return typeof id === 'string' && id.length > 0 && /^\d+$/.test(id);
+  return typeof id === 'string' && id.length > 0 && id.length < 1000;
 };
 
 /**
