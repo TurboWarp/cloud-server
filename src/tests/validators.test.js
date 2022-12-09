@@ -3,8 +3,9 @@ const validators = require('../validators');
 test('isValidRoomID', () => {
   expect(validators.isValidRoomID('')).toBe(false);
   expect(validators.isValidRoomID('123')).toBe(true);
-  expect(validators.isValidRoomID('123.0')).toBe(false);
-  expect(validators.isValidRoomID('-123')).toBe(false);
+  expect(validators.isValidRoomID('123.0')).toBe(true);
+  expect(validators.isValidRoomID('-123')).toBe(true);
+  expect(validators.isValidRoomID('@p4-project.sb3')).toBe(true);
   expect(validators.isValidRoomID(123)).toBe(false);
   expect(validators.isValidRoomID(null)).toBe(false);
   expect(validators.isValidRoomID(undefined)).toBe(false);
