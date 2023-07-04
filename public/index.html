@@ -14,7 +14,12 @@
       color: #575E75;
       white-space: pre;
     }
+    .var-outer {
+      display: block;
+      margin-bottom: 4px;
+    }
     .var {
+      flex-grow: 0;
       display: inline-block;
       background-color: #FF8C1A;
       border-radius: 15px;
@@ -28,7 +33,7 @@
       text-decoration: none;
       white-space: pre;
     }
-    .var.cloud::before {
+    .var::before {
       content: '☁ ';
     }
   </style>    
@@ -36,7 +41,8 @@
 
 <body>
   <h1 class="label">Cloud Data Server</h1>
-  <a href="https://github.com/TurboWarp/cloud-server" class="var cloud">Source Code</a>
+  <div class="var-outer"><a href="https://docs.turbowarp.org/cloud-variables#advanced" class="var">Important information for bot developers</a></div>
+  <div class="var-outer"><a href="https://github.com/TurboWarp/cloud-server" class="var">Source code</a></div>
 </body>
 
 </html>
