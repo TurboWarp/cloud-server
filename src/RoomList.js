@@ -7,7 +7,7 @@ const JANITOR_INTERVAL = 1000 * 60;
 /** Time a room must be empty for before it may be removed by the janitor. */
 const JANITOR_THRESHOLD = 1000 * 60 * 60;
 /** Maximum amount of rooms that can exist at once. Empty rooms are included in this limit. */
-const MAX_ROOMS = 1024;
+const MAX_ROOMS = 16384;
 
 /**
  * @typedef {import('./Room').RoomID} RoomID
@@ -65,7 +65,7 @@ class RoomList {
   create(id) {
     if (this.rooms.size >= this.maxRooms) {
       // TODO: it may be worthwhile to call janitor() and check again
-      throw new ConnectionError(ConnectionError.Overloaded, 'Too many rooms');
+      throw new ConnectionError(ConnectionError.Overloaded, `Too many rooms to fit ${id}`);
     }
     if (this.has(id)) {
       throw new Error('Room already exists');
