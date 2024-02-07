@@ -65,7 +65,7 @@ class RoomList {
   create(id) {
     if (this.rooms.size >= this.maxRooms) {
       // TODO: it may be worthwhile to call janitor() and check again
-      throw new ConnectionError(ConnectionError.Overloaded, 'Too many rooms');
+      throw new ConnectionError(ConnectionError.Overloaded, `Too many rooms to fit ${id}`);
     }
     if (this.has(id)) {
       throw new Error('Room already exists');
