@@ -121,6 +121,13 @@ wss.on('connection', (ws, req) => {
     return;
   }
 
+  if (!req.headers['user-agent']) {
+    logger.info('A connection was closed for lacking a valid user-agent.');
+    ws.send('Please provide a valid User-Agent header as required by https://docs.turbowarp.org/cloud-variables#advanced. If you use a cloud variable library, contact the author to find out how to do that.');
+    ws.close(4006);
+    return;
+  }
+
   const client = new Client(ws, req);
 
   let isHandshaking = false;

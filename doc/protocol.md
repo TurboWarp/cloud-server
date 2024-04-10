@@ -119,4 +119,7 @@ Multiple set messages may be sent in one message where each message is separated
 
 4005  Closed to protect your security
   When the client does something that compromises its security and the server closes the connection to force the client to fix its code.
+
+4006  Identify yourself
+  When the client is not providing sufficient information in the User-Agent header.
 ```
