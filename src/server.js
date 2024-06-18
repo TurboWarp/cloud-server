@@ -278,6 +278,7 @@ wss.on('connection', (ws, req) => {
 
   async function processWithErrorHandling(data) {
     try {
+      stats.recordBytesReceived(client, data.length);
       await processMessage(data);
     } catch (error) {
       client.error('Error handling connection: ' + error);
@@ -299,8 +300,6 @@ wss.on('connection', (ws, req) => {
     if (isBinary) {
       return;
     }
-
-    stats.recordBytesReceived(client, data.length);
 
     processWithErrorHandling(data);
   });
