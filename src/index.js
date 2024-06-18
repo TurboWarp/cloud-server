@@ -20,7 +20,6 @@ const server = http.createServer(function handler(req, res) {
 
 server.on('upgrade', function upgrade(request, socket, head) {
   // Forward these requests to the WebSocket server.
-  // @ts-expect-error
   wss.handleUpgrade(request, socket, head, function done(ws) {
     wss.emit('connection', ws, request);
   });
