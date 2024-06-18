@@ -1,6 +1,8 @@
 /*
 Example client for Node.js
 
+You must first update the USER_AGENT variable below.
+
 Dependencies:
 npm i ws
 
@@ -10,7 +12,23 @@ Use getVariable("☁ variable") to read variables.
 
 const WebSocket = require('ws');
 
-const ws = new WebSocket("ws://localhost:9080");
+// You are required to provide a valid User-Agent header. Please include:
+//  - contact information (Scratch profile, email, GitHub issues page, etc.)
+//  - name of bot library and version (if applicable)
+// For example: my-cool-cloud-variable-bot v2.0 by https://scratch.mit.edu/users/TestMuffin
+// See https://docs.turbowarp.org/cloud-variables#advanced for more information.
+const USER_AGENT = '';
+
+// Removing this if statement will not make your bot work. The user-agent is validated server-side.
+if (!USER_AGENT) {
+  throw new Error('You are required to provide a valid User-Agent header! See `const USER_AGENT = ...` and the comment above it near the start of this file.');
+}
+
+const ws = new WebSocket("wss://clouddata.turbowarp.org", {
+  headers: {
+    'user-agent': USER_AGENT
+  }
+});
 const variables = {};
 
 function setVariable(name, value) {
