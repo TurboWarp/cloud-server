@@ -35,7 +35,7 @@ function parseUsername(username) {
  * @returns {boolean} true if the username was probably randomly generated.
  */
 function isGenerated(username) {
-  return ANONYMIZE.test(username) || username === 'player';
+  return ANONYMIZE.test(username) || username === 'player' || username === 'scratchattach';
 }
 
 const agent = new https.Agent({
