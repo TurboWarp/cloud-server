@@ -13,6 +13,7 @@ add_executable(
 	src/droplet.c
 	src/protocol_cloud.c
 	src/resizable_buffer.c
+	src/username.c
 )
 target_include_directories(
 	droplet PRIVATE
@@ -26,4 +27,10 @@ add_executable(
 	resizable_buffer_test
 	src/resizable_buffer_test.c
 	src/resizable_buffer.c
+)
+
+add_executable(
+	username_test
+	src/username_test.c
+	src/username.c
 )

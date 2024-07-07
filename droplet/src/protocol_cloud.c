@@ -1,4 +1,5 @@
 #include "protocol_cloud.h"
+#include "username.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -205,7 +206,12 @@ static bool handle_full_rx(struct cloud_per_vhost_data* vhd, struct cloud_per_se
             return false;
         }
 
-        /* TODO: username validation */
+        const unsigned char* username_data = data + user_json->start;
+        size_t username_len = user_json->end - user_json->start;
+        if (!username_validate(username_data, username_len)) {
+            lwsl_wsi_user(pss->wsi, "Username is invalid");
+            return false;
+        }
 
         const unsigned char* project_id_data = data + project_id_json->start;
         size_t project_id_len = project_id_json->end - project_id_json->start;

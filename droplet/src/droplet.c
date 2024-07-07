@@ -1,4 +1,5 @@
 #include "protocol_cloud.h"
+#include "username.h"
 #include <signal.h>
 #include <stdbool.h>
 #include <string.h>
@@ -36,6 +37,8 @@ static const char* get_mount_origin(int argc, const char** argv)
 int main(int argc, const char** argv)
 {
     signal(SIGINT, sigint_handler);
+
+    username_init();
 
 #ifndef NDEBUG
     lws_set_log_level(LLL_USER | LLL_ERR | LLL_WARN | LLL_NOTICE, NULL);
