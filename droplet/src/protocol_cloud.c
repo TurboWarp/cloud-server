@@ -17,20 +17,28 @@
  */
 #define MAX_COOKIE_LEN 512
 
-enum invalid_headers {
-    headers_valid,
-    invalid_user_agent,
-    invalid_cookie
-};
+/* See protocol.md */
+#define CLOSED_GENERIC 4000
+#define CLOSED_BAD_USERNAME 4002
+#define CLOSED_OVERLOADED 4003
+#define CLOSED_PROJECT_DISABLED 4004
+#define CLOSED_FOR_SECURITY 4005
+#define CLOSED_IDENTIFY_YOURSELF 4006
 
-static enum invalid_headers check_headers(struct lws* wsi)
+#define CLOSE_WITH_REASON(wsi, code, reason)                                 \
+    do {                                                                     \
+        lwsl_wsi_user(wsi, reason);                                          \
+        lws_close_reason(wsi, code, (unsigned char*)reason, strlen(reason)); \
+    } while (0);
+
+/* Returns 0 on valid, -1 otherwise */
+static int check_headers(struct lws* wsi)
 {
     /* Require a non-empty User-Agent */
     int user_agent_len = lws_hdr_total_length(wsi, WSI_TOKEN_HTTP_USER_AGENT);
     if (user_agent_len == 0) {
-        static char* reason = "Invalid User-Agent";
-        lws_close_reason(wsi, 4006, (unsigned char*)reason, strlen(reason));
-        return invalid_user_agent;
+        CLOSE_WITH_REASON(wsi, CLOSED_BAD_USERNAME, "Provide a valid User-Agent");
+        return -1;
     }
 
     /*
@@ -52,13 +60,12 @@ static enum invalid_headers check_headers(struct lws* wsi)
         static char temp[MAX_COOKIE_LEN];
         int result = lws_hdr_copy(wsi, temp, MAX_COOKIE_LEN, WSI_TOKEN_HTTP_COOKIE);
         if (result > 0 && memcmp(temp, scratchsessionsid_header, strlen(scratchsessionsid_header)) == 0) {
-            static char* reason = "Stop giving us your Scratch session token";
-            lws_close_reason(wsi, 4005, (unsigned char*)reason, strlen(reason));
-            return invalid_cookie;
+            CLOSE_WITH_REASON(wsi, CLOSED_FOR_SECURITY, "Stop including Scratch cookies");
+            return -1;
         }
     }
 
-    return headers_valid;
+    return 0;
 }
 
 static const jsmntok_t* json_get_key(const unsigned char* data, const jsmntok_t* tokens, int num_tokens, const char* name)
@@ -221,7 +228,7 @@ static bool handle_full_rx(struct cloud_per_vhost_data* vhd, struct cloud_per_se
     /* char* and unsigned char* are the same in memory */
     int num_tokens = jsmn_parse(&parser, (char*)data, len, tokens, MAX_JSON_TOKENS);
     if (num_tokens < 0) {
-        lwsl_wsi_user(pss->wsi, "Invalid JSON: %d", num_tokens);
+        CLOSE_WITH_REASON(pss->wsi, CLOSED_GENERIC, "Invalid JSON");
         return false;
     }
 
@@ -229,7 +236,7 @@ static bool handle_full_rx(struct cloud_per_vhost_data* vhd, struct cloud_per_se
 
     const jsmntok_t* method_json = json_get_key(data, tokens, num_tokens, "method");
     if (method_json == NULL || method_json->type != JSMN_STRING) {
-        lwsl_wsi_user(pss->wsi, "method missing or not a string");
+        CLOSE_WITH_REASON(pss->wsi, CLOSED_GENERIC, "invalid method");
         return false;
     }
 
@@ -241,26 +248,26 @@ static bool handle_full_rx(struct cloud_per_vhost_data* vhd, struct cloud_per_se
 
         static const char* handshake = "handshake";
         if (method_len != strlen(handshake) || memcmp(method_data, handshake, strlen(handshake)) != 0) {
-            lwsl_wsi_user(pss->wsi, "method was not handshake");
+            CLOSE_WITH_REASON(pss->wsi, CLOSED_GENERIC, "invalid method");
             return false;
         }
 
         const jsmntok_t* user_json = json_get_key(data, tokens, num_tokens, "user");
         if (user_json == NULL || user_json->type != JSMN_STRING) {
-            lwsl_wsi_user(pss->wsi, "handshake user missing or not a string");
+            CLOSE_WITH_REASON(pss->wsi, CLOSED_GENERIC, "invalid user");
             return false;
         }
 
         const jsmntok_t* project_id_json = json_get_key(data, tokens, num_tokens, "project_id");
         if (project_id_json == NULL || project_id_json->type != JSMN_STRING) {
-            lwsl_wsi_user(pss->wsi, "handshake project_id missing or not a string");
+            CLOSE_WITH_REASON(pss->wsi, CLOSED_PROJECT_DISABLED, "invalid project_id");
             return false;
         }
 
         const unsigned char* username_data = data + user_json->start;
         size_t username_len = user_json->end - user_json->start;
         if (!username_validate(username_data, username_len)) {
-            lwsl_wsi_user(pss->wsi, "Username is invalid");
+            CLOSE_WITH_REASON(pss->wsi, CLOSED_BAD_USERNAME, "Invalid username");
             return false;
         }
 
@@ -268,12 +275,12 @@ static bool handle_full_rx(struct cloud_per_vhost_data* vhd, struct cloud_per_se
         size_t project_id_len = project_id_json->end - project_id_json->start;
         struct cloud_room* room = room_get_or_create(vhd, project_id_data, project_id_len);
         if (!room) {
-            lwsl_wsi_user(pss->wsi, "Failed to find or create room");
+            CLOSE_WITH_REASON(pss->wsi, CLOSED_OVERLOADED, "invalid room");
             return false;
         }
 
         if (!room_add_connection(room, pss)) {
-            lwsl_wsi_user(pss->wsi, "Failed to add to room");
+            CLOSE_WITH_REASON(pss->wsi, CLOSED_OVERLOADED, "room is full");
             return false;
         }
 
@@ -287,22 +294,28 @@ static bool handle_full_rx(struct cloud_per_vhost_data* vhd, struct cloud_per_se
         return true;
     }
 
+    /*
+     * Once we're handshaked, any errors handling the messages are not that critical,
+     * so we can keep the connection open. For example if someone sends a variable that's
+     * a bit too big, we don't need to completely destroy the connection.
+     */
+
     static const char* set = "set";
     if (method_len != strlen(set) || memcmp(method_data, set, strlen(set)) != 0) {
         lwsl_wsi_user(pss->wsi, "method was not set");
-        return false;
+        return true;
     }
 
     const jsmntok_t* name_json = json_get_key(data, tokens, num_tokens, "name");
     if (name_json == NULL || name_json->type != JSMN_STRING) {
         lwsl_wsi_user(pss->wsi, "name missing or not a string");
-        return false;
+        return true;
     }
 
     const jsmntok_t* value_json = json_get_key(data, tokens, num_tokens, "value");
     if (value_json == NULL || (value_json->type != JSMN_STRING && value_json->type != JSMN_PRIMITIVE)) {
         lwsl_wsi_user(pss->wsi, "value missing or not a string or primitive");
-        return false;
+        return true;
     }
 
     const unsigned char* name_data = data + name_json->start;
@@ -311,7 +324,7 @@ static bool handle_full_rx(struct cloud_per_vhost_data* vhd, struct cloud_per_se
     int variable_idx = room_get_or_create_variable_idx(pss->room, name_data, name_len);
     if (variable_idx < 0) {
         lwsl_wsi_user(pss->wsi, "Could not find or create variable: %d", variable_idx);
-        return false;
+        return true;
     }
 
     struct cloud_variable* variable = &pss->room->variables[variable_idx];
@@ -322,7 +335,7 @@ static bool handle_full_rx(struct cloud_per_vhost_data* vhd, struct cloud_per_se
     enum resizable_buffer_error buffer_result = resizable_buffer_push(&variable->value_buffer, value_data, value_len);
     if (buffer_result != resizable_buffer_ok) {
         lwsl_wsi_user(pss->wsi, "Variable buffer push failed: %d", buffer_result);
-        return false;
+        return true;
     }
 
     variable->sequence_number++;
@@ -385,7 +398,7 @@ int callback_cloud(struct lws* wsi, enum lws_callback_reasons reason, void* user
     case LWS_CALLBACK_ESTABLISHED: {
         lwsl_wsi_user(wsi, "Connection established");
 
-        if (check_headers(wsi) != headers_valid) {
+        if (check_headers(wsi) != 0) {
             return -1;
         }
 
