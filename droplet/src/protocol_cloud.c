@@ -10,6 +10,57 @@
 
 #define MAX_JSON_TOKENS 64
 
+/*
+ * Maximum size of buffer used to check for unsafe HTTP cookie header.
+ * scratchsessionsid is about 400 bytes, so we need at least that much plus
+ * a bit extra for safety.
+ */
+#define MAX_COOKIE_LEN 512
+
+enum invalid_headers {
+    headers_valid,
+    invalid_user_agent,
+    invalid_cookie
+};
+
+static enum invalid_headers check_headers(struct lws* wsi)
+{
+    /* Require a non-empty User-Agent */
+    int user_agent_len = lws_hdr_total_length(wsi, WSI_TOKEN_HTTP_USER_AGENT);
+    if (user_agent_len == 0) {
+        static char* reason = "Invalid User-Agent";
+        lws_close_reason(wsi, 4006, (unsigned char*)reason, strlen(reason));
+        return invalid_user_agent;
+    }
+
+    /*
+     * We are aware of at least one cloud variable library that sent Scratch
+     * session tokens to us for no reason. This is an unreasonable risk, so
+     * refuse to allow the connection.
+     *
+     * This isn't a spec-compliant cookie parser by any means, but it doesn't
+     * need to be. We're just trying to make it a bit harder to do the wrong
+     * thing.
+     */
+    static const char* scratchsessionsid_header = "scratchsessionsid=";
+    int cookie_len = lws_hdr_total_length(wsi, WSI_TOKEN_HTTP_COOKIE);
+    /*
+     * Length returned by LWS don't include the null terminator that will be
+     * added by the copy methods.
+     */
+    if (cookie_len >= strlen(scratchsessionsid_header) && cookie_len < MAX_COOKIE_LEN - 1) {
+        static char temp[MAX_COOKIE_LEN];
+        int result = lws_hdr_copy(wsi, temp, MAX_COOKIE_LEN, WSI_TOKEN_HTTP_COOKIE);
+        if (result > 0 && memcmp(temp, scratchsessionsid_header, strlen(scratchsessionsid_header)) == 0) {
+            static char* reason = "Stop giving us your Scratch session token";
+            lws_close_reason(wsi, 4005, (unsigned char*)reason, strlen(reason));
+            return invalid_cookie;
+        }
+    }
+
+    return headers_valid;
+}
+
 static const jsmntok_t* json_get_key(const unsigned char* data, const jsmntok_t* tokens, int num_tokens, const char* name)
 {
     if (num_tokens < 1) {
@@ -333,6 +384,10 @@ int callback_cloud(struct lws* wsi, enum lws_callback_reasons reason, void* user
 
     case LWS_CALLBACK_ESTABLISHED: {
         lwsl_wsi_user(wsi, "Connection established");
+
+        if (check_headers(wsi) != headers_valid) {
+            return -1;
+        }
 
         struct cloud_per_session_data* pss = (struct cloud_per_session_data*)user;
         pss->wsi = wsi;
