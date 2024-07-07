@@ -8,27 +8,6 @@ static struct lws_protocols protocols[] = {
     LWS_PROTOCOL_LIST_TERM
 };
 
-static const struct lws_http_mount mount = {
-    .mount_next = NULL,
-    .mountpoint = "/",
-    .origin = "./playground",
-    .def = "index.html",
-    .protocol = NULL,
-    .cgienv = NULL,
-    .extra_mimetypes = NULL,
-    .interpret = NULL,
-    .cgi_timeout = 0,
-    .cache_max_age = 0,
-    .auth_mask = 0,
-    .cache_reusable = 0,
-    .cache_revalidate = 0,
-    .cache_intermediaries = 0,
-    .cache_no = 0,
-    .origin_protocol = LWSMPRO_FILE,
-    .mountpoint_len = 1,
-    .basic_auth_login_file = NULL,
-};
-
 static bool interrupted;
 
 static void sigint_handler(int sig)
@@ -45,6 +24,15 @@ static int get_port(int argc, const char** argv)
     return 9082;
 }
 
+static const char* get_mount_origin(int argc, const char** argv)
+{
+    const char* w = lws_cmdline_option(argc, argv, "-w");
+    if (w) {
+        return w;
+    }
+    return "./playground";
+}
+
 int main(int argc, const char** argv)
 {
     signal(SIGINT, sigint_handler);
@@ -55,15 +43,24 @@ int main(int argc, const char** argv)
     lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE, NULL);
 #endif
 
+    struct lws_http_mount mount = { 0 };
+    mount.mountpoint = "/";
+    mount.origin = get_mount_origin(argc, argv);
+    mount.def = "index.html";
+    mount.origin_protocol = LWSMPRO_FILE;
+    mount.mountpoint_len = 1;
+
     struct lws_context_creation_info info = { 0 };
     info.port = get_port(argc, argv);
     info.mounts = &mount;
     info.protocols = protocols;
 
-    lwsl_user("Starting on http://localhost:%d | ws://localhost:%d", info.port, info.port);
+    lwsl_user("Starting on http://localhost:%d | ws://localhost:%d\n", info.port, info.port);
+    lwsl_user("Serving HTTP requests from %s\n", mount.origin);
+
     struct lws_context* context = lws_create_context(&info);
     if (!context) {
-        lwsl_err("lws init failed\n");
+        lwsl_err("lws_create_context failed\n");
         return 1;
     }
 
