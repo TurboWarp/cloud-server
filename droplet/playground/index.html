@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf8">
+    <style>
+      textarea, input {
+        width: 90%;
+      }
+      textarea {
+        height: 400px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <textarea id="r" readonly></textarea><br>
+    <input type="text" id="m" value='{"method":"handshake","user":"player1234","project_id":"123"}'>
+    <button id="b">Send</button>
+
+    <script>
+    function get_appropriate_ws_url(extra_url) {
+      var pcol;
+      var u = document.URL;
+
+      /*
+      * We open the websocket encrypted if this page came on an
+      * https:// url itself, otherwise unencrypted
+      */
+
+      if (u.substring(0, 5) === "https") {
+        pcol = "wss://";
+        u = u.substr(8);
+      } else {
+        pcol = "ws://";
+        if (u.substring(0, 4) === "http")
+        u = u.substr(7);
+      }
+
+      u = u.split("/");
+
+      /* + "/xxx" bit is for IE10 workaround */
+
+      return pcol + u[0] + "/" + extra_url;
+    }
+
+    function new_ws(urlpath, protocol) {
+      return new WebSocket(urlpath, protocol);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+
+      ws = new_ws(get_appropriate_ws_url(""));
+      try {
+        ws.onopen = function() {
+          // document.getElementById("m").disabled = 0;
+          // document.getElementById("b").disabled = 0;
+        };
+
+        ws.onmessage =function got_packet(msg) {
+          document.getElementById("r").value =
+          document.getElementById("r").value + msg.data + "\n";
+          document.getElementById("r").scrollTop =
+          document.getElementById("r").scrollHeight;
+        };
+
+        ws.onclose = function(){
+          document.getElementById("r").value = document.getElementById("r").value + "=== closed ===\n";
+        };
+      } catch(exception) {
+        alert("<p>Error " + exception);
+      }
+
+      function sendmsg() {
+        ws.send(document.getElementById("m").value);
+        document.getElementById("m").value = JSON.stringify({
+          method: "set",
+          name: "a b c",
+          value: Math.random()
+        });
+      }
+      document.getElementById("b").addEventListener("click", sendmsg);
+    }, false);
+    </script>
+  </body>
+</html>

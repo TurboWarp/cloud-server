@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+  </head>
+
+  <body>
+    <div>
+      <select id="ws">
+        <option value="ws://localhost:9082">droplet</option>
+        <option value="ws://localhost:9080">cloud-server</option>
+        <option value="ws://localhost:7681">libwebsockets</option>
+      </select>
+    </div>
+
+    <div>
+      <button onclick="start()">Start</button>
+      <button onclick="stop()">Stop</button>
+    </div>
+
+    <textarea id="metrics" readonly style="width: 90vw; height: 80vh;" autocomplete="off"></textarea>
+
+    <script>
+      const sockets = [];
+      const errors = [];
+      let updateQueued = false;
+
+      let startTime = 0;
+      let stopped = false;
+
+      function updateMetrics() {
+        if (updateQueued) return;
+        requestAnimationFrame(() => {
+          updateQueued = false;
+
+          let text = '';
+
+          if (errors.length) {
+            text += '--- ERRORS ---\n';
+            text += errors.join('\n');
+            text += '\n--- ERRORS ---\n';
+          }
+
+          text += '\topen\ttxMess\ttxBytes\trxMess\trxBytes\n';
+
+          let txMessages = 0;
+          let txBytes = 0;
+          let rxMessages = 0;
+          let rxBytes = 0;
+
+          for (let i = 0; i < sockets.length; i++) {
+            const s = sockets[i];
+
+            txMessages += s.txMessages;
+            txBytes += s.txBytes;
+            rxMessages += s.rxMessages;
+            rxBytes += s.rxBytes;
+
+            text += `ws${i}\t${s.open}\t${s.txMessages}\t${s.txBytes}\t${s.rxMessages}\t${s.rxBytes}\n`;
+          }
+
+          text += `total\t\t${txMessages}\t${txBytes}\t${rxMessages}\t${rxBytes}\n`;
+
+          const time = (Date.now() - startTime) / 1000;
+          const r = Math.round.bind(Math);
+          text += `avg\t\t${r(txMessages / time)}\t${r(txBytes / time)}\t${r(rxMessages / time)}\t${r(rxBytes / time)}\n`;
+
+          document.getElementById('metrics').value = text;
+        }, 0);
+      }
+
+      function reportError(m) {
+        errors.push(m);
+        updateMetrics();
+      }
+
+      function start() {
+        startTime = Date.now();
+        sockets.length = 0;
+
+        const server = document.getElementById("ws").value;
+
+        const randInt = (lower, upper) => Math.floor(Math.random() * (upper - lower) + lower);
+        const randStr = (size) => {
+          const buffer = new Uint8Array(Math.random() * 100);
+          for (let i = 0; i < buffer.length; i++) {
+            buffer[i] = 48 + randInt(0, 9);
+          }
+          return new TextDecoder().decode(buffer);
+        };
+        const projects = [
+          "60917032",
+          "@p4-345908734509834598ye4r35oidgtherfdiogher"
+        ];
+
+        for (let i = 0; i < 50; i++) {
+          const s = {
+            ws: new WebSocket(server),
+            open: false,
+            txMessages: 0,
+            rxMessages: 0,
+            txBytes: 0,
+            rxBytes: 0
+          };
+
+          s.ws.onopen = () => {
+            s.ws.send(JSON.stringify({
+              method: "handshake",
+              user: "player1234",
+              project_id: projects[randInt(0, projects.length)]
+            }));
+            s.open = true;
+            updateMetrics();
+
+            const strings = [
+              randStr(),
+              randStr(),
+              randStr(),
+              randStr(),
+              randStr(),
+              randStr(),
+              randStr(),
+            ];
+
+            s.interval = setInterval(() => {
+              for (let j = 0; j < 5; j++) {
+                const message = JSON.stringify({
+                  method: "set",
+                  name: "variable" + randInt(0, 100),
+                  value: strings[randInt(0, strings.length)]
+                });
+                s.ws.send(message);
+                s.txMessages += 1;
+                s.txBytes += message.length;
+                updateMetrics();
+              }
+            }, 0);
+          };
+
+          s.ws.onmessage = (e) => {
+            s.rxMessages += e.data.split("\n").length;
+            s.rxBytes += e.data.length;
+            updateMetrics();
+          };
+
+          s.ws.onerror = (e) => {
+            s.open = false;
+            console.error(e);
+            clearInterval(s.interval);
+            reportError(`ws${i} onerror ${e}`);
+          };
+
+          s.ws.onclose = (e) => {
+            clearInterval(s.interval);
+            s.open = false;
+            if (!stopped) {
+              console.warn(e);
+              reportError(`ws${i} onclose ${e}`);
+            }
+          };
+
+          sockets.push(s);
+        }
+
+        updateMetrics();
+      }
+
+      function stop() {
+        stopped = true;
+        for (let i = 0; i < sockets.length; i++) {
+          sockets[i].ws.close();
+          clearInterval(sockets[i].interval);
+        }
+        updateMetrics();
+      }
+    </script>
+  </body>
+</html>
