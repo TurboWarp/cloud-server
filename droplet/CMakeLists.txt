@@ -10,9 +10,9 @@ set(CMAKE_C_FLAGS_RELEASE "-g -Wall -pedantic -O3 -march=native -D_FORTIFY_SOURC
 
 add_executable(
 	droplet
-	droplet/droplet.c
-	droplet/protocol_cloud.c
-	droplet/resizable_buffer.c
+	src/droplet.c
+	src/protocol_cloud.c
+	src/resizable_buffer.c
 )
 target_include_directories(
 	droplet PRIVATE
@@ -24,6 +24,6 @@ target_link_libraries(droplet websockets)
 
 add_executable(
 	resizable_buffer_test
-	droplet/resizable_buffer_test.c
-	droplet/resizable_buffer.c
+	src/resizable_buffer_test.c
+	src/resizable_buffer.c
 )
