@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-
+    <meta charset="utf8">
   </head>
 
   <body>
@@ -33,15 +33,15 @@
         requestAnimationFrame(() => {
           updateQueued = false;
 
-          let text = '';
+          let text = "";
 
           if (errors.length) {
-            text += '--- ERRORS ---\n';
-            text += errors.join('\n');
-            text += '\n--- ERRORS ---\n';
+            text += "--- ERRORS ---\n";
+            text += errors.join("\n");
+            text += "\n--- ERRORS ---\n";
           }
 
-          text += '\topen\ttxMess\ttxBytes\trxMess\trxBytes\n';
+          text += "\topen\ttxMess\ttxBytes\trxMess\trxBytes\n";
 
           let txMessages = 0;
           let txBytes = 0;
@@ -65,7 +65,7 @@
           const r = Math.round.bind(Math);
           text += `avg\t\t${r(txMessages / time)}\t${r(txBytes / time)}\t${r(rxMessages / time)}\t${r(rxBytes / time)}\n`;
 
-          document.getElementById('metrics').value = text;
+          document.getElementById("metrics").value = text;
         }, 0);
       }
 

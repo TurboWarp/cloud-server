@@ -29,7 +29,7 @@ enum resizable_buffer_error resizable_buffer_push_uninit(struct resizable_buffer
     }
 
     if (!rb->buffer) {
-        // We assume there will be more data
+        /* Assume there will be more data, so over-allocate */
         size_t new_capacity = min(rb->max_capacity, len * 2);
 
         rb->buffer = malloc(new_capacity);
@@ -45,7 +45,7 @@ enum resizable_buffer_error resizable_buffer_push_uninit(struct resizable_buffer
     }
 
     if (needed_capacity > rb->capacity) {
-        // Grow exponentially to reduce avoid constantly reallocating
+        /* Grow exponentially to reduce avoid constantly reallocating */
         size_t new_capacity = rb->capacity;
         while (new_capacity < needed_capacity) {
             new_capacity *= 2;
