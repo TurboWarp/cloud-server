@@ -62,6 +62,10 @@ int main(int argc, const char** argv)
     info.mounts = &mount;
     info.protocols = protocols;
 
+    info.ka_time = 120;
+    info.ka_probes = 30;
+    info.ka_interval = 4;
+
     const char* unix_socket_path = get_unix_socket(argc, argv);
     if (unix_socket_path) {
         info.options |= LWS_SERVER_OPTION_UNIX_SOCK;
