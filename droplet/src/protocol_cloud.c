@@ -353,7 +353,7 @@ static bool handle_full_rx(struct cloud_per_vhost_data* vhd, struct cloud_per_se
 
     for (size_t i = 0; i < MAX_ROOM_CONNECTIONS; i++) {
         struct cloud_per_session_data* other_pss = pss->room->connections[i];
-        if (other_pss != NULL && other_pss != pss) {
+        if (other_pss != NULL && other_pss != pss && !other_pss->tx_due) {
             other_pss->tx_due = true;
             lws_callback_on_writable(other_pss->wsi);
         }
