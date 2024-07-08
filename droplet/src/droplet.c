@@ -16,6 +16,11 @@ static void sigint_handler(int sig)
     interrupted = true;
 }
 
+static const char* get_unix_socket(int argc, const char** argv)
+{
+    return lws_cmdline_option(argc, argv, "-u");
+}
+
 static int get_port(int argc, const char** argv)
 {
     const char* p = lws_cmdline_option(argc, argv, "-p");
@@ -54,11 +59,19 @@ int main(int argc, const char** argv)
     mount.mountpoint_len = 1;
 
     struct lws_context_creation_info info = { 0 };
-    info.port = get_port(argc, argv);
     info.mounts = &mount;
     info.protocols = protocols;
 
-    lwsl_user("Starting on http://localhost:%d | ws://localhost:%d\n", info.port, info.port);
+    const char* unix_socket_path = get_unix_socket(argc, argv);
+    if (unix_socket_path) {
+        info.options |= LWS_SERVER_OPTION_UNIX_SOCK;
+        info.iface = unix_socket_path;
+        lwsl_user("Starting on unix socket %s\n", unix_socket_path);
+    } else {
+        info.port = get_port(argc, argv);
+        lwsl_user("Starting on http://localhost:%d | ws://localhost:%d\n", info.port, info.port);
+    }
+
     lwsl_user("Serving HTTP requests from %s\n", mount.origin);
 
     struct lws_context* context = lws_create_context(&info);
