@@ -327,10 +327,18 @@ static bool handle_full_rx(struct cloud_per_vhost_data* vhd, struct cloud_per_se
         return true;
     }
 
-    struct cloud_variable* variable = &pss->room->variables[variable_idx];
-    const unsigned char* value_data = data + value_json->start;
-    size_t value_len = value_json->end - value_json->start;
+    /* For strings, we include the surrounding quotes in the internal value */
+    const unsigned char* value_data;
+    size_t value_len;
+    if (value_json->type == JSMN_STRING) {
+        value_data = data + value_json->start - 1;
+        value_len = value_json->end - value_json->start + 2;
+    } else {
+        value_data = data + value_json->start;
+        value_len = value_json->end - value_json->start;
+    }
 
+    struct cloud_variable* variable = &pss->room->variables[variable_idx];
     resizable_buffer_clear(&variable->value_buffer);
     enum resizable_buffer_error buffer_result = resizable_buffer_push(&variable->value_buffer, value_data, value_len);
     if (buffer_result != resizable_buffer_ok) {
