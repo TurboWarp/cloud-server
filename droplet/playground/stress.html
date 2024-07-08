@@ -82,7 +82,7 @@
 
         const randInt = (lower, upper) => Math.floor(Math.random() * (upper - lower) + lower);
         const randStr = (size) => {
-          const buffer = new Uint8Array(Math.random() * 100);
+          const buffer = new Uint8Array(Math.random() * 10000);
           for (let i = 0; i < buffer.length; i++) {
             buffer[i] = 48 + randInt(0, 9);
           }

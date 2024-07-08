@@ -39,6 +39,15 @@ static const char* get_mount_origin(int argc, const char** argv)
     return "./playground";
 }
 
+#ifndef LWS_WITHOUT_EXTENSIONS
+static const struct lws_extension extensions[] = {
+    { "permessage-deflate",
+        lws_extension_callback_pm_deflate,
+        "permessage-deflate" },
+    { NULL, NULL, NULL /* terminator */ }
+};
+#endif
+
 int main(int argc, const char** argv)
 {
     signal(SIGINT, sigint_handler);
@@ -46,7 +55,7 @@ int main(int argc, const char** argv)
     username_init();
 
 #ifndef NDEBUG
-    lws_set_log_level(LLL_USER | LLL_ERR | LLL_WARN | LLL_NOTICE, NULL);
+    lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE, NULL);
 #else
     lws_set_log_level(LLL_ERR | LLL_WARN, NULL);
 #endif
@@ -61,6 +70,10 @@ int main(int argc, const char** argv)
     struct lws_context_creation_info info = { 0 };
     info.mounts = &mount;
     info.protocols = protocols;
+
+#ifndef LWS_WITHOUT_EXTENSIONS
+    info.extensions = extensions;
+#endif
 
     info.ka_time = 120;
     info.ka_probes = 30;
