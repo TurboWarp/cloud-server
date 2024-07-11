@@ -8,8 +8,8 @@ set(LWS_WITH_SHARED OFF CACHE BOOL "")
 add_subdirectory(libwebsockets)
 
 # we want -fhardened but we are using too old GCC
-set(CMAKE_C_FLAGS_DEBUG "-g -Wall -pedantic -fsanitize=address -D_FORTIFY_SOURCE=3 -D_GLIBCXX_ASSERTIONS -ftrivial-auto-var-init=zero -fPIE -pie -Wl,-z,relro,-z,now -fstack-protector-strong -fstack-clash-protection -fcf-protection=full ${CMAKE_C_FLAGS_DEBUG}")
-set(CMAKE_C_FLAGS_RELEASE "-g -Wall -pedantic -O3 -march=native -D_FORTIFY_SOURCE=3 -D_GLIBCXX_ASSERTIONS -ftrivial-auto-var-init=zero -fPIE -pie -Wl,-z,relro,-z,now -fstack-protector-strong -fstack-clash-protection -fcf-protection=full ${CMAKE_C_FLAGS_RELEASE}")
+set(CMAKE_C_FLAGS_DEBUG "-g -Wall -pedantic -fsanitize=address -fPIE -pie -Wl,-z,relro,-z,now -fstack-protector-strong -fstack-clash-protection ${CMAKE_C_FLAGS_DEBUG}")
+set(CMAKE_C_FLAGS_RELEASE "-g -Wall -pedantic -O3 -march=native -fPIE -pie -Wl,-z,relro,-z,now -fstack-protector-strong -fstack-clash-protection ${CMAKE_C_FLAGS_RELEASE}")
 
 add_executable(
 	droplet
