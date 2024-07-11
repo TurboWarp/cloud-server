@@ -406,6 +406,11 @@ int callback_cloud(struct lws* wsi, enum lws_callback_reasons reason, void* user
     case LWS_CALLBACK_ESTABLISHED: {
         lwsl_wsi_user(wsi, "Connection established");
 
+#ifndef LWS_WITHOUT_EXTENSIONS
+        /* TODO: tune with production numbers */
+        lws_set_extension_option(wsi, "permessage-deflate", "rx_buf_size", "22");
+#endif
+
         if (check_headers(wsi) != 0) {
             return -1;
         }

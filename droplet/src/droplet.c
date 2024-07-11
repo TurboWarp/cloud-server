@@ -55,7 +55,7 @@ int main(int argc, const char** argv)
     username_init();
 
 #ifndef NDEBUG
-    lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE, NULL);
+    lws_set_log_level(LLL_USER | LLL_ERR | LLL_WARN | LLL_NOTICE, NULL);
 #else
     lws_set_log_level(LLL_ERR | LLL_WARN, NULL);
 #endif

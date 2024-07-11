@@ -59,11 +59,11 @@ struct cloud_per_vhost_data {
 
 int callback_cloud(struct lws* wsi, enum lws_callback_reasons reason, void* user, void* in, size_t len);
 
-#define LWS_PLUGIN_PROTOCOL_CLOUD                  \
-    {                                              \
-        "cloud",                                   \
-            callback_cloud,                        \
-            sizeof(struct cloud_per_session_data), \
-            4096, /* TODO: tune this number */     \
-            0, NULL, 0                             \
+#define LWS_PLUGIN_PROTOCOL_CLOUD                       \
+    {                                                   \
+        "cloud",                                        \
+            callback_cloud,                             \
+            sizeof(struct cloud_per_session_data),      \
+            1 << 18, /* TODO: tune with prod numbers */ \
+            0, NULL, 0                                  \
     }
