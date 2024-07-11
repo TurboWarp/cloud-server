@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.13)
 
 project(droplet LANGUAGES C)
 
+set(LWS_WITH_SSL OFF CACHE BOOL "")
+set(LWS_WITH_MINIMAL_EXAMPLES OFF CACHE BOOL "")
+set(LWS_WITH_SHARED OFF CACHE BOOL "")
 add_subdirectory(libwebsockets)
 
 # we want -fhardened but we are using too old GCC
