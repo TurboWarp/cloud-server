@@ -1,0 +1,39 @@
+cmake_minimum_required(VERSION 3.13)
+
+project(droplet LANGUAGES C)
+
+set(LWS_WITH_SSL OFF CACHE BOOL "")
+set(LWS_WITH_MINIMAL_EXAMPLES OFF CACHE BOOL "")
+set(LWS_WITH_SHARED OFF CACHE BOOL "")
+add_subdirectory(libwebsockets)
+
+# we want -fhardened but we are using too old GCC
+set(CMAKE_C_FLAGS_DEBUG "-g -Wall -pedantic -fsanitize=address -fPIE -pie -Wl,-z,relro,-z,now -fstack-protector-strong -fstack-clash-protection ${CMAKE_C_FLAGS_DEBUG}")
+set(CMAKE_C_FLAGS_RELEASE "-g -Wall -pedantic -O3 -march=native -fPIE -pie -Wl,-z,relro,-z,now -fstack-protector-strong -fstack-clash-protection ${CMAKE_C_FLAGS_RELEASE}")
+
+add_executable(
+	droplet
+	src/droplet.c
+	src/protocol_cloud.c
+	src/resizable_buffer.c
+	src/username.c
+)
+target_include_directories(
+	droplet PRIVATE
+	jsmn
+	${PROJECT_BINARY_DIR}/libwebsockets
+	${PROJECT_BINARY_DIR}/libwebsockets/include
+)
+target_link_libraries(droplet websockets)
+
+add_executable(
+	resizable_buffer_test
+	src/resizable_buffer_test.c
+	src/resizable_buffer.c
+)
+
+add_executable(
+	username_test
+	src/username_test.c
+	src/username.c
+)
