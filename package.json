@@ -13,7 +13,7 @@
   "dependencies": {
     "finalhandler": "^1.2.0",
     "serve-static": "^1.15.0",
-    "winston": "^3.13.1",
+    "winston": "^3.15.0",
     "winston-daily-rotate-file": "^5.0.0",
     "ws": "^8.18.0"
   },
