@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf8">
+    <style>
+      textarea, input {
+        width: 90%;
+      }
+      textarea {
+        height: 400px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <textarea id="out" readonly></textarea><br>
+    <input type="text" id="input" value='{"method":"handshake","user":"player1234","project_id":"123"}'>
+    <button id="button">Send</button>
+
+    <script>
+      const out = document.getElementById("out");
+      const input = document.getElementById("input");
+      const button = document.getElementById("button");
+
+      const ws = new WebSocket(location.href.replace(/^http/, "ws"));
+
+      function log(m) {
+        out.value += m + '\n';
+        out.scrollTop = out.scrollHeight;
+      }
+
+      ws.onopen = function() {
+        log('opened');
+      };
+      ws.onmessage = function(msg) {
+        log(msg.data);
+      };
+      ws.onclose = function(e) {
+        log(`closed with code ${e.code} reason ${e.reason}`);
+      };
+
+      function send() {
+        ws.send(input.value);
+        input.value = JSON.stringify({
+          method: "set",
+          name: "a b c",
+          value: Math.random()
+        });
+      }
+      button.addEventListener("click", send);
+    </script>
+  </body>
+</html>

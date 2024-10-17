@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# cmake
+build
+
+# various C
+*.out
+*.o
+*.so
+*.a
+callgrind.out.*

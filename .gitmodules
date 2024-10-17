@@ -1,0 +1,6 @@
+[submodule "droplet/libwebsockets"]
+	path = droplet/libwebsockets
+	url = https://github.com/warmcat/libwebsockets
+[submodule "droplet/jsmn"]
+	path = droplet/jsmn
+	url = https://github.com/zserge/jsmn
