@@ -141,7 +141,7 @@ wss.on('connection', (ws, req) => {
     isHandshaking = true;
     if (!validators.isValidRoomID(roomId)) {
       const roomToLog = `${roomId}`.substr(0, 100);
-      throw new ConnectionError(ConnectionError.Error, 'Invalid room ID: ' + roomToLog);
+      throw new ConnectionError(ConnectionError.ProjectUnavailable, 'Invalid room ID: ' + roomToLog);
     }
     if (isProjectBlocked(roomId)) {
       throw new ConnectionError(ConnectionError.ProjectUnavailable, 'Project blocked: ' + roomId);
