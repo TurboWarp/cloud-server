@@ -3,3 +3,7 @@ node_modules
 private.filter
 # Logs
 logs
+
+# nix
+result
+.direnv
