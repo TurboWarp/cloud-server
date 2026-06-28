@@ -11,7 +11,7 @@
   "author": "GarboMuffin",
   "license": "MIT",
   "dependencies": {
-    "finalhandler": "^2.1.0",
+    "finalhandler": "^2.1.1",
     "serve-static": "^2.2.0",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0",
