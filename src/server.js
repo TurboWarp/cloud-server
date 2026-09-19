@@ -8,6 +8,7 @@ const validators = require('./validators');
 const logger = require('./logger');
 const naughty = require('./naughty');
 const config = require('./config');
+const metrics = require('./metrics');
 
 const wss = new WebSocket.Server({
   noServer: true, // we setup the server on our own
@@ -72,6 +73,7 @@ function sendBuffered() {
 }
 
 function sendToClient(client, message) {
+  metrics.forwarded.inc();
   if (config.bufferSends) {
     if (buffered.has(client)) {
       buffered.get(client).push(message);
@@ -88,11 +90,16 @@ if (config.bufferSends) {
 }
 
 wss.on('connection', (ws, req) => {
+  metrics.connections.inc();
+
   // We know of at least one library that sends Scratch session tokens to us for no reason.
   // As this is putting accounts at unnecessary risk, refuse to accept the connection until they fix their code.
   // It's not important for us to really parse cookies, we just want it to be hard to do the wrong thing.
   if (req.headers.cookie && req.headers.cookie.startsWith('scratchsessionsid=')) {
     logger.info('A connection closed for security reasons.');
+    metrics.refused.inc({
+      reason: 'insecure'
+    });
     // Sending an invalid message to the client should hopefully trigger a warning somewhere for them to see.
     ws.send('The cloud data library you are using is putting your Scratch account at risk by sending us your login token for no reason. Change your Scratch password immediately, then contact the maintainers of that library for further information. This connection is being refused to protect your security.');
     ws.close(4005);
@@ -102,6 +109,7 @@ wss.on('connection', (ws, req) => {
   const client = new Client(ws, req);
 
   connectionManager.handleConnect(client);
+  metrics.clients.inc();
 
   function performHandshake(roomId, username) {
     if (client.room) throw new ConnectionError(ConnectionError.Error, 'Already performed handshake');
@@ -202,22 +210,27 @@ wss.on('connection', (ws, req) => {
 
     switch (method) {
       case 'handshake':
+        metrics.messages.inc({method});
         performHandshake('' + message.project_id, message.user);
         break;
 
       case 'set':
+        metrics.messages.inc({method});
         performSet(message.name, message.value);
         break;
 
       case 'create':
+        metrics.messages.inc({method});
         performCreate(message.name, message.value);
         break;
 
       case 'delete':
+        metrics.messages.inc({method});
         performDelete(message.name);
         break;
 
       case 'rename':
+        metrics.messages.inc({method});
         performRename(message.name, message.new_name);
         break;
 
@@ -242,8 +255,14 @@ wss.on('connection', (ws, req) => {
     } catch (error) {
       client.error('Error handling connection: ' + error);
       if (error instanceof ConnectionError) {
+        metrics.errors.inc({
+          code: error.code
+        });
         client.close(error.code);
       } else {
+        metrics.errors.inc({
+          code: ConnectionError.Error
+        });
         client.close(ConnectionError.Error);
       }
     }
@@ -251,11 +270,15 @@ wss.on('connection', (ws, req) => {
 
   ws.on('error', (error) => {
     client.error('** ERROR ** ' + error);
+    metrics.errors.inc({
+      code: 'socket_error'
+    });
     client.close(ConnectionError.Error);
   });
 
   ws.on('close', (code) => {
     connectionManager.handleDisconnect(client);
+    metrics.clients.dec();
     client.log(`Connection closed: code ${code}`);
     client.close(ConnectionError.Error);
   });

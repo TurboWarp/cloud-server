@@ -6,16 +6,24 @@ const serveStatic = require('serve-static');
 const logger = require('./logger');
 const config = require('./config');
 const wss = require('./server');
+const metrics = require('./metrics');
 
 // We serve static files over HTTP
-const serve = serveStatic('public');
+const serve = serveStatic('public', {
+  setHeaders: function setHeaders(res) {
+    // @ts-ignore
+    res.req.metricsRoute = 'static';
+  }
+});
 const server = http.createServer(function handler(req, res) {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('Permissions-Policy', 'interest-cohort=()');
-  // @ts-ignore
-  serve(req, res, finalhandler(req, res));
+  metrics.middleware(req, res, function next() {
+    // @ts-ignore
+    serve(req, res, finalhandler(req, res));
+  });
 });
 
 server.on('upgrade', function upgrade(request, socket, head) {
@@ -44,3 +52,5 @@ server.listen(port, function() {
   }
   logger.info('Server started on port: ' + port);
 });
+
+metrics.listen();

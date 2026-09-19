@@ -1,6 +1,7 @@
 const Room = require('./Room');
 const ConnectionError = require('./ConnectionError');
 const logger = require('./logger');
+const metrics = require('./metrics');
 
 /** Delay between janitor runs. */
 const JANITOR_INTERVAL = 1000 * 60;
@@ -73,6 +74,7 @@ class RoomList {
     const room = new Room(id);
     // It is important we update the room ID map at the end as setRoomData may throw.
     this.rooms.set(id, room);
+    metrics.rooms.inc();
     if (this.enableLogging) {
       logger.info('Created room: ' + id);
     }
@@ -90,6 +92,7 @@ class RoomList {
       throw new Error('Clients are connected to this room');
     }
     this.rooms.delete(id);
+    metrics.rooms.dec();
     if (this.enableLogging) {
       logger.info('Removed room: ' + id);
     }
