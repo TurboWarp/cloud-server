@@ -11,6 +11,7 @@
   "author": "GarboMuffin",
   "license": "MIT",
   "dependencies": {
+    "@prometheus-io/client": "^0.16.1",
     "finalhandler": "^2.1.0",
     "serve-static": "^2.2.0",
     "winston": "^3.17.0",

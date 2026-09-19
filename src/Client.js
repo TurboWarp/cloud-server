@@ -2,6 +2,7 @@ const Room = require('./Room');
 const address = require('./address');
 const {parseUsername} = require('./username');
 const logger = require('./logger');
+const metrics = require('./metrics');
 
 class Client {
   /**
@@ -154,6 +155,7 @@ class Client {
    * @param {string} reason Reason for time out, included in logs.
    */
   timedOut(reason) {
+    metrics.timeouts.inc({reason});
     if (this.ws !== null) {
       // terminate will then run the proper onclose handlers
       this.ws.terminate();
