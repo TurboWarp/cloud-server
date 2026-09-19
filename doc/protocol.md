@@ -38,7 +38,7 @@ Clients send variable updates to the server:
 }
 ```
 
-If the variable value is invalid, the message will be ignored. If the variable does not exist, it will be created.
+If the variable name is invalid, the connection is closed. If the variable value is invalid, the message will be ignored. If the variable does not exist, it will be created.
 
 Value can be encoded as either as string or as a number.
 

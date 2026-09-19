@@ -168,7 +168,7 @@ wss.on('connection', (ws, req) => {
     if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
 
     if (!validators.isValidVariableName(newName)) {
-      throw new Error(`Invalid variable name: ${newName}`);
+      throw new Error('Invalid variable name');
     }
 
     // get throws if old name does not exist
@@ -179,6 +179,10 @@ wss.on('connection', (ws, req) => {
 
   function performSet(variable, value) {
     if (!client.room) throw new ConnectionError(ConnectionError.Error, 'No room setup yet');
+
+    if (!validators.isValidVariableName(variable)) {
+      throw new Error('Invalid variable name');
+    }
 
     if (!validators.isValidVariableValue(value)) {
       // silently ignore
