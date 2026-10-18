@@ -1,3 +1,5 @@
+const {test} = require('node:test');
+const assert = require('node:assert/strict');
 const RoomList = require('../RoomList');
 const Room = require('../Room');
 const Client = require('../Client');
@@ -8,54 +10,54 @@ test('create', () => {
   const roomList = new RoomList();
   const room1 = roomList.create('1');
   const room2 = roomList.create('2');
-  expect(room1).toBeInstanceOf(Room);
-  expect(room2).toBeInstanceOf(Room);
-  expect(room1).not.toBe(room2);
-  expect(() => roomList.create('1')).toThrow();
-  expect(() => roomList.create('2')).toThrow();
+  assert.ok(room1 instanceof Room);
+  assert.ok(room2 instanceof Room);
+  assert.notStrictEqual(room1, room2);
+  assert.throws(() => roomList.create('1'));
+  assert.throws(() => roomList.create('2'));
 });
 
 test('has', () => {
   const roomList = new RoomList();
-  expect(roomList.has('1234')).toBe(false);
-  expect(roomList.has('12345')).toBe(false);
-  expect(roomList.has('123456')).toBe(false);
+  assert.strictEqual(roomList.has('1234'), false);
+  assert.strictEqual(roomList.has('12345'), false);
+  assert.strictEqual(roomList.has('123456'), false);
   roomList.create('1234');
-  expect(roomList.has('1234')).toBe(true);
-  expect(roomList.has('12345')).toBe(false);
-  expect(roomList.has('123456')).toBe(false);
+  assert.strictEqual(roomList.has('1234'), true);
+  assert.strictEqual(roomList.has('12345'), false);
+  assert.strictEqual(roomList.has('123456'), false);
   roomList.create('12345');
-  expect(roomList.has('1234')).toBe(true);
-  expect(roomList.has('12345')).toBe(true);
-  expect(roomList.has('123456')).toBe(false);
+  assert.strictEqual(roomList.has('1234'), true);
+  assert.strictEqual(roomList.has('12345'), true);
+  assert.strictEqual(roomList.has('123456'), false);
 });
 
 test('get', () => {
   const roomList = new RoomList();
   const room1 = roomList.create('1');
   const room2 = roomList.create('2');
-  expect(roomList.get('1')).toBe(room1);
-  expect(roomList.get('2')).toBe(room2);
-  expect(() => roomList.get('3')).toThrow();
+  assert.strictEqual(roomList.get('1'), room1);
+  assert.strictEqual(roomList.get('2'), room2);
+  assert.throws(() => roomList.get('3'));
 });
 
 test('remove', () => {
   const roomList = new RoomList();
-  expect(() => roomList.remove('1')).toThrow();
-  expect(roomList.has('1')).toBe(false);
+  assert.throws(() => roomList.remove('1'));
+  assert.strictEqual(roomList.has('1'), false);
   roomList.create('1');
-  expect(roomList.has('1')).toBe(true);
+  assert.strictEqual(roomList.has('1'), true);
   roomList.remove('1');
-  expect(roomList.has('1')).toBe(false);
-  expect(roomList.has('2')).toBe(false);
+  assert.strictEqual(roomList.has('1'), false);
+  assert.strictEqual(roomList.has('2'), false);
   const room = roomList.create('2');
-  expect(roomList.has('2')).toBe(true);
+  assert.strictEqual(roomList.has('2'), true);
   const testClient = new Client(null, null);
   room.addClient(testClient);
-  expect(() => roomList.remove('2')).toThrow();
+  assert.throws(() => roomList.remove('2'));
   room.removeClient(testClient);
   roomList.remove('2')
-  expect(roomList.has('2')).toBe(false);
+  assert.strictEqual(roomList.has('2'), false);
 });
 
 test('maxRooms', () => {
@@ -64,5 +66,5 @@ test('maxRooms', () => {
   for (var i = 0; i < roomList.maxRooms; i++) {
     roomList.create(i.toString());
   }
-  expect(() => roomList.create('10000')).toThrow();
+  assert.throws(() => roomList.create('10000'));
 });
